@@ -128,16 +128,13 @@ var
 					case (typeof obj === "undefined") :
 						return 'undefined';
 				}
-				
 				return 'notype';
 			};
 			
 			// This private method returns true if a value exists in an array. It is used for when
 			// we are building an array object with order definitions in place.
 			inArray = function( arr, val ) {
-				for ( var i = 0; i < arr.length; i++ ) {
-					if ( arr[i] === val ) { return true; }
-				}
+				for ( var i = 0; i < arr.length; i++ ) { if ( arr[i] === val ) { return true; } }
 				return false;
 			};
 			
@@ -378,7 +375,7 @@ var
 	 * @param {object} obj Target collection
 	 * @param {function} fn Function iterator
 	 * @param {object|function} scope The scope to call iterator in
-	 * @return {object}
+	 * @return {object|array}
 	 */
 	(l).each = (l).forEach = function( obj, fn, scope ) {
 		var args = (l).fn.__args({0: [obj, [0]], 1:[fn, [0,1]], 2:[scope, [1,2]]}, [{obj:'object|array'}, {fn:'function'}, {scope:'object|function|defaultobject'}]),
@@ -546,11 +543,11 @@ var
 	/**
 	 * Returns only the values whos properties are matched in a list.
 	 * @param {object} obj Target collection
-	 * @param {array|string} list Comparison list
+	 * @param {array} list Comparison list
 	 * @return {array}
 	 */
 	(l).only = (l).whitelist = function( obj, list ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1:[list, [0,1]]}, [{obj:'object|array'}, {list:'string|array'}]),
+		var args = (l).fn.__args({0: [obj, [0]], 1:[list, [0,1]]}, [{obj:'object|array'}, {list:'array'}]),
 			list = (l).isString(args.list) ? args.list.split(" ") : args.list, ret = [];
 		(l).each(list, function(index, value) {
 			if ( (l).keyExists(args.obj, value) ) { ret.push( args.obj[value] ); }
@@ -575,12 +572,12 @@ var
 	
 	/**
 	 * Returns an array containing the minimum value in a collection.
-	 * @param {object} obj Target collection
+	 * @param {object|array} obj Target collection
 	 * @return {array}
 	 */
 	(l).min = (l).minValue = function( obj ) {
 		var args = (l).fn.__args([obj], [{obj:'object|array'}]),
-			vals = (l).values(obj), minVals = [];
+			vals = (l).isPlainObject(args.obj) ? (l).values(args.obj) : args.obj, minVals = [];
 		(l).each(vals, function(index, value) { if ( (l).isNumber(value) ) { minVals.push(value); } });
 		return (l).fn.__chain( [ Math.min.apply( this, minVals ) ] );
 	};
@@ -592,7 +589,7 @@ var
 	 */
 	(l).max = (l).maxValue = function( obj ) {
 		var args = (l).fn.__args([obj], [{obj:'object|array'}]),
-			vals = (l).values(obj), maxVals = [];
+			vals = (l).isPlainObject(args.obj) ? (l).values(args.obj) : args.obj, maxVals = [];
 		(l).each(vals, function(index, value) { if ( (l).isNumber(value) ) { maxVals.push(value); } });
 		return (l).fn.__chain( [ Math.max.apply( this, maxVals ) ] );
 	};
@@ -615,61 +612,48 @@ var
 	 * @return {array}
 	 */
 	(l).sum = function( obj ) {
-		var args = (l).fn.__args([obj], [{obj:'object|array'}]),
-			ret = 0;
+		var args = (l).fn.__args([obj], [{obj:'object|array'}]), ret = 0;
 		(l).each(args.obj, function(index, value) { ret += value; });
-		return (l).fn.__chain( [ret] );
+		return (l).fn.__chain( [ ret ] );
 	};
 		
 	/**
 	 * Returns an array containing the reduced value from a list of values based on an 
-	 * iterator function. `base` is the initial value of the reduction.
-	 * @param {object} obj Target object
+	 * iterator function where`base` is the initial value of the reduction.
+	 * @param {object|array} obj Target collection
 	 * @param {function} fn Iterator function
 	 * @return {array}
 	 */
 	(l).reduce = (l).foldl = function( obj, fn, right ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1: [fn, [0,1]], 2: [right, [1,2]]}, [{obj:'object|array'}, {fn:'function'}, {right:'bool'}]),
-			copy = args.obj, i = 0, base, keys, vals, chainOn;
-			
-		// Detect if in a chain sequence
-		chainOn = (l)._chain ? true : false;
-		
+		var args = (l).fn.__args({0: [obj, [0]], 1: [fn, [0,1]], 2: [right, [1,2]]}, [{obj:'object|array'}, {fn:'function'}, {right:'bool'}]), copy = args.obj, i = 0, base, keys, vals;
+
 		// When reducing from right, flip the list 
 		if ( args.right ) {
 			if ( (l).isPlainObject(copy) ) {
-				(l)._chain = false;
 				keys = (l).keys(copy).reverse();
 				vals = (l).values(copy).reverse();
 				copy = (l).create(keys, vals);
-				(l)._chain = chainOn ? true : false;
 			} else if ( (l).isArray(copy) ) {
 				copy = copy.reverse();
 			}
 		}
-
-		// Get base from returned result of iterator with the first element in the list
-		(l).each(copy, function(index, value) {
-			base = args.fn.call(this, value, value, index);
-			return false;
-		});
-
-		// Now reduce all other values in list with iterator
+		
+		base = (l).find(copy, function(value) { return value; });
 		(l).each(copy, function(index, value) {
 			if ( i !== 0 ) { base = args.fn.call(this, base, value, index); }
 			i++;
 		});		
-		return (l).fn.__chain( [base] );
+		return (l).fn.__chain( [ base ] );
 	};
 	
 	/**
-	 * Returns an array containing the right associative version of the reduce method.
+	 * Returns an array containing the result from the right associative version of the reduce method.
 	 * @param {object} obj Target collection
 	 * @param {function} fn Iterator function
 	 * @return {array}
 	 */
 	(l).reduceRight = (l).foldr = function( obj, fn ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1: [fn, [0,1]]}, [{obj:'object|array'}, {fn:'function'}]);
+		var args = (l).fn.__args([obj, fn], [{obj:'object|array'}, {fn:'function'}]);
 		return (l).reduce.call(this, args.obj, args.fn, true);
 	};
 	
@@ -1961,14 +1945,14 @@ var
 	
 	/**
 	 * Returns true if a member name/index in a collection exists.
-	 * @param {object} obj Target object
-	 * @param {...*} key Target name or index
+	 * @param {object} obj Target collection
+	 * @param {string|number} key Target name or index
 	 * @return {boolean}
 	 */
 	(l).keyExists = function( obj, key ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1:[key, [0,1]]}, [{obj:'object'}, {key:'string|number'}]);
+		var args = (l).fn.__args({0: [obj, [0]], 1:[key, [0,1]]}, [{obj:'object|array'}, {key:'string|number'}]);
 		return (l).findKey(args.obj, function(index) {
-			return args.key.toString() === index ? true : false;
+			return args.key === index ? true : false;
 		}) ? true : false;
 	};
 	
@@ -2385,21 +2369,16 @@ var
 	(l).range = function( start, stop, step ) {
 		var args = (l).fn.__args({0: [start, [0]], 1:[stop, [0,1]], 2:[step, [1,2]]}, [{start:'number'}, {stop:'number'}, {step:'number'}]),
 		i = 0, ret = [];
-
 		if ( arguments.length === 1 ) {
 			args.stop = args.start || 0;
 			args.start = 0;
 		}
-		if ( arguments.length < 3 ) {
-			args.step = 1;
-		}
-		
+		if ( arguments.length < 3 ) { args.step = 1; }
 		len = Math.max(Math.ceil((args.stop - args.start) / args.step), 0);
 		while ( i < len ) {
 			ret[ i++ ] = args.start;
 			args.start += args.step;
 		}
-		
 		return (l).fn.__chain( ret );
 	};
 	
@@ -2473,7 +2452,6 @@ var
 				ret = o;
 			}
 		}
-		
 		(l)._chain = false;
 		return ret || -1;
 	};
