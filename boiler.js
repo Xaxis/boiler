@@ -1474,10 +1474,8 @@ var
 	};
 	
 	/**
-	 * Removes a name/value pair from an object OR a value from an array. If an array of keys is 
-	 * passed with a target object will remove name/value pairs at each property name. When `obj` is
-	 * an array, `key` should be an array containing the starting and ending indices to remove 
-	 * values from.
+	 * Removes a value from a collection at `key`. If `key` is an array will remove values at all
+	 * matching properties/indices.
 	 * @param {object|array} obj
 	 * @param {string} key
 	 * @throws {Error} When target property key doesn't exist.
@@ -1489,19 +1487,23 @@ var
 		if ( (l).isPlainObject(args.obj) ) {			
 			if ( (l).isArray(args.key) ) {
 				for ( i = 0; i < args.key.length; i++ ) {
-					if ( args.key[i] in args.obj ) { delete args.obj[args.key[i]];
-					} else { throw new Error('Targeted property ' + args.key[i] + ' does not exist.'); }
+					if ( args.key[i] in args.obj ) { 
+						delete args.obj[args.key[i]];
+					}
 				}
 			} else {
-				if ( args.key in args.obj ) { delete args.obj[args.key];
-				} else { throw new Error('Targeted property ' + args.key + ' does not exist.'); }
+				if ( args.key in args.obj ) { 
+					delete args.obj[args.key];
+				}
 			}
-		} else if ( (l).isArray(args.obj) && (l).isArray(args.key) && args.key.length === 2 ) {
-			from = args.key[0];
-			to = args.key[1];
-			ret = args.obj.slice((to || from) + 1 || args.obj.length);
-			args.obj.length = from < 0 ? args.obj.length + from : from;
-			args.obj.push.apply(args.obj, ret);
+		} else if ( (l).isArray(args.obj) && (l).isArray(args.key) ) {
+			for ( i in args.key ) {
+				from = args.key[i];
+				ret = args.obj.slice(from + 1 || args.obj.length);
+				args.obj.length = from < 0 ? args.obj.length + from : from; 
+				args.obj.push.apply(args.obj, ret);
+				console.log(args.obj);
+			}
 		}
 		return (l).fn.__chain( args.obj );
 	};
@@ -1591,7 +1593,7 @@ var
 		// Place passed object at the beginning of the 'fargs' array
 		args.fargs = args.fargs ? args.fargs : [];
 
-		// Call iterator on every nested object to level specified by depth
+		// Call iterator on every nested object/array to level specified by depth
 		for ( o in args.obj ) {
 			if ( (l).isArray(args.fargs) ) { args.fargs.unshift(depth, o, args.obj[o], args.obj); }
 			res = args.fn.apply( args.scope || this, args.fargs );
