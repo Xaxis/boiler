@@ -19,6 +19,7 @@ var
 	
 	// Library Definition
 	(l) = window[l] = function( obj, key ) {
+		this._chainned = obj;
 		return new (l).fn.__init( obj, key );
 	};
 	
@@ -30,20 +31,18 @@ var
 		 * object is called as a function and when the `chain` method is invoked. It sets the
 		 * `_global` and `_object` properties on the library. These properties are used for 
 		 * various internal referencing.
-		 * @param {object|array} obj
+		 * @param {...*} obj
 		 * @param {string|number} key
 		 * @return {function}
 		 */
 		__init: function( obj, key ) {			
 			if ( arguments.length >= 1 ) {
 				var args = (l).fn.__args([obj, key], [{obj:'object|array'}, {key:'string|number'}]),
-					target = null;
-					
-				// Set the _global property to the object being acted on regardless of its type
-				(l)._global = obj;
-				
+					target;
+
 				// Retrieve targeted object
 				target = (l).get( args.obj, args.key );
+				(l)._global = obj;
 				
 				// Attach targeted object to the library. Since 'false', 'null', and 'undefined' are
 				// all valid found values we test that a value was found not if there is a value in 
@@ -88,7 +87,7 @@ var
 		 * @return {object|array}
 		 */
 		__args: function( args, list, rule ) {
-			var i, d, a, n, q, mtypes, name, type,
+			var i, d, a, n, q, mtypes, name, type, chainOn,
 			  types = list,
 				snargs = [],
 				oargs = {},
@@ -349,25 +348,15 @@ var
 			}
 			return oargs;
 		},
-
-		/**
-		 * Returns a wrapped object dependent on the current mode of operation as
-		 * determined by the __chain property of the library.
-		 * @param {object} obj
-		 * @return {object}
-		 */
-		__chain: function( obj ) {			
-			if ( (l)._chain ) {
-				(l)._object = obj;
-				return (l);
-			} else {
-				(l)._object = obj;
-				return obj;
-			}
+		
+		__chain: function( obj ) {
+			(l)._global = obj;
+			(l)._object = obj;
+			return (l)._chain ? (l) : obj;
 		}
 		
-	};	
-
+	};
+	
 	/** 
 	 * Apply a callback function to every member in a collection. If the iterator 
 	 * returns false the loop will break and the method will return.
@@ -390,7 +379,7 @@ var
 				if ( value === false ) { break; }
 			}				
 		}
-		return args.obj;
+		return (l).fn.__chain( args.obj );
 	};
 	
 	/**
@@ -406,7 +395,7 @@ var
 		(l).each(list, function(index, value, list) {
 			ret.push( args.fn.call( args.scope || this, value, index, list ) );
 		});
-		return ret;
+		return (l).fn.__chain( ret );
 	};
 	
 	/**
@@ -470,7 +459,7 @@ var
 				return false;
 			}
 		});
-		return ret;
+		return (l).fn.__chain( ret );
 	};
 	
 	/**
@@ -486,7 +475,7 @@ var
 		(l).each(args.obj, function(index, value) {
 			if ( !args.fn.call( args.scope ? args.scope : this, value, index ) ) { ret = false; }
 		});
-		return ret;
+		return (l).fn.__chain( ret );
 	};
 	
 	/**
@@ -502,7 +491,7 @@ var
 		(l).each(args.obj, function(index, value) {
 			if ( args.fn.call( args.scope ? args.scope : this, value, index ) ) { ret = false; }
 		});
-		return ret;	
+		return (l).fn.__chain( ret );	
 	};
 	
 	/**
@@ -518,7 +507,7 @@ var
 		(l).each(args.obj, function(index, value) {
 			if ( args.fn.call( args.scope ? args.scope : this, value, index ) ) { ret++; }
 		});
-		return ret;		
+		return (l).fn.__chain( ret );		
 	};
 
 	/**
@@ -544,7 +533,7 @@ var
 				}				
 			}
 		});
-		return ret;
+		return (l).fn.__chain( ret );
 	};
 	
 	/**
@@ -587,7 +576,7 @@ var
 		(l).each(list, function(index, value) {
 			if ( (l).keyExists(args.obj, value) ) { ret.push( args.obj[value] ); }
 		});
-		return ret;
+		return (l).fn.__chain( ret );
 	};
 	
 	/**
@@ -602,7 +591,7 @@ var
 		(l).each(args.obj, function(index, value) {
 			if ( !(l).exists(list, index) ) { ret.push(value); }
 		});
-		return ret;
+		return (l).fn.__chain( ret );
 	};
 	
 	/**
@@ -678,7 +667,7 @@ var
 			if ( i !== 0 ) { base = args.fn.call(args.scope || this, base, value, index); }
 			i++;
 		});
-		return (l).fn.__chain( (l).isArray(base) ? base : [ base ] );
+		return (l).isArray(base) ? (l).fn.__chain( base ) : (l).fn.__chain( [ base ] );
 	};
 	
 	/**
@@ -1107,7 +1096,7 @@ var
 		(l).deep(args.obj, function(depth, index, elm) {
 			if ( args.type === (l).type(elm) || type === "*") { stack[index] = elm; }
 		}, (args.deep ? "*" : 1), true );
-		return stack;
+		return (l).fn.__chain( stack );
 	};
 	
 	/**
@@ -1207,7 +1196,7 @@ var
 			}
 		}), keys);
 	};
-	
+		
 	/**
 	 * [type]s(): 
 	 * Returns an object containing all found values of [type].
@@ -1220,7 +1209,7 @@ var
 		function(index, name) {
 			(l)[ name + 's' ] = function( obj, key, deep ) {
 				var args = (l).fn.__args([obj, key, deep], [{obj:'object'}, {key:'string|number'}, {deep:'bool'}]); 
-				return (l).fn.__chain( (l).getByType(args.obj, name, args.key, args.deep) );
+				return (l).getByType(args.obj, name, args.key, args.deep);
 			};
 	});
 	
@@ -1238,7 +1227,7 @@ var
 				var args = (l).fn.__args([obj, key, deep], [{obj:'object'}, {key:'string|number'}, {deep:'bool'}]), stack = {}; 
 				(l).each( (l).getByType(args.obj, "*", args.key, args.deep), 
 					function(index, value) { if ( !((l).type(value) === name) ) { stack[ index ] = value; } });
-				return (l).fn.__chain( stack ); 
+				return stack; 
 			};
 	});
 	
@@ -1255,7 +1244,7 @@ var
 		function(index, name) {
 			(l)[ name + 'Names' ] = function( obj, key, deep ) {
 				var args = (l).fn.__args([obj, key, deep], [{obj:'object'}, {key:'string|number'}, {deep:'bool'}]);
-				return (l).fn.__chain( (l).keys((l).getByType(args.obj, name, args.key, args.deep)).sort() );
+				return (l).keys((l).getByType(args.obj, name, args.key, args.deep)).sort();
 			};
 	});
 
@@ -1269,9 +1258,9 @@ var
 	 */
 	(l).invoke = function( obj, fn, fargs ) {
 		var args = (l).fn.__args({0: [obj, [0]], 1:[fn, [0,1]], 2:[fargs, [1,2]]}, [{obj:'object|array'}, {fn:'function|string'}, {fargs:'array'}]), fargs = args.fargs || [];
-		return (l).fn.__chain( (l).map(args.obj, function(value) { 
+		return (l).map(args.obj, function(value) { 
 			return ((l).isFunction(args.fn) ? args.fn : value[args.fn]).apply(value, fargs);
-		})); 
+		}); 
 	};
 	
 	/**
@@ -1288,7 +1277,7 @@ var
 			if ( (l).isPlainObject(objs[o]) ) {
 				for ( p in objs[o] ) {
 					if ( (l).isEqual(objs[o][p], target) ) {
-						return (l).fn.__chain( objs[o] );
+						return objs[o];
 					}
 				}
 			}
@@ -1343,7 +1332,7 @@ var
 				break;
 			}
 		}
-		return (l).fn.__chain( (l).paths(args.obj)[args.key] );
+		return (l).paths(args.obj)[args.key];
 	};
 	
 	/**
@@ -1675,12 +1664,12 @@ var
 	 */
 	(l).where = function( obj, matches, find ) {
 		var args = (l).fn.__args({0: [obj, [0]], 1:[matches, [0,1]], 2:[find, [1,2]]}, [{obj:'object|array'}, {matches:'array|object'}, {find:'bool'}]);
-		return (l).fn.__chain( (l)[find ? 'find' : 'filter'](args.obj, function(value, index) {
+		return (l)[find ? 'find' : 'filter'](args.obj, function(value, index) {
 			for ( var key in args.matches ) {
 				if (args.matches[key] !== value[key]) { return false; }
 			}
 			return true;
-		}));
+		});
 	};
 
 	/**
@@ -1693,7 +1682,7 @@ var
 	 */
 	(l).whereFirst = function( obj, matches ) {
 		var args = (l).fn.__args({0: [obj, [0]], 1:[matches, [0,1]]}, [{obj:'object|array'}, {matches:'array|object'}]);
-		return (l).fn.__chain( (l).where(args.obj, args.matches, true) );
+		return (l).where(args.obj, args.matches, true);
 	};
 	
 	/**
@@ -1870,7 +1859,9 @@ var
 		} else {
 			target = args.obj ? args.obj : (l)._object;
 			for ( o in objs ) {
-				if ( (l).isEqual(target, objs[o]) ) { return (l).howDeep(o); }
+				if ( (l).isEqual(target, objs[o]) ) { 
+					return (l).howDeep(o); 
+				}
 			}
 		}
 	};
@@ -1899,7 +1890,7 @@ var
 			}
 		}, "*");
 		ret = encodeURIComponent( ret.replace(/&$/g, '') );
-		return (l).fn.__chain( ret );
+		return ret;
 	};
 	
 	/**
@@ -1923,7 +1914,7 @@ var
 				ret[ parts[0] ] = parts[1];
 			}
 		});
-		return (l).fn.__chain( ret );
+		return ret;
 	};
 
 	/**
@@ -1943,7 +1934,7 @@ var
 			}
 			return false;
 		});
-		return (l).fn.__chain( ret );
+		return ret;
 	};
 		
 	/**
@@ -1971,7 +1962,7 @@ var
 		var args = (l).fn.__args({0: [obj, [0]], 1: [n, [0,1]]}, [{obj:'array'}, {n:'number'}]),
 			n = args.n ? args.obj.length - args.n : args.obj.length - 1, i = 0, ret = [];
 		for ( ; i < n; i++ ) { ret.push(args.obj[i]); }
-		return (l).fn.__chain( ret );
+		return ret;
 	};
 
 	/**
@@ -1985,7 +1976,7 @@ var
 		var args = (l).fn.__args({0: [obj, [0]], 1: [n, [0,1]]}, [{obj:'array'}, {n:'number'}]),
 			n = args.n ? args.obj.length - args.n : args.obj.length - 1, i = args.obj.length, ret = [];
 		for ( ; n < i; n++ ) { ret.push(args.obj[n]); }
-		return (l).fn.__chain( ret );
+		return ret;
 	};
 	
 	/**
@@ -1999,7 +1990,7 @@ var
 		var args = (l).fn.__args({0: [obj, [0]], 1: [n, [0,1]]}, [{obj:'array'}, {n:'number'}]),
 			n = args.n ? args.n : 1, i = args.obj.length, ret = [];
 		for ( ; n < i; n++ ) { ret.push(args.obj[n]); }
-		return (l).fn.__chain( ret );
+		return ret;
 	};
 
 	/**
@@ -2013,7 +2004,7 @@ var
 		for ( ; i < args.obj.length; i++ ) {
 			if ( !(l).isFalsy(args.obj[i]) ) { ret.push(args.obj[i]); }
 		}
-		return (l).fn.__chain( ret );
+		return ret;
 	};
 	
 	/**
@@ -2044,7 +2035,7 @@ var
 					break;
 			}
 		}, n);
-		return (l).fn.__chain( ret );
+		return ret;
 	};
 	
 	/**
@@ -2055,12 +2046,12 @@ var
 	 */
 	(l).without = (l).exclude = (l).subtract = function( obj, values ) {
 		var args = (l).fn.__args({0: [obj, [0]], 1: [values, [0,1]]}, [{obj:'array'}, {values:'array'}]);
-		return (l).fn.__chain( (l).filter(args.obj, function(value, index) {
+		return (l).filter(args.obj, function(value, index) {
 			for ( var i = 0; i < args.values.length; i++ ) {
 				if ( (l).isEqual(args.values[i], value) ) { return false; }
 			}
 			return true;
-		}));
+		});
 	};
 
 	/**
@@ -2081,7 +2072,7 @@ var
 				ret.push(value);
 			}
 		});
-		return (l).fn.__chain( ret );
+		return ret;
 	};
 		
 	/**
@@ -2105,7 +2096,7 @@ var
 		// Merge the arrays and retrieve unique values
 		ret = (l).uniq(Array.prototype.concat.apply(this, arrs));
 		ret.shift();
-		return (l).fn.__chain( ret );
+		return ret;
 	};
 	 
 	/**
@@ -2132,7 +2123,7 @@ var
 			});
 		});
 		
-		return (l).fn.__chain( ret );
+		return ret;
 	};
 
 	/**
@@ -2161,7 +2152,7 @@ var
 		(l).each(args, function(index, value) { if ( index !== "obj" && index !== "length" ) { arrs.push(value); } });
 		arrs.unshift(args.obj);				
 		for ( ; i < arrs.length; i++ ) { ret[i] = (l).pluck(arrs, "" + i); }
-		return (l).fn.__chain( ret );
+		return ret;
 	};
 
 	/**
@@ -2184,7 +2175,7 @@ var
 			ret[ i++ ] = args.start;
 			args.start += args.step;
 		}
-		return (l).fn.__chain( ret );
+		return ret;
 	};
 	
 	/** 
@@ -2200,7 +2191,7 @@ var
 		} else {
 			(l).each(args.obj, function(index, value) { ret.push(value); });
 		}
-		return (l).fn.__chain( ret );
+		return ret;
 	};
 	
 	/** 
@@ -2221,7 +2212,7 @@ var
 		} else {
 			for ( ; i < arrs.length; i++ ) { ret[ arrs[i][0] ] = arrs[i][1]; }
 		}
-		return (l).fn.__chain( ret );
+		return ret;
 	};
 				
 	/**
@@ -2305,13 +2296,14 @@ var
 	 */
 	(l).sortBy = function( obj, fn, scope ) {
 		var args = (l).fn.__args({0: [obj, [0]], 1:[fn, [0,1]], 2:[scope, [1,2]]}, [{obj:'array'}, {fn:'function'}, {scope:'object|function|defaultobject'}]);
-		return (l).fn.__chain( (l).pluck((l).map(args.obj, function(value, index, list) {
+		return (l).pluck( (l).map(args.obj, function(value, index, list) {
 			return {
 				value : value,
 				index : index,
 				criteria : args.fn.call(args.scope, value, index, list) 
 			};
 		}).sort(function(left, right) {
+			var args = (l).fn.__args(arguments, [{left:'*'}, {right:'*'}]);
 			var a = left.criteria;
 			var b = right.criteria;
 			if ( a !== b ) {
@@ -2319,7 +2311,7 @@ var
 				if ( a < b || b === void 0 ) { return -1; }
 			}
 			return left.index < right.index ? -1 : 1;
-		}), 'value'));		
+		}), 'value');		
 	};
 
 	/**
@@ -2332,7 +2324,7 @@ var
 		var args = (l).fn.__args([obj, n], [{obj:'object|array'}, {n:'number'}]),
 			ret = (l).isPlainObject(args.obj) ? (l).toArray(args.obj) : args.obj, i;
 		for ( i = args.n || 1; i > 0;  i-- ) { ret.shift(); }
-		return (l).fn.__chain( ret );
+		return ret;
 	};
 	
 	/**
@@ -2345,7 +2337,7 @@ var
 		var args = (l).fn.__args([obj, n], [{obj:'object|array'}, {n:'number'}]),
 			ret = (l).isPlainObject(args.obj) ? (l).toArray(args.obj) : args.obj, i;
 		for ( i = args.n || 1; i > 0;  i-- ) { ret.pop(); }
-		return (l).fn.__chain( ret );
+		return ret;
 	};
 	
 	/**
@@ -2598,18 +2590,17 @@ var
 	 * @return {object}
 	 */
 	(l).chain = function( obj, key ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1: [key, [0,1]]}, [{obj:'*'}, {key:'string|number'}]);
 		(l)._chain = true;
-		return (l).fn.__init.call(this, args.obj, args.key);
+		return (l).fn.__init.apply(this, arguments);
 	};
 	
 	/**
 	 * Breaks chaining mode and returns the targeted object
 	 * @return {object}
 	 */
-	(l).end = (l).value = (l).return = function() {
+	(l).end = (l).value = (l).return = function( obj ) {
 		(l)._chain = false;
-		return (l)._object;
+		return (l)._global;
 	};
 	
 	/**
@@ -2619,7 +2610,7 @@ var
 	 */
 	(l).result = function( value ) {
 		var args = (l).fn.__args([value], [{value:'*'}]);
-		return (l).fn.__chain( (l).isFunction(args.value) ? args.value() : value );
+		return (l).isFunction(args.value) ? args.value() : value;
 	};
 	
 	/**
@@ -2640,5 +2631,14 @@ var
 	(l).identity = function( value ) {
 		return value;
 	};
+	
+	/**
+	 * Extends JavaScript array methods onto the library.
+	 * @return {function}
+	 */
+	(l).each(['concat', 'indexOf', 'join', 'lastIndexOf', 'pop', 'push', 'reverse', 'shift', 'slice', 'sort', 'splice', 'toString', 'unshift', 'valueOf'],			 
+		function(index, name) {
+			(l)[name] = !(l)[name] ? Array.prototype[name] : (l)[name]; 
+	});
 	
 })();
