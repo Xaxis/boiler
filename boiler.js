@@ -42,12 +42,14 @@ var
 
 				// Retrieve targeted object
 				target = (l).get( args.obj, args.key );
+				
+				// Set whatever is passed to the global object
 				(l)._global = obj;
 				
 				// Attach targeted object to the library. Since 'false', 'null', and 'undefined' are
 				// all valid found values we test that a value was found not if there is a value in 
 				// the returned target.
-				(l)._object = (l)._found ? target : args.obj;
+				(l)._object = (l)._found ? target : (l)._global;
 			}
 			return (l);
 		},
@@ -1224,10 +1226,13 @@ var
 	(l).each(['array', 'object', 'function', 'string', 'bool', 'number', 'null', 'undefined', 'date', 'regexp', 'element', 'nan'],			 
 		function(index, name) {
 			(l)[ 'no' + name.charAt(0).toUpperCase() + name.slice(1) + 's' ] = function( obj, key, deep ) {
-				var args = (l).fn.__args([obj, key, deep], [{obj:'object'}, {key:'string|number'}, {deep:'bool'}]), stack = {}; 
-				(l).each( (l).getByType(args.obj, "*", args.key, args.deep), 
-					function(index, value) { if ( !((l).type(value) === name) ) { stack[ index ] = value; } });
-				return stack; 
+				var args = (l).fn.__args([obj, key, deep], [{obj:'object'}, {key:'string|number'}, {deep:'bool'}]), stack = {};
+				console.log((l).getByType(args.obj, "*", args.key, args.deep));  
+				(l).each((l).getByType(args.obj, "*", args.key, args.deep), 
+					function(index, value) { if ( !((l).type(value) === name) ) {
+						stack[ index ] = value; } 
+					});
+				return (l).fn.__chain( stack ); 
 			};
 	});
 	
@@ -2591,7 +2596,7 @@ var
 	 */
 	(l).chain = function( obj, key ) {
 		(l)._chain = true;
-		return (l).fn.__init.apply(this, arguments);
+		return (l).fn.__init.call((l), obj, key);
 	};
 	
 	/**
@@ -2633,12 +2638,14 @@ var
 	};
 	
 	/**
-	 * Extends JavaScript array methods onto the library.
+	 * Extends specified JavaScript array methods onto the library.
 	 * @return {function}
 	 */
-	(l).each(['concat', 'indexOf', 'join', 'lastIndexOf', 'pop', 'push', 'reverse', 'shift', 'slice', 'sort', 'splice', 'toString', 'unshift', 'valueOf'],			 
+	(l).each(['sort'],			 
 		function(index, name) {
-			(l)[name] = !(l)[name] ? Array.prototype[name] : (l)[name]; 
+			if ( Array.prototype[name] ) {
+				(l)[name] = !(l)[name] ? Array.prototype[name] : (l)[name]; 
+			}
 	});
 	
 })();
