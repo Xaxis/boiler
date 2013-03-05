@@ -312,7 +312,7 @@ var
 			// Since nearly every method in the libary uses oargs.obj, we assume that if it
 			// is undefined at this point it is because the object was selected with the library
 			// function itself.
-			if ( !oargs.obj ) { 
+			if ( !oargs.obj && (l)._chain ) { 
 				oargs.obj = (l)._object || (l)._global;
 				
 				// So long as `rule` is not equal to null, reassign `obj` with first array or 
@@ -408,7 +408,7 @@ var
 	 * @return {array}
 	 */
 	(l).pluck = (l).fetch = function( obj, key ) {
-		var args = (l).fn.__args([obj, key], [{obj:'object|array'}, {key:'string|number'}]);	
+		var args = (l).fn.__args([obj, key], [{obj:'object|array'}, {key:'string|number'}]);
 		return (l).map(args.obj, function(value) { return value[args.key]; });
 	};
 
@@ -430,7 +430,7 @@ var
 				if ( args.fn.call( args.scope ? args.scope : this, value, index ) ) { ret.push(value); }
 			}
 		});
-		return (l).fn.__chain( ret );		
+		return (l).fn.__chain( ret );
 	};
 	
 	/**
@@ -482,7 +482,7 @@ var
 	
 	/**
 	 * Returns true if none of the values in a collection pass `fn`.
-	 * @param {object} obj
+	 * @param {object|array} obj
 	 * @param {function} fn
 	 * @param {object|function} scope
 	 * @return {boolean}
@@ -498,7 +498,7 @@ var
 	
 	/**
 	 * Returns the count of how many values in a collection pass `fn`.
-	 * @param {object} obj
+	 * @param {object|array} obj
 	 * @param {function} fn
 	 * @param {object|function} scope
 	 * @return {number}
@@ -515,7 +515,7 @@ var
 	/**
 	 * Returns the first value in a collection that passes `fn'.
 	 * @param {object|array} obj
-	 * @param {function} scope
+	 * @param {function} fn
 	 * @param {object|function} scope
 	 * @return {...*}
 	 */
@@ -551,24 +551,8 @@ var
 	};
 	
 	/**
-	 * Returns all values in a collection that pass `fn'.
-	 * @param {object} obj
-	 * @param {function} scope
-	 * @param {object|function} scope
-	 * @return {array}
-	 */
-	(l).findAll = function( obj, fn, scope ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1:[fn, [0,1]], 2:[scope, [1,2]]}, [{obj:'object|array'}, {fn:'function'}, {scope:'object|function|defaultobject'}]), 
-			ret = [];
-		(l).each(args.obj, function(index, value) {
-			if ( args.fn.call( args.scope ? args.scope : this, value, index ) ) { ret.push(value); }
-		});
-		return (l).fn.__chain( ret );		
-	};
-	
-	/**
 	 * Returns only the values whos properties are matched in a list.
-	 * @param {object} obj
+	 * @param {object|array} obj
 	 * @param {array} list
 	 * @return {array}
 	 */
@@ -928,7 +912,7 @@ var
 			target, o;
 		if ( args.key in args.obj ) {
 			target = args.obj[args.key];
-			args.key = (l).isArray(args.obj) ? args.key.toString() : args.key;
+			args.key = args.key.toString();
 			for ( o in args.obj ) {
 				if ( (l).isEqual(target, args.obj[o]) && o !== args.key ) { 
 					return false; 
@@ -1127,6 +1111,11 @@ var
 					 !((l).isEqual(target, value))) { return value; }
 		});
 		
+		// When target object is not selected globally
+		if ( !args.obj ) {
+			target = objs.shift();
+		}
+		
 		// When target object is not selected globally and only a single object
 		// is passed extend the library itself
 		if ( !(l)._global && !objs.length ) {
@@ -1262,9 +1251,12 @@ var
 	 * @return {array}
 	 */
 	(l).invoke = function( obj, fn, fargs ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1:[fn, [0,1]], 2:[fargs, [1,2]]}, [{obj:'object|array'}, {fn:'function|string'}, {fargs:'array'}]), fargs = args.fargs || [];
-		return (l).map(args.obj, function(value) { 
-			return ((l).isFunction(args.fn) ? args.fn : value[args.fn]).apply(value, fargs);
+		var args = (l).fn.__args({0: [obj, [0]], 1:[fn, [0,1]], 2:[fargs, [1,2]]}, [{obj:'object|array'}, {fn:'function|string'}, {fargs:'array'}]), fargs = args.fargs || [], ret;
+		return (l).map(args.obj, function(value) {
+			fargs.unshift(value);
+			ret = ((l).isFunction(args.fn) ? args.fn : value[args.fn]).apply(value, fargs);
+			fargs.shift();
+			return ret;
 		}); 
 	};
 	
@@ -1457,7 +1449,7 @@ var
 	 * @return {object}
 	 */
 	(l).set = function( obj, key, value ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1:[key, [0,1]], 2:[value, [1,2]]}, [{obj:'object'}, {key:'string|number'}, {value:'*'}]);
+		var args = (l).fn.__args({0: [obj, [0]], 1:[key, [0,1]], 2:[value, [1,2]]}, [{obj:'object|array'}, {key:'string|number'}, {value:'*'}]);
 		args.obj[args.key] = args.value;
 		return (l).fn.__chain( args.obj );
 	};
@@ -1829,7 +1821,7 @@ var
 	/**
 	 * Returns the count of all values that are not falsy (null, undefined, 0, "", NaN). Performs 
 	 * a deep count when `deep` is true.
-	 * @param {object} obj
+	 * @param {object|array} obj
 	 * @return {integer}
 	 */
 	(l).size = function( obj, deep, count ) {
@@ -1859,6 +1851,7 @@ var
 			paths, target, o,
 			paths = (l).paths(args.obj),
 			objs = (l).getByType(args.obj, "*", true);
+		console.log(args);
 		if ( args.key ) {
 			if ( args.key in paths ) { return paths[args.key].split(".").length; }
 		} else {
@@ -1949,7 +1942,7 @@ var
 	 * @param {integer} n
 	 * @return {array}
 	 */
-	(l).first = (l).to = function( obj, n ) {
+	(l).first = function( obj, n ) {
 		var args = (l).fn.__args({0: [obj, [0]], 1: [n, [0,1]]}, [{obj:'array'}, {n:'number'}]),
 			n = args.n ? args.n : 1, i = 0, ret = [];
 		for ( ; i < n; i++ ) { ret.push(args.obj[i]); }
@@ -2069,7 +2062,7 @@ var
 	 */
 	(l).uniq = (l).unique = function( obj, fn, scope ) {
 		var args = (l).fn.__args({0: [obj, [0]], 1:[fn, [0,1]], 2:[scope, [1,2]]}, [{obj:'array'}, {fn:'function'}, {scope:'object|function|defaultobject'}]),
-			ret = [], seen = [], target, chainOn;
+			ret = [], seen = [], target;
 		target = args.fn ? (l).map(args.obj, args.fn, args.scope) : args.obj;
 		(l).each(target, function(index, value) {
 			if ( !(l).contains(seen, value) ) {
@@ -2095,9 +2088,6 @@ var
 			if ( index !== "obj" && index !== "length" ) { arrs.push(value); }
 		});
 		
-		// Make sure target array is first element
-		arrs.unshift(args.obj);
-		
 		// Merge the arrays and retrieve unique values
 		ret = (l).uniq(Array.prototype.concat.apply(this, arrs));
 		ret.shift();
@@ -2106,7 +2096,7 @@ var
 	 
 	/**
 	 * Returns an array containing the values that are the intersection of all passed arrays (every 
-	 * value present in the result is present in the other arrays).
+	 * value present in the result is present in the passed arrays).
 	 * @param {*arrays}
 	 * @return {array}
 	 */
@@ -2120,7 +2110,6 @@ var
 		});
 		
 		// Make sure target array is first element
-		arrs.unshift(args.obj);
 		rest = Array.prototype.slice.call(arrs, 1);
 		ret = (l).filter((l).uniq(arrs[0]), function(item) {
 			return (l).every(rest, function(other) {
@@ -2155,7 +2144,6 @@ var
 		var args = (l).fn.__args(arguments, [{'*':'arr:array'}]),
 			i = 0, arrs = [], ret = [];
 		(l).each(args, function(index, value) { if ( index !== "obj" && index !== "length" ) { arrs.push(value); } });
-		arrs.unshift(args.obj);				
 		for ( ; i < arrs.length; i++ ) { ret[i] = (l).pluck(arrs, "" + i); }
 		return ret;
 	};
@@ -2192,7 +2180,9 @@ var
 	(l).array = (l).toArray = function( obj ) {
 		var args = (l).fn.__args([obj], [{obj:'object'}]), i = 0, ret = [];
 		if ( arguments.length > 1 ) {
-			for ( ; i < arguments.length; i++ ) { ret.push(arguments[i]); }
+			for ( ; i < arguments.length; i++ ) { 
+				(l).each(arguments[i], function(index, value) { ret.push(value); });
+			}
 		} else {
 			(l).each(args.obj, function(index, value) { ret.push(value); });
 		}
@@ -2200,22 +2190,32 @@ var
 	};
 	
 	/** 
-	 * Returns an object created from passed array(s) when passed single lists of key value
-	 * pairs or a list of keys and a list of values.
+	 * Returns an object created from passed array(s). When two arrays are passed the first is used
+	 * for the objects keys and the second its values. When more than two arrays are passed each array
+	 * should contain one key and one value. Additionally passing an even number of arguments will result
+	 * in all odd arguments being used as keys and all even arguments as values.
 	 * @param {*arrays}
 	 * @return {object}
 	 */
 	(l).object = (l).toObject = function() {
 		var args = (l).fn.__args(arguments, [{'*':'arr:array'}]),
 			arrs = [], keys = [], ret = {}, i = 0;
-
-		// Put passed arrays into arrs array
-		(l).each(args, function(index, value) { if ( (l).isArray(value) ) { arrs.push(value); }});
+		(l).each(args, function(index, value) { 
+			if ( (l).isArray(value) ) { arrs.push(value); }
+		});
 		if ( arrs.length === 2 ) {
 			keys = arrs[1];
-			(l).each(arrs[0], function(index, value) { ret[ keys[index] ] = value; });			
+			(l).each(arrs[0], function(index, value) { 
+				ret[ value ] = keys[index]; 
+			});			
+		} else if ( arrs.length > 2 ) {
+			for ( ; i < arrs.length; i++ ) { 
+				ret[ arrs[i][0] ] = arrs[i][1]; 
+			}
 		} else {
-			for ( ; i < arrs.length; i++ ) { ret[ arrs[i][0] ] = arrs[i][1]; }
+			for ( ; i < arguments.length; i+=2 ) { 
+				ret[ arguments[i] ] = arguments[i+1]; 
+			}
 		}
 		return ret;
 	};
@@ -2287,7 +2287,7 @@ var
 	 * @param {integer} from
 	 * @return {integer}
 	 */
-	(l).firstIndexOf = (l).findIndex = function( obj, value, from ) {
+	(l).firstIndexOf = function( obj, value, from ) {
 		var args = (l).fn.__args({0: [obj, [0]], 1:[value, [0,1]], 2:[from, [1,2]]}, [{obj:'array'}, {value:'*'}, {from:'number'}]);
 		return (l).lastIndexOf.call(this, args.obj, args.value, args.from, true);
 	};
@@ -2603,7 +2603,7 @@ var
 	 * Breaks chaining mode and returns the targeted object
 	 * @return {object}
 	 */
-	(l).end = (l).value = (l).return = function( obj ) {
+	(l).end = (l).value = function( obj ) {
 		(l)._chain = false;
 		return (l)._global;
 	};
