@@ -1216,7 +1216,6 @@ var
 		function(index, name) {
 			(l)[ 'no' + name.charAt(0).toUpperCase() + name.slice(1) + 's' ] = function( obj, key, deep ) {
 				var args = (l).fn.__args([obj, key, deep], [{obj:'object'}, {key:'string|number'}, {deep:'bool'}]), stack = {};
-				console.log((l).getByType(args.obj, "*", args.key, args.deep));  
 				(l).each((l).getByType(args.obj, "*", args.key, args.deep), 
 					function(index, value) { if ( !((l).type(value) === name) ) {
 						stack[ index ] = value; } 
@@ -1851,7 +1850,6 @@ var
 			paths, target, o,
 			paths = (l).paths(args.obj),
 			objs = (l).getByType(args.obj, "*", true);
-		console.log(args);
 		if ( args.key ) {
 			if ( args.key in paths ) { return paths[args.key].split(".").length; }
 		} else {
@@ -2080,18 +2078,7 @@ var
 	 * @return {array}
 	 */
 	(l).union = function() {
-		var args = (l).fn.__args(arguments, [{'*':'arr:array'}]),
-			ret, arrs = [];
-
-		// Put passed arrays into arrs array
-		(l).each(args, function(index, value) {
-			if ( index !== "obj" && index !== "length" ) { arrs.push(value); }
-		});
-		
-		// Merge the arrays and retrieve unique values
-		ret = (l).uniq(Array.prototype.concat.apply(this, arrs));
-		ret.shift();
-		return ret;
+		return _.uniq(Array.prototype.concat.apply(Array.prototype, arguments));
 	};
 	 
 	/**
