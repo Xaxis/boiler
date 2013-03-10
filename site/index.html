@@ -1,0 +1,1879 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title></title>
+<link href="css/index.css" rel="stylesheet" />
+<link href="css/thirdparty/sh_custom.css" rel="stylesheet" />
+<script type="text/javascript" src="js/thirdparty/jquery-1.8.3.min.js"></script>
+<script type="text/javascript" src="js/thirdparty/jquery.corner.js"></script>
+<script type="text/javascript" src="js/thirdparty/shjs/sh_main.min.js"></script>
+<script type="text/javascript" src="js/thirdparty/shjs/lang/sh_javascript.js"></script>
+<script type="text/javascript" src="js/thirdparty/shjs/lang/sh_javascript_dom.js"></script>
+<script type="text/javascript" src="js/thirdparty/shjs/lang/sh_html.js"></script>
+<script type="text/javascript" src="js/jquery.doc.js"></script>
+<script type="text/javascript" src="../refresh/refresh.js"></script>
+<script type="text/javascript" src="../boiler.js"></script>
+<script type="text/javascript">
+// Initialize plugin with Drupal module settings
+jQuery.fn.refresh('init', {
+	dirs: "../site/",
+	files: "../index.html ../boiler.js",
+	types: "html js css",
+	path: "../refresh/refresh.php",  
+	on: true,
+	jsOn: false,  
+	interval: 1000
+}); 
+</script>  
+<script>
+$(document).ready(function(e) {
+	
+	// jDoc namespace 
+	var jDoc = jQuery.fn; 
+	
+	// Center pertinent content holding divisions
+	$("#nav, #nav-bg, #separator, #content, #footer").center('h');
+	
+	// Round corners
+	//$('pre').corner();
+
+	var methods = {
+		arrays: {
+			"at": {
+				description: "Gets the elements at a given ^index^.",
+				desc_ext: "If ^index^ is passed as an array the values within should represent the indices from which to get elements at.",
+				def: "arr, index",
+				args: [ 
+					[["red", "green", "magenta", "yellow", "cyan", "blue"], [2]], 
+					[["red", "green", "magenta", "yellow", "cyan", "blue"], [0,1,2]]
+				],
+				example: "",
+				returns: []
+			},
+			"compact": {
+				description: "Removes all falsy values (`false`, `null`, `0`, `\"\"`, `undefined`, and `NaN`) from ^arr^.",
+				desc_ext: "This method is non-destructive (the original array is preserved).",		
+				def: "arr",
+				args: [ 
+					[[0,'Earth',null,'Fire',undefined,'Air',"",'Water',NaN,'Heart',false]] 
+				],
+				returns: []
+			},
+			"create": {
+				description: "Creates an object literal from arrays.",
+				desc_ext: "When passed two arrays, elements in the first are used as keys and elements from the second as values. When passed a single array, odd elements are used as keys and even as values.",		
+				def: "arr, arr",
+				args: [ 
+					[[0,1,2], ['Red','Green','Yellow']], 
+					[[0,'Red',1,'Green',2,'Yellow']], 
+				],
+				returns: []
+			},
+			"difference": {
+				description: "Computes the values from ^arr^ that are not in *^arrs^.",
+				desc_ext: "Accepts any number of arrays as arguments. The first array passed will always be the target array from which to compute differences.",
+				def: "arr, *arrs",
+				args: [ 
+					[[0,1,2,3,4,5,6,7],[1,2,3,4],[2,3,4,5,6]], 
+				],
+				returns: []
+			},
+			"first": {
+				description: "Gets the first element of an array.",	
+				desc_ext: "Passing ^n^ will return the first ^n^ number of elements starting from the beginning of the array.",	
+				def: "arr, n",
+				args: [ 
+					[['Mercury', 'Venus', 'Earth', 'Mars']],
+					[['Mercury', 'Venus', 'Earth', 'Mars'], 2], 
+				],
+				returns: []
+			},
+			"firstIndexOf": {
+				description: "Gets the first index at which a value occurs.",		
+				desc_ext: "Passing ^from^ will get the first occurance of ^value^ after index. If a value does not exist in the array will return -1.",
+				def: "arr, value, from",
+				args: [ 
+					[[0,1,2,3,0,1,2,3], 2],
+					[['Honda', 'Ford', 'GM', 'Suburu', 'Honda', 'Plymoth'], 'Honda', 3]
+				],
+				returns: ['...*', '-1']
+			},
+			"indexOf": {
+				description: "Gets the first index at which a value occurs.",	
+				desc_ext: "If a value does not exist in the array -1 is returned.",	
+				def: "arr, value",
+				args: [ 
+					[[0,1,2,3,4], 4], 
+				],
+				returns: ['...*', '-1']
+			},
+			"initial": {
+				description: "Gets all but the last value of ^arr^.",
+				desc_ext: "Passing ^n^ will return all but the last ^n^ number of elements from the end of ^arr^.",		
+				def: "arr, n",
+				args: [ 
+					[['Red','Green','Blue','Yellow','Cyan']], 
+					[['Red','Green','Blue','Yellow','Cyan'], 3],
+				],
+				returns: []
+			},
+			"intersection": {
+				description: "Computes the values from ^arr^ that are also in *^arrs^.",
+				desc_ext: "Accepts any number of arrays as arguments. The first array passed will always be the target array from which to compute intersections.",		
+				def: "arr, *arrs",
+				args: [ 
+					[[1,2,3,4], [101,2,1,10], [2,1]],
+					[['Red','Green'], ['Green','Magenta'], ['Green','Pink']]
+				],
+				returns: []
+			},
+			"last": {
+				description: "Gets the last element from ^arr^.",
+				desc_ext: "Passing ^n^ will return the last ^n^ number of elements from the end of ^arr^.",		
+				def: "arr, n",
+				args: [ 
+					[[1,2,3,4,5]], 
+					[[1,2,3,4,5], 3],
+				],
+				returns: []
+			},
+			"lastIndexOf": {
+				description: "Gets the last index at which a value occurs.",		
+				desc_ext: "Passing ^from^ will start the search from ^from^ number of elements from the end of ^arr^. If a value does not exist in the array -1 is returned.",
+				def: "arr, value, from",
+				args: [ 
+					[[1,2,3,1,2,3], 2], 
+				],
+				returns: []
+			},
+			"object": {
+				description: "Creates an object literal from passed values.",
+				desc_ext: "When two arrays are passed the first is used for the object's keys and the second its values. When more than two arrays are passed each array should contain one key and one value. Additionally passing an even number of arguments (where all arguments are not arrays) will result in all odd arguments being used as keys and all even arguments as values.",
+				def: "...*, *arrs",
+				aliases: ["toObject"],
+				args: [ 
+					[[0, 'Blue'], [1, 'Red'], [2, 'Green']], 
+					[[0,1,2], ['Blue', 'Red', 'Green']],
+					[0, 'Blue', 1, 'Red', 2, 'Green'], 
+				],
+				returns: []
+			},
+			"pop": {
+				description: "Removes element(s) from the end of ^arr^.",
+				desc_ext: "Passing ^n^ removes ^n^ number of elements from the end of ^arr^.",		
+				def: "arr, n",
+				args: [ 
+					[[1,2,3,4,5,6], 2], 
+				],
+				returns: []
+			},
+			"rest": {
+				description: "Gets elements from ^arr^ after the first element.",
+				desc_ext: "Passing ^index^ will get all elements from ^arr^ after index ^index^.",
+				def: "arr, index",
+				aliases: ["tail", "drop"],
+				args: [ 
+					[[1,2,3,4,5,6], 3],
+				],
+				returns: []
+			},
+			"shift": {
+				description: "Removes element(s) from the beginning of ^arr^.",
+				desc_ext: "Passing ^n^ removes ^n^ number of elements from the beginning of ^arr^.",		
+				def: "arr, n",
+				args: [ 
+					[[1,2,3,4,5,6], 3], 
+				],
+				returns: []
+			},
+			"union": {
+				description: "Gets all unique values from *^arrs^.",
+				desc_ext: "Duplicate values are not returned.",		
+				def: "*arrs",
+				args: [ 
+					[[1,2,3], [101,2,1,10], [2,1]], 
+				],
+				returns: []
+			},
+			"uniq": {
+				description: "Gets all non-duplicate values from ^arr^ using a deep `===` comparison.",
+				desc_ext: "When `fn` is passed unique values are computed based off the returned value of `fn`.",
+				def: "arr, fn, scope",
+				aliases: ["unique"],
+				args: [ 
+					[[22,11,22,33,22,44]], 
+					[[1,2,2,3,3,4,5,6], function(num) { return num * 2.5; }],
+				],
+				returns: []
+			},
+			"without": {
+				description: "",
+				desc_ext: "",
+				def: "arr, values",
+				aliases: ["exclude", "subtract"],
+				args: [ 
+					[[1,2,[3,4,[5,6,[7,8]]],9,10],[2,10]], 
+				],
+				returns: []
+			},
+			"zip": {
+				description: "",
+				desc_ext: "",		
+				def: "*arrs",
+				args: [ 
+					[['red','green','blue'],['#F00','#0F0','#00F'],['0', '1', '2']], 
+				],
+				returns: []
+			}
+		},
+		
+		collections: {
+			"add": {
+				description: "Adds a value to a collection.",
+				desc_ext: "Will only add if the index ^index^ exists as a property or key in ^list^.",		
+				def: "list, index, value",
+				args: [ 
+					[[1,2,3,4], 4, 5], 
+					[{0: "Green", 1: "Blue"}, 2, "Red"]
+				],
+				returns: []
+			},
+			"all": {
+				description: "Returns `true` when all members of a collection pass a test.",
+				desc_ext: "The test is established by a condition within `fn`.",
+				def: "list, fn, scope",
+				aliases: ["every"],
+				args: [ 
+					[[1,2,3,4], function(n) { return _.isNumber(n) ? true : false; }],
+					[{0: "Green", 1: "Blue"}, function(n) { return _.isString(n) ? true : false; }]
+				],
+				returns: []
+			},
+			"any": {
+				description: "",
+				desc_ext: "",
+				def: "list, fn, scope",
+				aliases: ["some"],
+				args: [ 
+					[[1,2,3,4], function(n) { return _.isNumber(n) ? true : false; }],
+					[{0: "Green", 1: "Blue"}, function(n) { return _.isString(n) ? true : false; }]
+				],
+				returns: []
+			},
+			"average": {
+				description: "",
+				desc_ext: "",		
+				def: "list",
+				args: [ 
+					[[22,44,88]], 
+					[{0: 99, 1: 999}], 
+				],
+				returns: []
+			},
+			"clear": {
+				description: "",
+				desc_ext: "",		
+				def: "list",
+				args: [ 
+					[{0: "Sky", 1: "Sun"}],
+					[[1,2,3,4]]
+				],
+				returns: []
+			},
+			"clone": {
+				description: "",
+				desc_ext: "",		
+				def: "list",
+				args: [ 
+					[{0: "Sky", 1: "Sun"}],
+					[[1,2,3,4]]
+				],
+				returns: []
+			},
+			"count": {
+				description: "",
+				desc_ext: "",		
+				def: "list, fn, scope",
+				args: [ 
+					[[1,2,3,4,'str'], function(v) { return _.isNumber(v) ? true : false; }],
+					[[1,2,3,4,'str'], {}, function(v) { return _.isString(v) ? true : false; }], 
+				],
+				returns: []
+			},
+			"countBy": {
+				description: "",
+				desc_ext: "",		
+				def: "list, fn, scope, index",
+				args: [ 
+					[[1.3, 1.5, 2.1, 2.4, 3.9, 3.8, 3.2], function(num){ return Math.floor(num); }], 
+				],
+				returns: []
+			},
+			"deep": {
+				description: "",
+				desc_ext: "",		
+				def: "list, fn, args, scope, depth, noArrs",
+				args: [ 
+					[{0:{1:{2:{3:false}}}}, function(d, i, v, r) { return v; }],
+					[[0,[1,[2,[3]]]], function(d, i, v, r) { return v; }],
+					[{0:{1:{2:{3:[0,1,2,3,[4,5,6]]}}}}, function(d, i, v, r) { return v; }, '*', true],
+				],
+				returns: []
+			},
+			"each": {
+				description: "",
+				desc_ext: "",
+				def: "list, fn, scope",
+				aliases: ["forEach"],
+				args: [ 
+					//[[1,2,3,4,5], function(i,v) { console.log(i); }], 
+				],
+				returns: []
+			},
+			"empty": {
+				description: "",
+				desc_ext: "",		
+				def: "list",
+				args: [ 
+					[[1,2,3,4,5]], 
+					[{1:0,2:0,3:0,4:0,5:0}],
+				],
+				returns: []
+			},
+			"filter": {
+				description: "",
+				desc_ext: "",		
+				def: "list, fn, scope",
+				args: [ 
+					[[1,2,3,4], function(v) {return _.isNumber(v) ? true : false}], 
+					[{0:99,1:100,2:'str'}, function(v) {return _.isNumber(v) ? true : false}], 
+				],
+				returns: []
+			},
+			"find": {
+				description: "",
+				desc_ext: "",
+				def: "list, fn, scope",
+				aliases: ["findValue"],
+				args: [ 
+					[[1,2,3,4], function(v) {return _.isNumber(v) ? true : false}], 
+					[{0:99,1:100,2:'str'}, function(v) {return _.isNumber(v) ? true : false}], 
+				],
+				returns: []
+			},
+			"findKey": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, fn, scope",
+				args: [ 
+					[[1,2,3,4], function(v) {return v === 2 ? true : false}], 
+					[{0:99,1:100,2:'str'}, function(v) {return v == 2 ? true : false}], 
+				],
+				returns: []
+			},
+			"flatten": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, depth",
+				args: [ 
+					[[1,[2,[3,[4,[5]]]]]], 
+					[[1,[2,[3,[4,[5]]]]], 3], 
+				],
+				returns: []
+			},
+			"groupBy": {
+				description: "",
+				desc_ext: "",		
+				def: "list, fn, scope",
+				args: [ 
+					[[1.3, 1.5, 2.1, 2.4, 3.9, 3.8], function(num){ return Math.floor(num); }],
+					[[{name:'Dan', age:22},{name:'Bob', age:25},{name:'Ted', age:32}], 'age'] 
+				],
+				returns: []
+			},
+			"groupsOf": {
+				description: "",
+				desc_ext: "",		
+				def: "list, n, pad",
+				args: [ 
+					[[1.3, 1.5, 2.1, 2.4, 3.9, 3.8, 4.2], 2],
+					[[1.3, 1.5, 2.1, 2.4, 3.9, 3.8, 4.2], 2, 9.9]
+				],
+				returns: []
+			},
+			"has": {
+				description: "",
+				desc_ext: "",		
+				def: "list, key",
+				args: [ 
+					[[0,1,2,3,4], 3],
+					[{name:'Ted', age:33}, 'name'] 
+				],
+				returns: []
+			},
+			"invert": {
+				description: "",
+				desc_ext: "",
+				def: "list",
+				aliases: ["transpose"],
+				args: [ 
+					[{0: "Green", 1: "Blue", 2: "Red", 3: "Yellow"}], 
+				],
+				returns: []
+			},
+			"invoke": {
+				description: "",
+				desc_ext: "",		
+				def: "list, fn, args",
+				args: [ 
+					[{0:'Tulip', 1:'Daisy'}, function(v, a) {return v + a;}, [' is a flower.']], 
+				],
+				returns: []
+			},
+			"isUnique": {
+				description: "",
+				desc_ext: "",		
+				def: "list, index",
+				args: [ 
+					[[1,2,1,2,3], 4], 
+					[{0:'green',1:'green',2:'blue'}, 0]
+				],
+				returns: []
+			},
+			"keyExists": {
+				description: "",
+				desc_ext: "",		
+				def: "list, key",
+				args: [ 
+					[[0,1,2,3,4], 3],
+					[{name:'Ted', age:33}, 'name'] 
+				],
+				returns: []
+			},
+			"keys": {
+				description: "",
+				desc_ext: "",		
+				def: "list",
+				args: [ 
+					[[0,1,2,3,4]],
+					[{name:'Ted', age:33}] 
+				],
+				returns: []
+			},
+			"least": {
+				description: "",
+				desc_ext: "",		
+				def: "list, fn",
+				args: [ 
+					[[1,1,2,2,3]],
+					[{0:'zero',1:'zero',2:'one',3:'two',4:'two'}] 
+				],
+				returns: []
+			},
+			"len": {
+				description: "",
+				desc_ext: "",		
+				def: "list, deep",
+				args: [ 
+					[[1,1,2,2,3]],
+					[{0:'zero',1:'zero',2:'one',3:'two',4:'two'}],
+					[{0:'zero',1:'zero',2:{0:'zero',0:'zero'}}, true] 
+				],
+				returns: []
+			},
+			"map": {
+				description: "",
+				desc_ext: "",
+				def: "list, fn, scope",
+				aliases: ["collect"],
+				args: [ 
+					[['Green', 'Cyan', 'Blue', 'Magenta', 'Red', 'Yellow'], function(v) {
+						if ( _.inArray(['Green', 'Blue', 'Red'], v) ) {
+							return v + ' is a primary.';
+						} else {
+							return v + ' is a sub-prime.'
+						}
+					}], 
+				],
+				returns: []
+			},
+			"max": {
+				description: "",
+				desc_ext: "",
+				def: "list",
+				aliases: ["maxValue"],
+				args: [ 
+					[[1,2,3,4,5,6]], 
+					[{A:99,B:1000,C:499}]
+				],
+				returns: []
+			},
+			"min": {
+				description: "",
+				desc_ext: "",
+				def: "list",
+				aliases: ["minValue"],
+				args: [ 
+					[[1,2,3,4,5,6]], 
+					[{A:99,B:1000,C:499}]
+				],
+				returns: []
+			},
+			"most": {
+				description: "",
+				desc_ext: "",		
+				def: "list, fn",
+				args: [ 
+					[[1,1,2,2,3]],
+					[{0:'zero',1:'zero',2:'one',3:'two',4:'two'}] 
+				],
+				returns: []
+			},
+			"none": {
+				description: "",
+				desc_ext: "",		
+				def: "list, fn, scope",
+				args: [ 
+					[[0,1,2], function(v) {return _.isNull(v) ? true : false; }], 
+				],
+				returns: []
+			},
+			"omit": {
+				description: "",
+				desc_ext: "",
+				def: "list, values",
+				aliases: ["blacklist"],
+				args: [ 
+					[{'red':'#F00', 'green':'#0F0', 'blue':'#00F'}, ['green']], 
+				],
+				returns: []
+			},
+			"only": {
+				description: "",
+				desc_ext: "",
+				def: "list, values",
+				aliases: ["whitelist"],
+				args: [ 
+					[{'red':'#F00', 'green':'#0F0', 'blue':'#00F'}, ['green']], 
+				],
+				returns: []
+			},
+			"reduce": {
+				description: "",
+				desc_ext: "",
+				def: "list, fn, scope",
+				aliases: ["foldl"],
+				args: [ 
+					[[22,44,88], function(base, value, index) { return base * value; }], 
+				],
+				returns: []
+			},
+			"reduceRight": {
+				description: "",
+				desc_ext: "",
+				def: "list, fn, scope",
+				aliases: ["foldr"],
+				args: [ 
+					[[22,44,88], function(base, value, index) { return base * value; }], 
+				],
+				returns: []
+			},
+			"reject": {
+				description: "",
+				desc_ext: "",		
+				def: "list, fn, scope",
+				args: [ 
+					[[1,2,3,4], function(v) {return _.isNumber(v) ? true : false}], 
+					[{0:99,1:100,2:'str'}, function(v) {return _.isNumber(v) ? true : false}], 
+				],
+				returns: []
+			},
+			"remove": {
+				description: "",
+				desc_ext: "",		
+				def: "list, key",
+				args: [ 
+					[[1,2,3,4], 2],
+					[{'red':'#F00', 'green':'#0F0', 'blue':'#00F'}, 'green'] 
+				],
+				returns: []
+			},
+			"replace": {
+				description: "",
+				desc_ext: "",		
+				def: "list, fn, scope",
+				args: [ 
+					[{'red':'#F00', 'green':'#0F0', 'blue':'#00F'}, function(v) {return v + '000';}], 
+				],
+				returns: []
+			},
+			"sample": {
+				description: "",
+				desc_ext: "",		
+				def: "list, n",
+				args: [ 
+					[[1,2,3,4,5,6]], 
+					[[1,2,3,4,5,6], 3], 
+				],
+				returns: []
+			},
+			"set": {
+				description: "",
+				desc_ext: "",		
+				def: "list, index, value",
+				args: [ 
+					[[1,2,3,4,5,6], 2, 'string'], 
+					[{'red':'#F00', 'green':'#0F0', 'blue':'#00F'}, 'yellow', '#0FF']
+				],
+				returns: []
+			},
+			"setUndef": {
+				description: "",
+				desc_ext: "",
+				def: "list, value",
+				aliases: ["setIfUndefined"],
+				args: [ 
+					[[1,2,3,undefined,5,6], 2], 
+					[{'red':'#F00', 'green':'#0F0', 'blue':'#00F', 'yellow':undefined}, '#0FF']
+				],
+				returns: []
+			},
+			"shuffle": {
+				description: "",
+				desc_ext: "",
+				def: "list",
+				aliases: ["randomized"],
+				args: [ 
+					[[1,2,3,4,5]], 
+				],
+				returns: []
+			},
+			"size": {
+				description: "",
+				desc_ext: "",		
+				def: "list, deep",
+				args: [ 
+					[[1,null,2,3,4]], 
+				],
+				returns: []
+			},
+			"sortBy": {
+				description: "",
+				desc_ext: "",		
+				def: "list, fn, scope",
+				args: [ 
+					[[1, 2, 3, 4, 5, 6], function(num){ return Math.sin(num); }], 
+				],
+				returns: []
+			},
+			"sum": {
+				description: "",
+				desc_ext: "",		
+				def: "list",
+				args: [ 
+					[[1,2,3,4]], 
+				],
+				returns: []
+			},
+			"values": {
+				description: "",
+				desc_ext: "",		
+				def: "list",
+				args: [ 
+					[[0,1,2,3,4]],
+					[{name:'Ted', age:33}] 
+				],
+				returns: []
+			},
+			"where": {
+				description: "",
+				desc_ext: "",		
+				def: "list, matches",
+				args: [ 
+					[[{name: 'Ted', age: 22},{name: 'Ted', age: 29},{name: 'Bob', age: 29}], {name: 'Ted', age:22}], 
+				],
+				returns: []
+			},
+			"whereFirst": {
+				description: "",
+				desc_ext: "",		
+				def: "list, matches",
+				args: [ 
+					[[{name: 'Ted', age: 22},{name: 'Ted', age: 29},{name: 'Bob', age: 29}], {name: 'Ted'}], 
+				],
+				returns: []
+			}
+		},
+				
+		functions: {
+			"after": {
+				description: "",
+				desc_ext: "",		
+				def: "fn, n, start",
+				args: [ [], ],
+				returns: []
+			},		
+			"bind": {
+				description: "",
+				desc_ext: "",		
+				def: "fn, scope, args",
+				args: [ [], ],
+				returns: []
+			},
+			"bindAll": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, methods",
+				args: [ [], ],
+				returns: []
+			},
+			"compose": {
+				description: "",
+				desc_ext: "",		
+				def: "*fns",
+				args: [ [], ],
+				returns: []
+			},
+			"debounce": {
+				description: "",
+				desc_ext: "",		
+				def: "fn, n, start",
+				args: [ [], ],
+				returns: []
+			},
+			"defer": {
+				description: "",
+				desc_ext: "",		
+				def: "fn, args",
+				args: [ [], ],
+				returns: []
+			},
+			"delay": {
+				description: "",
+				desc_ext: "",		
+				def: "fn, ms, args",
+				args: [ [], ],
+				returns: []
+			},
+			"fill": {
+				description: "",
+				desc_ext: "",
+				def: "fn, args",
+				aliases: ["partial"],
+				args: [ [], ],
+				returns: []
+			},
+			"memoize": {
+				description: "",
+				desc_ext: "",		
+				def: "fn, hash",
+				args: [ [], ],
+				returns: []
+			},
+			"once": {
+				description: "",
+				desc_ext: "",		
+				def: "fn",
+				args: [ [], ],
+				returns: []
+			},
+			"throttle": {
+				description: "",
+				desc_ext: "",		
+				def: "fn, ms",
+				args: [ [], ],
+				returns: []
+			},
+			"times": {
+				description: "",
+				desc_ext: "",		
+				def: "fn, n",
+				args: [ [], ],
+				returns: []
+			},
+			"wrap": {
+				description: "",
+				desc_ext: "",		
+				def: "fn, wrapper",
+				args: [ [], ],
+				returns: []
+			},
+		},
+
+		numbers: {
+			"range": {
+				description: "",
+				desc_ext: "",		
+				def: "start, stop, step",
+				args: [ 
+					[0, 100, 10], 
+				],
+				returns: []
+			},
+		},
+		
+		objects: {
+			"array": {
+				description: "",
+				desc_ext: "",
+				def: "*objs",
+				aliases: ["toArray"],
+				args: [ 
+					[{0: "Green", 1: "Blue"}],
+					[{0: "Green", 1: "Blue"},{2: "Red", 3: "Yellow"}]
+				],
+				returns: []
+			},		
+			"arrayNames": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, deep",
+				args: [ 
+					[{arr1: [], str1: "Blue"}], 
+				],
+				returns: []
+			},
+			"arrays": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, deep",
+				args: [ 
+					[{arr1: [], str1: "Blue"}], 
+				],
+				returns: []
+			},
+			"boolNames": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, deep",
+				args: [ 
+					[{arr1: [], str1: "Blue", boo1: false}] 
+				],
+				returns: []
+			},
+			"bools": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, deep",
+				args: [ 
+					[{arr1: [], str1: "Blue", boo1: false}] 
+				],
+				returns: []
+			},
+			"build": {
+				description: "",
+				desc_ext: "",
+				def: "obj, ns, members, deep",
+				aliases: ["module"],
+				args: [ [], ],
+				returns: []
+			},
+			"call": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, args, deep, only",
+				args: [ 
+					//[{fn1: function(){console.log('fn1')}, obj1: {fn2: function(){console.log('fn2');}}}],
+					//[{fn1: function(){console.log('fn1')}, obj1: {fn2: function(){console.log('fn2');}}}, true] 
+				],
+				returns: []
+			},
+			"contains": {
+				description: "",
+				desc_ext: "",
+				def: "obj, value",
+				aliases: ["exists", "valueExists", "inArray"],
+				args: [ 
+					[[1,2,3,4], 3],
+					[{0: 99, 1:100}, 101] 
+				],
+				returns: []
+			}, 
+			"dateNames": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, deep",
+				args: [ 
+					[{dt1: new Date}], 
+				],
+				returns: []
+			},
+			"dates": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, deep",
+				args: [ 
+					[{dt1: new Date}], 
+				],
+				returns: []
+			},
+			"defaults": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, defaults",
+				args: [ 
+					[{flavor : "chocolate", scoops: null}, {flavor : "vanilla", sprinkles : "lots", scoops: 2}], 
+				],
+				returns: []
+			},
+			"elementNames": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, deep",
+				args: [ 
+					[{el1: document.createElement("a")}], 
+				],
+				returns: []
+			},
+			"elements": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, deep",
+				args: [ 
+					[{el1: document.createElement("a")}], 
+				],
+				returns: []
+			},
+			"extend": {
+				description: "",
+				desc_ext: "",
+				def: "*objs",
+				aliases: ["merge"],
+				args: [ 
+					[{0:'zero'}, {1:'one'}, {2:'two'}],
+					[{0:'zero', A:{}}, {1:'one'}, true, {2:'two'}],
+				],
+				returns: []
+			},
+			"functionNames": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, deep",
+				args: [ 
+					[{fn1: function(){}}], 
+				],
+				returns: []
+			},
+			"functions": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, deep",
+				args: [ 
+					[{fn1: function(){}}], 
+				],
+				returns: []
+			},
+			"get": {
+				description: "",
+				desc_ext: "",
+				def: "obj, key",
+				aliases: ["getByKey"],
+				args: [ 
+					[{0: {a: 8, b: {b_1: 'Green'}}}, 'b_1'], 
+				],
+				returns: []
+			},
+			"getByType": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, type, key, deep",
+				args: [ 
+					[{0: {a: 3, b: {b_1: 'Green'}}}, '*'],
+					[{0: {a: 3, b: {b_1: 'Green'}}}, '*', true],
+					[{0: {a: 3, b: {b_1: 'Green'}}}, '*', 'b', true],  
+					[{0: {a: 3, b: {b_1: 'Green'}}}, 'number', true],
+					[{0: {a: 3, b: {b_1: 'Green'}}}, 'object', true], 
+				],
+				returns: []
+			},
+			"howDeep": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key",
+				args: [ 
+					[{0: {a: 22, b: {b_1: 'Green'}}}, 'b_1'], 
+				],
+				returns: []
+			},
+			"isArguments": {
+				description: "",
+				desc_ext: "",		
+				def: "obj",
+				args: [ 
+					[(function(){return arguments;})()], 
+				],
+				returns: []
+			},
+			"isArray": {
+				description: "",
+				desc_ext: "",		
+				def: "obj",
+				args: [ 
+					[[1,2,3]], 
+				],
+				returns: []
+			},
+			"isBool": {
+				description: "",
+				desc_ext: "",		
+				def: "obj",
+				args: [ 
+					[false], 
+				],
+				returns: []
+			},
+			"isDate": {
+				description: "",
+				desc_ext: "",		
+				def: "obj",
+				args: [ 
+					[new Date], 
+				],
+				returns: []
+			},
+			"isElement": {
+				description: "",
+				desc_ext: "",		
+				def: "obj",
+				args: [ 
+					[document.createElement("a")], 
+				],
+				returns: []
+			},
+			"isEmpty": {
+				description: "",
+				desc_ext: "",		
+				def: "obj",
+				args: [ 
+					[[]], 
+					[{}],
+				],
+				returns: []
+			},
+			"isEqual": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, obj",
+				args: [ 
+					[null, null], 
+					[0, 0],
+					[undefined, undefined],
+					[NaN, NaN],
+					["", ""],
+					[function(){},function(){}],
+					[[1,2,3,4],[1,2,3,4]],
+					[[1,2,3,4,[1,2]],[1,2,3,4,[1,2]]],
+					[{0: {a: 3, b: {b_1: 'Green'}}}, {0: {a: 3, b: {b_1: 'Green'}}}]
+				],
+				returns: []
+			},
+			"isFalsy": {
+				description: "",
+				desc_ext: "",		
+				def: "obj",
+				args: [ 
+					[""], 
+					[0],
+					[NaN],
+					[false],
+					[null],
+				],
+				returns: []
+			},
+			"isFinite": {
+				description: "",
+				desc_ext: "",		
+				def: "obj",
+				args: [ 
+					[Infinity], 
+					[-Infinity],
+				],
+				returns: []
+			},
+			"isFunction": {
+				description: "",
+				desc_ext: "",		
+				def: "obj",
+				args: [ 
+					[function() {}],
+					[new Function()],
+					[Date] 
+				],
+				returns: []
+			},
+			"isNaN": {
+				description: "",
+				desc_ext: "",		
+				def: "obj",
+				args: [ 
+					[NaN], 
+				],
+				returns: []
+			},
+			"isNull": {
+				description: "",
+				desc_ext: "",		
+				def: "obj",
+				args: [ 
+					[null], 
+				],
+				returns: []
+			},
+			"isNumber": {
+				description: "",
+				desc_ext: "",		
+				def: "obj",
+				args: [ 
+					[99], 
+					[-99],
+					[99.98798],
+				],
+				returns: []
+			},
+			"isObject": {
+				description: "",
+				desc_ext: "",		
+				def: "obj",
+				args: [ 
+					[{}],
+					[Math] 
+				],
+				returns: []
+			},
+			"isPlainObject": {
+				description: "",
+				desc_ext: "",		
+				def: "obj",
+				args: [ 
+					[{}],
+					[Math] 
+				],
+				returns: []
+			},
+			"isRegExp": {
+				description: "",
+				desc_ext: "",		
+				def: "obj",
+				args: [ 
+					[/[s]/],
+					[new RegExp(/[s]/)] 
+				],
+				returns: []
+			},
+			"isString": {
+				description: "",
+				desc_ext: "",		
+				def: "obj",
+				args: [ 
+					['str'], 
+				],
+				returns: []
+			},
+			"isUndefined": {
+				description: "",
+				desc_ext: "",		
+				def: "obj",
+				args: [ 
+					[undefined], 
+				],
+				returns: []
+			},
+			"nanNames": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, deep",
+				args: [ 
+					[{nan1:NaN}], 
+				],
+				returns: []
+			},
+			"nans": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, deep",
+				args: [ 
+					[{nan1:NaN}], 
+				],
+				returns: []
+			},
+			"nest": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, prefix",
+				args: [ 
+					[{0: 'some value', 1: {}}], 
+					[{0: 'some value', 1: {}}, 'prefix-'], 
+				],
+				returns: []
+			},
+			"noArrays": {
+				description: "",
+				desc_ext: "obj, key, deep",		
+				def: "",
+				args: [ 
+					[{0: [1,2,3], 1: 'string', 2: false, 3: {a:[3,4], b: null, c: 99}}, true], 
+				],
+				returns: []
+			},
+			"noBools": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, deep",
+				args: [ 
+					[{0: [1,2,3], 1: 'string', 2: false, 3: {a:[3,4], b: null, c: 99}}, true], 
+				],
+				returns: []
+			},
+			"noDates": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, deep",
+				args: [ 
+					[{0: [1,2,3], 1: 'string', 2: false, 3: {a:[3,4], b: null, c: new Date}}, true], 
+				],
+				returns: []
+			},
+			"noElements": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, deep",
+				args: [ 
+					[{0: [1,2,3], 1: 'string', 2: false, 3: {a:[3,4], b: null, c: document.createElement("a")}}, true], 
+				],
+				returns: []
+			},
+			"noFunctions": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, deep",
+				args: [ 
+					[{0: [1,2,3], 1: function(){console.log('fn')}, 2: {a:[3,4], b: null}}, true], 
+				],
+				returns: []
+			},
+			"noNans": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, deep",
+				args: [ 
+					[{0: NaN, 1: function(){console.log('fn')}, 2: {a:[3,4], b: null}}, true], 
+				],
+				returns: []
+			},
+			"noNulls": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, deep",
+				args: [ 
+					[{0: [1,2,3], 1: function(){console.log('fn')}, 2: {a:[3,4], b: null}}, true], 
+				],
+				returns: []
+			},
+			"noNumbers": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, deep",
+				args: [ 
+					[{0: 999, 1: function(){console.log('fn')}, 2: {a:[3,4], b: null}}, true], 
+				],
+				returns: []
+			},
+			"noObjects": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, deep",
+				args: [ 
+					[{0: 999, 1: function(){console.log('fn')}, 2: {a:[3,4], b: null}}, true], 
+				],
+				returns: []
+			},
+			"noRegexps": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, deep",
+				args: [ 
+					[{0: 999, 1: /[s]/, 2: {a:[3,4], b: null}}, true], 
+				],
+				returns: []
+			},
+			"noStrings": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, deep",
+				args: [ 
+					[{0: 'string', 1: function(){console.log('fn')}, 2: {a:[3,4], b: null}}, true], 
+				],
+				returns: []
+			},
+			"noUndefineds": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, deep",
+				args: [ 
+					[{0: 999, 1: undefined, 2: {a:undefined, b: null}}, true], 
+				],
+				returns: []
+			},
+			"nullNames": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, deep",
+				args: [ 
+					[{nu1: null}], 
+				],
+				returns: []
+			},
+			"nulls": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, deep",
+				args: [ 
+					[{nu1: null}], 
+				],
+				returns: []
+			},
+			"numberNames": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, deep",
+				args: [ 
+					[{num1: 22}], 
+				],
+				returns: []
+			},
+			"numbers": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, deep",
+				args: [ 
+					[{num1: 22}], 
+				],
+				returns: []
+			},
+			"objectNames": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, deep",
+				args: [ 
+					[{obj1:{}}], 
+				],
+				returns: []
+			},
+			"objects": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, deep",
+				args: [ 
+					[{obj1:{}}], 
+				],
+				returns: []
+			},
+			"pairs": {
+				description: "",
+				desc_ext: "",		
+				def: "",
+				args: [ 
+					[{'red':'#F00', 'green':'#0F0', 'blue':'#00F'}, ['green']], 
+				],
+				returns: []
+			},
+			"parent": {
+				description: "",
+				desc_ext: "",		
+				def: "obj",
+				args: [ 
+					[{0: {a: 8, b: {b_1: 'Green'}}}, 'b_1'], 
+				],
+				returns: []
+			},
+			"paths": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key",
+				args: [ 
+					[{0: {a: 8, b: {b_1: 'Green'}}}], 
+				],
+				returns: []
+			},
+			"pluck": {
+				description: "",
+				desc_ext: "",
+				def: "obj, key",
+				aliases: ["fetch"],
+				args: [ 
+					[[{name:'Dan', age:22},{name:'Bob', age:25},{name:'Ted', age:32}], 'name'],
+				],
+				returns: []
+			},
+			"regexpNames": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, deep",
+				args: [ 
+					[{reg1:/[s]/}], 
+				],
+				returns: []
+			},
+			"regexps": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, deep",
+				args: [ 
+					[{reg1:/[s]/}], 
+				],
+				returns: []
+			},
+			"resolve": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key",
+				args: [ 
+					[{0: {a: 8, b: {b_1: 'Green'}}}, 'b_1'], 
+				],
+				returns: []
+			},
+			"stringNames": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, deep",
+				args: [ 
+					[{str1:'string'}], 
+				],
+				returns: []
+			},
+			"strings": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, deep",
+				args: [ 
+					[{str1:'string'}], 
+				],
+				returns: []
+			},
+			"tap": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, fn",
+				args: [ [], ],
+				returns: []
+			},
+			"toQueryString": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, prefix",
+				args: [ [], ],
+				returns: []
+			},
+			"type": {
+				description: "",
+				desc_ext: "",		
+				def: "obj",
+				args: [ 
+					[[]],
+					[{}],
+					[983] 
+				],
+				returns: []
+			},
+			"undefinedNames": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, deep",
+				args: [ 
+					[{undf1:undefined}], 
+				],
+				returns: []
+			},
+			"undefineds": {
+				description: "",
+				desc_ext: "",		
+				def: "obj, key, deep",
+				args: [ 
+					[{undf1:undefined}], 
+				],
+				returns: []
+			}
+		},
+				
+		strings: {
+			"fromQueryString": {
+				description: "",
+				desc_ext: "",		
+				def: "str, deep",
+				args: [ [], ],
+				returns: []
+			},
+		},
+		
+		utility: {
+			"chain": {
+				description: "",
+				desc_ext: "",
+				def: "obj, index",			
+				args: [ [], ],
+				returns: []
+			},
+			"end": {
+				description: "",
+				desc_ext: "",
+				def: "",
+				aliases: ["value"],
+				args: [ [], ],
+				returns: []
+			},
+			"identity": {
+				description: "",
+				desc_ext: "",		
+				def: "value",
+				args: [ [], ],
+				returns: []
+			},
+			"noConflict": {
+				description: "",
+				desc_ext: "",		
+				def: "",
+				args: [ [], ],
+				returns: []
+			},
+			"result": {
+				description: "",
+				desc_ext: "",		
+				def: "value",
+				args: [ [], ],
+				returns: []
+			},
+		},
+
+	};
+	
+	function test( methods, category ) {
+		var args, updateReturns;	
+		for ( var t in methods ) {
+			if ( _.inArray(category, t) ) {
+				for ( var c in methods[t] ) {
+					
+					// Only parse return types if not already defined
+					if ( methods[t][c].returns.length === 0 ) {
+						updateReturns = true;
+						methods[t][c].returns = [];
+					} else {
+						updateReturns = false;
+					}
+					
+					// Build new results and resultString arrays
+					methods[t][c].results = [];
+					methods[t][c].resultString = [];
+					methods[t][c].argumentString = [];
+					
+					// Iterate over each argument definition
+					for ( var a in methods[t][c].args ) {
+						
+						if ( _.isArray(args = methods[t][c].args[a]) && args.length > 0 ) {	
+									
+							try {
+									
+								// RESULT STRING - Make result string HTML viewable
+								var result = _[c].apply(this, args);
+								var resultString = "";
+								
+								// Parse RESULT STRING based on type
+								switch ( _.type(result) ) {
+									
+									// For arrays parse each value 
+									case "array" :
+										for ( var r in result ) {
+											switch ( _.type(result[r]) ) {
+												case "null" :
+													result[r] = "null";
+													break;
+												case "undefined" :
+													result[r] = "undefined";
+													break;
+												case "nan" :
+													result[r] = "NaN";
+													break;
+												case "bool" :
+													if ( result[r] === true ) {
+														result[r] = "true";
+													} else {
+														result[r] = "false";
+													}
+													break;
+												case "string" :
+													if ( result[r] === "" ) {
+														result[r] = "\"\"";
+													} else {
+														result[r] = "\"" + result[r] + "\"";
+													}
+													break;
+											}
+										}
+										resultString = "[" + result.toString() + "]";
+										break;
+									case "object" :
+										resultString = JSON.stringify(result);
+										resultString = resultString.replace(/[\"]([0-9])[\"]/g, "\$1");
+										break;
+									default :
+										resultString = result.toString();
+								}
+								
+								// Set results and resultString
+								methods[t][c].results.push(result);
+								methods[t][c].resultString.push(resultString);
+
+								// Parse RESULT STRING based on type
+								if ( updateReturns ) {
+									methods[t][c].returns.push(_.type(result));
+								}
+
+								//console.log('SUCCESS: ' + c + '(): ', methods[t][c].results[a]);		
+							} catch (e) {
+								//console.log('ERROR  : ' + c + '(): '); 					
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return methods;
+	}
+	
+	// Build Doc Site 
+	jDoc.buildDocTemplate('Boiler.js', {
+		methods: [
+			'Arrays',
+			{title: 'at'},
+			{title: 'compact'},
+			{title: 'create'},
+			{title: 'difference'},
+			{title: 'first'},
+			{title: 'firstIndexOf'},
+			{title: 'indexOf'},
+			{title: 'initial'},
+			{title: 'intersection'},
+			{title: 'last'},
+			{title: 'lastIndexOf'},
+			{title: 'object'},
+			{title: 'pop'},
+			{title: 'rest'},
+			{title: 'shift'},
+			{title: 'union'},
+			{title: 'uniq'},
+			{title: 'without'},
+			{title: 'zip'},
+			
+			'Collections',
+			{title: 'add'},
+			{title: 'all'},
+			{title: 'any'},
+			{title: 'average'},
+			{title: 'clear'},
+			{title: 'clone'},
+			{title: 'count'},
+			{title: 'countBy'},
+			{title: 'deep'},
+			{title: 'each'},
+			{title: 'empty'},
+			{title: 'filter'},
+			{title: 'find'},
+			{title: 'findKey'},
+			{title: 'flatten'},
+			{title: 'groupBy'},
+			{title: 'groupsOf'},
+			{title: 'has'},
+			{title: 'invert'},
+			{title: 'invoke'},
+			{title: 'isUnique'},
+			{title: 'keyExists'},
+			{title: 'keys'},
+			{title: 'least'},
+			{title: 'len'},
+			{title: 'map'},
+			{title: 'max'},
+			{title: 'min'},
+			{title: 'most'},
+			{title: 'none'},
+			{title: 'omit'},
+			{title: 'only'},
+			{title: 'reduce'},
+			{title: 'reduceRight'},
+			{title: 'reject'},
+			{title: 'remove'},
+			{title: 'replace'},
+			{title: 'sample'},
+			{title: 'set'},
+			{title: 'setUndef'},
+			{title: 'shuffle'},
+			{title: 'size'},
+			{title: 'sortBy'},
+			{title: 'sum'},
+			{title: 'values'},
+			{title: 'where'},
+			{title: 'whereFirst'},
+			
+			'Functions',
+			{title: 'after'},
+			{title: 'bind'},
+			{title: 'bindAll'},
+			{title: 'compose'},
+			{title: 'debounce'},
+			{title: 'defer'},
+			{title: 'delay'},
+			{title: 'fill'},
+			{title: 'memoize'},
+			{title: 'once'},
+			{title: 'throttle'},
+			{title: 'times'},
+			{title: 'wrap'},
+			
+			'Numbers',
+			{title: 'range'},
+			
+			'Objects',
+			{title: 'array'},
+			{title: 'arrayNames'},
+			{title: 'arrays'},
+			{title: 'boolNames'},
+			{title: 'bools'},
+			{title: 'build'},
+			{title: 'call'},
+			{title: 'contains'},
+			{title: 'dateNames'},
+			{title: 'dates'},
+			{title: 'defaults'},
+			{title: 'elementNames'},
+			{title: 'elements'},
+			{title: 'extend'},
+			{title: 'functionNames'},
+			{title: 'functions'},
+			{title: 'get'},
+			{title: 'getByType'},
+			{title: 'howDeep'},
+			{title: 'isArguments'},
+			{title: 'isArray'},
+			{title: 'isBool'},
+			{title: 'isDate'},
+			{title: 'isElement'},
+			{title: 'isEmpty'},
+			{title: 'isEqual'},
+			{title: 'isFalsy'},
+			{title: 'isFinite'},
+			{title: 'isFunction'},
+			{title: 'isNaN'},
+			{title: 'isNull'},
+			{title: 'isNumber'},
+			{title: 'isObject'},
+			{title: 'isPlainObject'},
+			{title: 'isRegExp'},
+			{title: 'isString'},
+			{title: 'isUndefined'},
+			{title: 'nanNames'},
+			{title: 'nans'},
+			{title: 'nest'},
+			{title: 'noArrays'},
+			{title: 'noBools'},
+			{title: 'noDates'},
+			{title: 'noElements'},
+			{title: 'noFunctions'},
+			{title: 'noNans'},
+			{title: 'noNulls'},
+			{title: 'noNumbers'},
+			{title: 'noObjects'},
+			{title: 'noRegexps'},
+			{title: 'noStrings'},
+			{title: 'noUndefineds'},
+			{title: 'nullNames'},
+			{title: 'nulls'},
+			{title: 'numberNames'},
+			{title: 'numbers'},
+			{title: 'objectNames'},
+			{title: 'objects'},
+			{title: 'pairs'},
+			{title: 'parent'},
+			{title: 'paths'},
+			{title: 'pluck'},
+			{title: 'regexpNames'},
+			{title: 'regexps'},
+			{title: 'resolve'},
+			{title: 'stringNames'},
+			{title: 'strings'},
+			{title: 'tap'},
+			{title: 'toQueryString'},
+			{title: 'type'},
+			{title: 'undefinedNames'},
+			{title: 'undefineds'},
+			
+			'Strings',
+			{title: 'fromQueryString'},
+			
+			'Utility',
+			{title: 'chain'},
+			{title: 'end'},
+			{title: 'identity'},
+			{title: 'noConflict'},
+			{title: 'result'},
+		], 
+	}, test(methods, ['utility', 'functions', 'strings', 'numbers', 'arrays', 'objects', 'collections']));
+
+	// Handle the methods click event
+	$(".sub_section_method").bind('click', function(e) {
+		var duration = 350;
+		var description = $(e.currentTarget).find('.methodExtendedDescription').show(); 
+		var examples =  $(e.currentTarget).find('.methodExamples');
+		var aliases =  $(e.currentTarget).find('.methodAliases');
+		var showOrNo = description.css('opacity') === "0" ? true : false;		
+		if ( showOrNo ) {
+			description.css({position:'relative'});
+			description.animate({opacity: 1}, duration);
+			aliases.animate({height: "toggle", opacity: "toggle"}, duration);
+			examples.animate({height: "toggle", opacity: "toggle"}, duration);
+		} else {
+			$(description, examples).animate({opacity: 0}, duration, function() {
+				aliases.animate({height: "toggle", opacity: "toggle"}, duration);
+				examples.animate({height: "toggle", opacity: "toggle"}, duration);
+				description.css({position:'absolute', top:'0'});
+				description.animate({height: "toggle"}, duration);
+			});
+		}
+	});
+	
+	// Highlight all code blocks
+	sh_highlightDocument();
+});
+</script>
+</head>
+<body>
+<div id="wrapper">
+	<div id="nav"></div>
+    <div id="nav-bg"></div>
+    <div id="separator"></div>
+    <div id="content">
+        <div id="index"></div>
+    </div>
+</div>
+<div id="templates">
+    <ul id="tpl_nav">
+        <li class="appName"><a href="#"></a></li> 
+    </ul> 
+    <section id="tpl_section">
+        <a name="" class="sec_ref"></a>
+        <article>
+            <h2></h2>
+        </article>
+    </section>
+	<div id="tpl_sub_section">
+    	<a name="" class="sub_sec_ref"></a>
+        <h4></h4>
+    </div>
+    <aside id="tpl_sub_index">
+    </aside>
+</div>
+
+<div id="data">
+</div>
+
+</body>
+</html>
