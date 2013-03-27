@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Test.js</title>
+<script src="../site/js/thirdparty/jquery-1.8.3.min.js"></script>
+<script src="../refresh/refresh.js"></script>
+<script src="../boiler.js"></script>
+<script src="../test.js"></script>
+<script type="text/javascript">
+jQuery.fn.refresh('init', {
+	dirs: "../tests/",
+	files: "../index.html ../boiler.js ../test.js",
+	types: "html js css",
+	path: "../refresh/refresh.php",  
+	on: true,
+	jsOn: false,  
+	interval: 1000
+}); 
+</script>  
+</head> 
+<body>  
+</body>
+</html>

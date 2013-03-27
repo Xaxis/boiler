@@ -1,0 +1,1671 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Untitled Document</title>
+<script type="text/javascript" src="boiler.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+<script type="text/javascript" src="refresh/refresh.js"></script>
+<script type="text/javascript">
+// Initialize plugin with Drupal module settings
+jQuery.fn.refresh('init', {
+	dirs: "../",
+	files: "../refresh.js ../refresh.php",
+	types: "html js",
+	path: "refresh/refresh.php",
+	on: true,
+	jsOn: false,  
+	interval: 1250
+}); 
+</script> 
+</head> 
+<body>
+<script type="text/javascript">
+
+var obj = {
+	A: function( arg1, arg2 ) {
+		console.log('Calling A'); 
+		return arg1 + arg2;
+	},
+	C: {
+		C_A: function( arg1, arg2 ) {
+			console.log('Calling C_A'); 
+			return arg1 + arg2 * 33;
+		},
+		C_B: false,
+		C_C: {
+			C_C_A: function( arg1, arg2 ) {
+				console.log('Calling C_C_A'); 
+				return arg1 + arg2 / 1000;
+			},
+			C_C_C: {
+				C_C_C_1: {
+					C_C_1_a: function( arg1, arg2 ) {
+						console.log('Calling C_C_1_a'); 
+						return arg1 + arg2 + 8;
+					},
+				}
+			},
+			C_C_D: [1,2,3,4,5,6,7,8],
+			C_C_E: false,
+			C_C_F: {
+				C_C_F_1: {
+					C_C_F_1_a: function( arg3 ) {
+						console.log('Calling C_C_F_1_a');
+						return arg3;
+					}
+				}
+			}
+		},
+		C_D: [1,2,3,4,5,6,7],
+		C_E: "string",
+		C_F: false
+	},
+	D: [1,2,3,4,5,6], // equals
+	W: document.createElement("div"),
+	G: null,
+	H: false,
+	//I: undefined, 		// isEqual() fails when matching against a function
+	//J: new Date, 			// isEqual() fails when matching against a function
+	Q: NaN,
+	//Y: /[]/,					// isEqual() fails when matching against a function
+	//Z: 98							// isEqual() fails when matching against a function
+};
+var obj2 = {A:2, B:4, C:8, D:16, F:32};
+var obj4 = {title: "Cymbeline", author: "Shakespeare", year: [1,2,3,4,5]};
+/*
+var res = o(obj, "C").omitByType({deep:true, type:'bool', key:'C_C_E'}); 
+var res = o(obj, 'C').functionNames(true);
+var res1 = o(obj, 'E').isFalsy(false); 
+var res = o(obj, 'D').isArray([]); 
+var res = o({A:1, B:90, C:22, D: {A:1, B:90, C:22, D: 44}}).isEqual({A:1, B:90, C:22, D: {A:1, B:90, C:22, D: 44}}); 
+var res = o.chain(obj).noArrays(true).noObjects().noFunctions().noBools().noUndefs().end();  
+var res = o.chain(obj, 'C').getByType({type:'array'}).end(); 
+var res = o.chain(obj).noArrays(true).noObjects().noFunctions().noBools().noUndefs().noRegExps().noDates().end();  
+var res = o.nest(obj, "sub_");
+var res = o.chain(obj).functions(true).functionNames().end();
+var res = o(obj, "A").chain(obj, "C").functions("C_A").call({
+	deep: true, 
+	args: [2, 2]
+}).end(); 
+var res = o.isEqual({1:'string', 2:{1:[1]}}, [1,2]);
+var res = o.resolve(obj, 'C_E');
+var res = o.chain(obj, "C_C_F").getParent().getParent().end();
+var res = o.isEqual(obj2, obj3); 
+var res = o.chain(obj).build("t.te.tes.test").end();
+var res = o.chain(obj).paths().resolve("xL").end(); 
+var res = o.chain(obj)
+	.paths()
+		.build("t.te.tes.test")
+			.create([1, 'test', 2, 'test'], "J")
+				.add({key:"Z", value:"Test"})
+					.extend({obj: obj}, {'1': "object"}, {'2': "object"})
+						.set({key: '1', value:"function"})
+							.setUndef({value: 'NOW DEFINED'})
+								//.functions(false)
+									//.call()
+										.clone()
+											//.has("A")
+											//.contains({value:[]})
+												//.nest('sub_')
+													.remove([1, 2]) 
+													//.clear()
+													//.empty()	
+														.filter(function( value, index ) {
+															return ( index === "Z" ) ? 'New value for Z!' : value;
+														})
+															//.keys()
+															//.values()
+															//.pairs();
+															//.each(function( value, index ) { console.log(index); })
+															//.map({callback: function( value, index ) { return o.type(value); }})
+															//.len(true)
+															//.size(true)
+														.end(); 
+var res = o(obj).every({obj: obj2, fn: function(index, value) {
+	return (o.isArray(value)) ? true : false;
+}, scope: obj2});
+var res = o(obj).some(obj3, function(index, value) {
+	return typeof value === "number" ? true : false;
+}, o);
+var res = o(obj).findKey(function(index) {
+	return index === "D" ? true : false;
+});
+var res = o(obj).omit(["A", "C"]);
+var res = o([1,2,3,4,5,6]).toObject();
+var res = o().inArray([1,2,3,4,5,6], 3);
+var res = o([1,2,3,4,5,6]).isArray();
+var res = o
+					.chain(obj)
+						.map(function(index, value) { return value * 2; }, this);
+var res = o.chain(obj).len(obj3, true);
+
+
+var res = o(obj).every(obj3, function(index, value) {
+	return (typeof value === "number") ? true : false;
+}, function(scope) {});
+
+var res = o.chain(obj).set("NEW_KEY", "VALUE").end();
+var res = o.chain(obj).deep(function( o ) {
+	
+	console.log(o);
+	//o.functions(obj);
+	
+}, [o], o).end();
+var res = o.isEqual(
+	{0: [1,2,3,4,5,6], 3: function(){}, 1:{a: true, b: [1,2,3,4,undefined, function(){}]}}, 
+	{0: [1,2,3,4,5,6], 3: function(){}, 1:{a: true, b: [1,2,3,4,undefined, function(){}]}}
+); 
+var res = o.chain(obj2).reduceRight(function(base, value, index) {
+	console.log(base, value);
+	return base * value;
+});
+*/
+//var res = o(obj).getByType({type:"object", deep:"true"}); 
+//var res = o.chain(obj, 'C_C_F_1_a').parent().tap(function(obj) { obj.A = "test"; }).end();
+//var res = o(obj4).where({author: "Gibson", year:1982});
+//var res = o([1,2,3,4,5,6,7]).first(7);
+//var res = o.chain([1,2,[3,4,[5,6,[7,8]]],9,10,[11,12,[13,14,[15,16,[17,18]]],19,20]]).flatten(4).end();
+//var res = o.chain([1,2,[3,4,[5,6,[7,8]]],9,10]).without([2,10]).end();
+//var res = o.chain([1,2,3]).union([3,4,5,6],[3,4,5,6,7,8],[8,9,10],[10,11]).end();
+//var res = o.chain([1,2,3]).uniq([3,4,5,6,5,6,7,8,8,9,10,10]).end();
+//var res = o.chain([1,2,3,4]).intersection([101,2,1,10],[2,1]).end();
+//var res = o.chain([1,2,3]).indexOf(3);
+//var res = o.chain([1,2,3,4,5]).difference([5, 2, 10]).end();
+//var res = o.chain([1,2,3,4,5]).zip([2,4,6,8,10],[true,false,true,false,true]).end();
+//var res = o.chain([{name : 'moe', age : 40}, {name : 'larry', age : 50}, {name : 'curly', age : 60}]).pluck('name');
+//var res = o.chain([1,2,3,4,5]).object([2,4,6,8,10]).end();
+//var res = o.chain([1,2,3,4,1,1,3,3]).range(0,30,5).end();
+//var res = o.chain([1,2,3,7,4,1,1,7,3,3,7]).lastIndexOf(7, 11);
+//var res = o.chain([1,2,3,7,4,1,1,7,3,3,7]).firstIndexOf(7, 8);
+//var res = o.chain({flavor : "chocolate", scoops: null}).defaults({flavor : "vanilla", sprinkles : "lots", scoops: 2});
+//var res = o.chain(obj).getByType({obj:obj, deep:true, type:"function"});
+//var res = _.chain(obj).functions(true).functionNames().at([0,1,3,4]).array().first().end();
+//var res = _.chain(obj).noConflict();
+//var res = _.chain([2,3,5,6,2,77]).max().end();
+//var res = _.chain([2,4,6,8,16,32]).reduceRight(function(base, value, index) { return base * value; }).end();
+//var obj3 = {A:9, B:90, C:[2,3,4], D: {A:1, B:90, C:22, D: [2,3,2]}, J: undefined, H: document.createElement("div")};
+//var obj4 = {A:9, B:90, C:[2,3,4], D: {A:1, B:90, C:22, D: [2,3,2]}, J: undefined, H: document.createElement("div")};
+//var res = _.chain(obj3).isEqual(elm, elm2); 
+//var res = _.chain(obj).extend({test:{'sub':1}}, true, {test2:{'sub':2}});
+//var res = _.chain(obj).extend({newF: function() {console.log('Calling newF')}}).call().end();
+//var res = _.chain([99,98,[1,2,3,7],4,1,1,7,3,3,7]).lastIndexOf([1,2,3,7]);
+//var res = _.chain(obj).after(3, function( arg ) { console.log('Calling now with arg: '+arg); });
+//var res = _.chain(obj).delay(2000, function(a, b) { console.log(a+b);});
+//var res = _.compose(function(val) { return val; },function(val) { return val * 2; }); console.log(res(2));
+
+/*
+var func = function(greeting){ return greeting + ': ' + this.name };
+func = _.bind(func, {name : 'moe'}, ['hi']);
+console.log(func());
+var buttonView = {
+	label: 'boiler',
+	onClick: function(){ console.log('clicked: ' + this.label); },
+  onHover: function(){ console.log('hovering: ' + this.label); }
+};
+_.bindAll(buttonView);
+jQuery(document).ready(function(e) {
+	jQuery('#boiler_button').bind('click', buttonView.onClick);
+});
+*/
+//var add5 = _.partial(function(a, b) { return a + b; }, [5]);console.log(add5(10));
+//var fibonacci = _.memoize(function(n) { return n < 2 ? n : fibonacci(n - 1) + fibonacci(n - 2);});console.log(fibonacci(9));
+//var delayed = _.delay(function(a) { console.log('executing ater: '+a+ ' milaseconds!'); }, 1500, [1500]); delayed();
+//var deferred = _.defer(function(){ alert('deferred'); }); deferred();
+/*
+function updatePosition() {console.log(window.screenY);};
+var throttled = _.throttle(updatePosition, 1000);
+$(window).scroll(throttled);
+var lazyLayout = _.debounce(function() { console.log('windowY: ' + window.screenY); }, 300); 
+$(window).scroll(lazyLayout);
+*/
+//console.log(_.keys(_)); 
+//var res = _.chain([1, 2, 3, 4, 5, 6]).sortBy(function(num){ return Math.sin(num); }).end();
+/*
+var res = _.groupBy([1.3, 1.5, 2.1, 2.4, 3.9, 3.8], function(num){ return Math.floor(num); });
+var res = _.groupBy(['one', 'two', 'three', 'seven'], 'length');
+var res = _.groupBy([{age:35,name:'ken'},{age:15,name:'bob'},{age:15,name:'ted'}], 'age');
+var res = _.groupBy({ted:{age:35}, ken:{age:15}, bob:{age:15}}, 'age');
+*/
+//var res = _.groupsOf([1.3, 1.5, 2.1, 2.4, 3.9, 3.8, 4.1], 3, 5);
+//var res = _.countBy([1.3, 1.5, 2.1, 2.4, 3.9, 3.8, 3.2], function(num){ return Math.floor(num); });
+/*
+var lib = 
+	_.chain({'Boiler' : {}})
+	.build('Boiler.function.methods')
+	.build('Boiler.collection.methods')
+	.deep(function(depth, index, elm) {
+		//elm.name = index;
+	}, "*")
+	//.extend({constructor: function(){}, }, true)
+	.end();
+*/
+//console.log(lib);
+
+/*
+// Create the 'Boiler' module and tell it to inherit from objects in the
+// 'extends' array.
+var module1 = {prop3:'Property 3'}; 
+var module2 = {prop4:'Property 4'};
+var module3 = {method2: function() { return this.prop2; }};
+
+var lib = _.module({}, 'Boiler.Core', {
+		_extends: [module1, module2, module3],
+		_exposed: ['util'],
+		//_retract: ['helpers'],
+	
+		prop1: 'Property 1',
+		prop2: 'Property 2',
+		method1: function() {			
+			this.h_method1();
+		},
+		util: {
+			prop5: 'Property 5',
+			prop6: 'Property 6',
+			method3: function() {
+				console.log('prop4: ' + this.prop4);
+				console.log('prop2: ' + this.prop2);
+			}
+		},
+		helpers: {
+			h_prop1: 'Helper Property 1',
+			h_method1: function() { console.log('Calling h_method1'); },
+			h_method2: function() {}
+		},
+		libs: {
+		}
+		
+// Passing true tells all nested objects to inherit from extensions.
+},);
+*/
+//console.log(lib);
+
+//lib.Boiler.util.method3();
+//lib.Boiler.h_method1(); === lib.Boiler.method1();
+/*
+lib = _.invoke(lib.Boiler, function(value, index, name) {
+	if ( index === name ) { return "UTIL ERASED"; }
+	else { return value; }
+}, ['util']);
+*/
+/*
+var res = _.reject(lib.Boiler, function(value, index) {
+	if ( index === 'helpers') { return true; }
+});
+*/
+//var res = _.chain(obj4).toQueryString('books-').fromQueryString().end();
+//var res = _.none(obj2, function(value) { if ( _.isString(value) ) { return true; }});
+//var res = _.countBy([{age:35,name:'ken'},{age:12,name:'bob'},{age:12,name:'ted'}], function(num){ return num.age; });
+//var res = _.most([{age:35,name:'ken'},{age:12,name:'bob'},{age:12,name:'ted'}], 'age');
+//var res = _.shuffle({age:35,name:'ken',height:6,eyecolor:'blue'});
+//var res = _.remove([1,2,3,4,5,6,7,8,9], [2]);   
+
+/** STAND ALONE METHOD TESTS **/
+var arr = [8,9,22,1,1,2,2,3,3,3,4];
+var res;
+//res = _.each(arr, function(index, value) { console.log(index, value); });
+//res = _(arr).each(function(index, value) { console.log(index, value); });
+
+//res = _.map(arr, function(value, index) { return value * 2; });
+//res = _(arr).map( function(value, index) { return value * 2; } );
+
+//res = _.pluck([{age:35,name:'ken'},{age:15,name:'bob'},{age:15,name:'ted'}], 'age');
+//res = _([{age:35,name:'ken'},{age:15,name:'bob'},{age:15,name:'ted'}]).pluck('age');
+
+//res = _.filter(arr, function(value) { if ( value === 2 ) { return value; } });
+//res = _(arr).filter(function(value) { if ( value === 2 ) { return value; } }); 
+
+//res = _.reject([1,2,3,4], function(val) { return val == 2 ? val : false; });
+//res = _([1,2,3,4]).reject(function(val) { return val == 2 ? val : false; });
+
+//res = _.any(arr, function(value) { if ( value === 2 ) { return true; } }); 
+//res = _(arr).any(function(value) { if ( value === 2 ) { return true; } }); 
+
+//res = _.all(arr, function(value) { if ( _.isNumber(value) ) { return true; } }); 
+//res = _.all(arr).all(function(value) { if ( _.isNumber(value) ) { return true; } });
+
+//res = _.none(arr, function(value) { if ( _.isString(value) ) { return true; } }); 
+//res = _.count(arr, function(value) { if ( _.isNumber(value) ) { return true; } });
+//res = _.find(arr, function(value) { if ( _.isNumber(value) ) { return true; } });
+//res = _.findKey(obj, function(index) { return index === 'C' ? true : false; } );
+//res = _.findAll(arr, function(value) { if ( _.isNumber(value) ) { return true; } }); 
+//res = _.only(arr, [1,2]); 
+//res = _.omit(arr, [1,2]); 
+//res = _.min(arr); 
+//res = _.max(arr); 
+//res = _.average(arr); 
+//res = _.sum(arr);
+//res = _.reduce(arr, function(base, value, index) { return base * value; }) 
+//res = _.reduceRight(arr, function(base, value, index) { return base * value; })  
+//res = _.least(arr);
+//res = _.most(arr);
+//res = _.shuffle(arr);
+//res = _.sample(arr, 3);
+//res = _.has(arr, 4);
+//res = _.contains([1,2,3,4,5], 22);
+//res = _.keyExists([1,2,3,4], 5);
+//res = _.isFalsy(NaN);
+//res = _.isArray([]);
+//res = _.isString("");
+//res = _.isBool(false);
+//res = _.isNull(null);
+//res = _.isNumber(98);
+//res = _.isFunction(function(){});
+//res = _.isArguments((function(){return arguments;})());
+//res = _.isUndefined(undefined);
+//res = _.isDate(new Date);
+//res = _.isRegExp(/[s]/);
+//res = _.isPlainObject({});
+//res = _.isObject([]);
+//res = _.isElement(document.createElement("a"));
+//res = _.isNaN(NaN);
+//res = _.isFinite(-Infinity);
+//res = _.isEmpty([]);
+//res = _.isUnique(arr, 7);
+//res = _.isEqual([false,1,{2:[1,2,3,4]}], [false,1,{2:[1,2,3,4]}]);
+//res = _.type(/[]/);
+//res = _.type(/[]/);
+//res = _.get(lib, 'helpers.h_prop1');
+//res = _.getByType(obj, "function", "C", true);
+//res = _.call(obj, 'C', [2,3], ['C_A'], true);
+//res = _.arrays(obj, true);
+//res = _.objects(obj, true);
+//res = _.functions(obj, true);
+//res = _.strings(obj, true);
+//res = _.bools(obj, true);
+//res = _.numbers(obj, true);
+//res = _.nulls(obj, true);
+//res = _.undefineds(obj, true);
+//res = _.dates(obj, true);
+//res = _.regexps(obj, true);
+//res = _.elements(obj, true);
+//res = _.nans(obj, true);
+//res = _.norrays(obj, true);
+//res = _.noObjects(obj, true);
+//res = _.noFunctions(obj, true);
+//res = _.noStrings(obj, true);
+//res = _.noBools(obj, true);
+//res = _.noNumbers(obj, true);
+//res = _.noNulls(obj, true);
+//res = _.noUndefineds(obj, true);
+//res = _.noDates(obj, true);
+//res = _.noRegexps(obj, true);
+//res = _.noElements(obj, true);
+//res = _.noNans(obj, true);
+//res = _.arrayNames(obj, true);
+//res = _.objectNames(obj, true);
+//res = _.functionNames(obj, true);
+//res = _.stringNames(obj, true);
+//res = _.boolNames(obj, true);
+//res = _.numberNames(obj, true);
+//res = _.nullNames(obj, true);
+//res = _.undefinedNames(obj, true);
+//res = _.dateNames(obj, true);
+//res = _.regexpNames(obj, true);
+//res = _.elementNames(obj, true);
+//res = _.nanNames(obj, true);
+//res = _.invoke([arr, [4,3,2,1]], 'reverse');
+//res = _.parent(obj, "C_C_F");
+//res = _.invert(arr);
+//res = _.paths(obj);
+//res = _.resolve(obj, "C_C_F");
+/*
+var module1 = {prop3:'Property 3'}; 
+var module2 = {prop4:'Property 4'};
+var module3 = {method2: function() { return this.prop2; }};
+res = _.module({}, 'Boiler.Core', {
+		_extends: [module1, module2, module3],
+		_exposed: ['util'],
+		_retract: ['helpers'],
+	
+		prop1: 'Property 1',
+		prop2: 'Property 2',
+		method1: function() {			
+			this.h_method1();
+		},
+		util: {
+			prop5: 'Property 5',
+			prop6: 'Property 6',
+			method3: function() {
+				console.log('prop4: ' + this.prop4);
+				console.log('prop2: ' + this.prop2);
+			}
+		},
+		helpers: {
+			h_prop1: 'Helper Property 1',
+			h_method1: function() { console.log('Calling h_method1'); },
+			h_method2: function() {}
+		},
+		libs: {
+		}
+}, true);
+*/
+//res = _.create([1,2,'one','two',3,'three']);
+//res = _.add([1,2,'one','two',3,'three'], 6, []);
+//res = _.set([1,2,'one','two',3,'three'], 6, []);
+//res = _.extend(obj, {1:'test'}, {2:'test'}, true);
+//res = _.setUndef([2,3,undefined,4,undefined], 'sfds');
+//res = _.defaults({flavor : "chocolate", scoops: null}, {flavor : "vanilla", sprinkles : "lots", scoops: 2});
+//res = _.clone(arr);
+//res = _.nest(obj, 'sub-');
+//res = _.remove([1,2,3,4], 0);
+//res = _.clear([1,2,3,4]);
+//res = _.empty([1,2,3,4]);
+//res = _.replace([1,2,3,4], function(val) { return val * 2; });
+/*
+res = _.deep(obj, function(depth, index, value, ref) {
+	console.log(value);
+}, "*", true);
+*/
+//res = _.tap(arr, function(elm) { console.log(elm.length); });
+/*
+res = _.where(
+	{
+		0: {name:'Ted', age:45, eyecolor:'blue'},
+		1: {name:'Joe', age:45, eyecolor:'blue'},
+		2: {name:'Bob', age:33, eyecolor:'brown'}
+	}, {age: 45});
+*/
+/*
+res = _.whereFirst(
+	{
+		0: {name:'Ted', age:45, eyecolor:'blue'},
+		1: {name:'Joe', age:45, eyecolor:'blue'},
+		2: {name:'Bob', age:33, eyecolor:'brown'}
+	}, {name:'Joe', age: 45});
+*/
+//res = _.groupsOf([1.3, 1.5, 2.1, 2.4, 3.9, 3.8, 4.1], 3, 5);
+//res = _.groupBy([{age:35,name:'ken'},{age:15,name:'bob'},{age:15,name:'ted'}], 'age');
+//res = _.countBy([1.3, 1.5, 2.1, 2.4, 3.9, 3.8, 3.2], function(num){ return Math.floor(num); });
+//res = _.keys(obj);
+//res = _.values(obj);
+//res = _.pairs(obj);
+//res = _.len([1,2,3,4,[1,2,3]], true);
+//res = _.size([1,undefined,3,4,[0,undefined,null]], true);
+//res = _.howDeep(obj, 'C_C_F_1');
+//res = _.toQueryString(obj4, 'books-');
+//res = _.fromQueryString(res);
+//res = _.at(arr, [2,5]);
+//res = _.first(arr, 3);
+//res = _.initial(arr, 7);
+//res = _.last(arr, 7);
+//res = _.rest([1,2,3,4,5], 3);
+//res = _.compact([1,2,undefined,4,null]);
+//res = _.flatten([1,2,[3],4,5,[7,8,[9,10,[11,12]]]], 4);
+//res = _.without([1,2,3,4,5,[1,2]], [3, [1,2]]);
+//res = _.uniq([1,2,[1,2],4,5,[1,2]]);
+//res = _.union([1,2,3],[3,4,5,6],[3,4,5,6,7,8],[8,9,10],[10,11]);
+//res = _.intersection([1,2,3,4],[101,2,1,10],[2,1]);
+//res = _.difference([1,2,3], [1,2,3,4,5], [3,4,5,6,7]);
+//res = _.zip(['moe', 'larry', 'curly'], [30, 40, 50], [true, false, false]);
+//res = _.range(0, 30, 4);
+//res = _.array(obj);
+//res = _.object([0],['zero']);
+//res = _.indexOf([1,2,3,4,5], 3);
+//res = _.lastIndexOf([1,2,3,4,5,3,4], 4);
+//res = _.firstIndexOf([1,2,3,4,5,3,4], 4);
+//res = _.sortBy([1,2,3,4,5,6], function(num){ return Math.sin(num); });
+//res = _.shift([1,2,3,4,5,6], 3);
+//res = _.pop([1,2,3,4,5,6], 3);
+//res = _.after(3, function(arg) { console.log('Calling now with arg: '+arg); });
+//res = _.once(function(arg) { return arg; });
+//res = _.times(function(arg) { console.log(arg); }, 3);
+/*
+res = function(name) { return "hello: " + name; };
+res = _.wrap(res, function(func) { return "before, " + func("moe") + ", after"; });
+*/
+//res = _.compose(function(val) { return val; },function(val) { return val * 2; });
+/*
+var res = function(greeting){ return greeting + ': ' + this.name };
+res = _.bind(res, {name : 'moe'}, ['hi']);
+*/
+/*
+var buttonView = {
+	label: 'boiler',
+	onClick: function(){ console.log('clicked: ' + this.label); },
+  onHover: function(){ console.log('hovering: ' + this.label); }
+};
+_.bindAll(buttonView);
+jQuery(document).ready(function(e) {
+	jQuery('#boiler_button').bind('click', buttonView.onClick);
+});
+*/
+//res = _.fill(function(a, b) { return a + b; }, [5]);
+//res = _.memoize(function(n) { return n < 2 ? n : res(n - 1) + res(n - 2);});
+//res = _.delay(2000, function(a, b) { return(a+b);});
+//res = _.delay(function(a) { console.log('executing ater: '+a+ ' milaseconds!'); }, 1500, [1500]);
+//res = _.defer(function(a){ alert(a); }, ['Deferred']);
+/*
+function updatePosition() {console.log(window.screenY);};
+var throttled = _.throttle(updatePosition, 1000);
+*/
+/*
+var lazyLayout = _.debounce(function() { console.log('windowY: ' + window.screenY); }, 300); 
+$(window).scroll(lazyLayout);
+*/
+
+/*
+var stooges = [{name : 'curly', age : 25}, {name : 'moe', age : 21}, {name : 'larry', age : 23}];
+res = _.chain(stooges)
+	.sortBy(function(stooge){ return stooge.age; })
+	.map(function(stooge) { return stooge.name + ' is ' + stooge.age; })
+	.first()
+  .end();
+*/
+
+/** CHAINED METHOD TESTS **/
+var tests = {
+	methods: {
+		
+		utility: {
+			"chain": {
+				description: "",			
+				args: [ [], ]
+			},
+			"end": {
+				description: "",
+				aliases: ["value"],
+				args: [ [], ]
+			},
+			"identity": {
+				description: "",
+				args: [ [], ]
+			},
+			"noConflict": {
+				description: "",
+				args: [ [], ]
+			},
+			"result": {
+				description: "",
+				args: [ [], ]
+			},
+		},
+		
+		string: {
+			"fromQueryString": {
+				description: "",
+				args: [ [], ]
+			},
+		},
+		
+		number: {
+			"range": {
+				description: "",
+				args: [ 
+					[0, 100, 10], 
+				]
+			},
+		},
+		
+		'function': {
+			"after": {
+				description: "",
+				args: [ [], ]
+			},		
+			"bind": {
+				description: "",
+				args: [ [], ]
+			},
+			"bindAll": {
+				description: "",
+				args: [ [], ]
+			},
+			"compose": {
+				description: "",
+				args: [ [], ]
+			},
+			"debounce": {
+				description: "",
+				args: [ [], ]
+			},
+			"defer": {
+				description: "",
+				args: [ [], ]
+			},
+			"delay": {
+				description: "",
+				args: [ [], ]
+			},
+			"fill": {
+				description: "",
+				aliases: ["partial"],
+				args: [ [], ]
+			},
+			"memoize": {
+				description: "",
+				args: [ [], ]
+			},
+			"once": {
+				description: "",
+				args: [ [], ]
+			},
+			"throttle": {
+				description: "",
+				args: [ [], ]
+			},
+			"times": {
+				description: "",
+				args: [ [], ]
+			},
+			"wrap": {
+				description: "",
+				args: [ [], ]
+			},
+		},
+		
+		array: {
+			"at": {
+				description: "Gets the elements at a given index or indices.",
+				args: [ 
+					[["red", "green", "magenta", "yellow", "cyan", "blue"], [2]], 
+					[["red", "green", "magenta", "yellow", "cyan", "blue"], [0,1,2]]
+				]
+			},
+			"compact": {
+				description: "",
+				args: [ 
+					[[0,'Earth',null,'Fire',undefined,'Air',"",'Heart',NaN]] 
+				]
+			},
+			"create": {
+				description: "",
+				args: [ 
+					[[0,1,2], ['Red','Green','Yellow']], 
+					[[0,'Red',1,'Green',2,'Yellow']], 
+				]
+			},
+			"difference": {
+				description: "",
+				args: [ 
+					[[0,1,2,3,4,5,6,7],[1,2,3,4],[2,3,4,5,6]], 
+				]
+			},
+			"drop": {
+				description: "",
+				args: [ 
+					[[0,1,2,3,4,5,6]], 
+					[[0,1,2,3,4,5,6], 3], 
+				]
+			},
+			"first": {
+				description: "",
+				args: [ 
+					[[0,1,2,3]],
+					[[0,1,2,3], 2], 
+				]
+			},
+			"firstIndexOf": {
+				description: "",
+				args: [ 
+					[[0,1,2,3,0,1,2,3], 2], 
+				]
+			},
+			"indexOf": {
+				description: "",
+				args: [ 
+					[[0,1,2,3,4], 4], 
+				]
+			},
+			"initial": {
+				description: "",
+				args: [ 
+					[[0,1,2,3,4]], 
+					[[0,1,2,3,4], 3],
+				]
+			},
+			"intersection": {
+				description: "",
+				args: [ 
+					[[1,2,3,4], [101,2,1,10], [2,1]], 
+				]
+			},
+			"last": {
+				description: "",
+				args: [ 
+					[[1,2,3,4,5]], 
+					[[1,2,3,4,5], 3],
+				]
+			},
+			"lastIndexOf": {
+				description: "",
+				args: [ 
+					[[1,2,3,1,2,3], 2], 
+				]
+			},
+			"object": {
+				description: "",
+				aliases: ["toObject"],
+				args: [ 
+					[[0, 'Blue'], [1, 'Red'], [2, 'Green']], 
+					[[0,1,2], ['Blue', 'Red', 'Green']],
+					[0, 'Blue', 1, 'Red', 2, 'Green'], 
+				]
+			},
+			"pop": {
+				description: "",
+				args: [ 
+					[[0,1,2,3], 2], 
+				]
+			},
+			"rest": {
+				description: "",
+				aliases: ["tail", "drop"],
+				args: [ 
+					[[1,2,3,4,5,6], 3], 
+				]
+			},
+			"shift": {
+				description: "",
+				args: [ 
+					[[1,2,3,4,5], 3], 
+				]
+			},
+			"tail": {
+				description: "",
+				args: [ 
+					[[1,2,3,4]],
+					[[1,2,3,4], 2], 
+				]
+			},
+			"union": {
+				description: "",
+				args: [ 
+					[[1,2,3],[3,4,5,6],[3,4,5,6,7,8],[8,9,10],[10,11]], 
+				]
+			},
+			"uniq": {
+				description: "",
+				aliases: ["unique"],
+				args: [ [], ]
+			},
+		},
+		
+		object: {
+			"array": {
+				description: "",
+				aliases: ["toArray"],
+				args: [ 
+					[{0: "Green", 1: "Blue"}],
+					[{0: "Green", 1: "Blue"},{2: "Red", 3: "Yellow"}]
+				]
+			},		
+			"arrayNames": {
+				description: "",
+				args: [ 
+					[{arr1: [], str1: "Blue"}], 
+				]
+			},
+			"arrays": {
+				description: "",
+				args: [ 
+					[{arr1: [], str1: "Blue"}], 
+				]
+			},
+			"boolNames": {
+				description: "",
+				args: [ 
+					[{arr1: [], str1: "Blue", boo1: false}] 
+				]
+			},
+			"bools": {
+				description: "",
+				args: [ 
+					[{arr1: [], str1: "Blue", boo1: false}] 
+				]
+			},
+			"build": {
+				description: "",
+				aliases: ["module"],
+				args: [ [], ]
+			},
+			"call": {
+				description: "",
+				args: [ 
+					//[{fn1: function(){console.log('fn1')}, obj1: {fn2: function(){console.log('fn2');}}}],
+					//[{fn1: function(){console.log('fn1')}, obj1: {fn2: function(){console.log('fn2');}}}, true] 
+				]
+			},
+			"contains": {
+				description: "",
+				aliases: ["exists", "valueExists", "inArray"],
+				args: [ 
+					[[1,2,3,4], 3],
+					[{0: 99, 1:100}, 101] 
+				]
+			}, 
+			"dateNames": {
+				description: "",
+				args: [ 
+					[{dt1: new Date}], 
+				]
+			},
+			"dates": {
+				description: "",
+				args: [ 
+					[{dt1: new Date}], 
+				]
+			},
+			"defaults": {
+				description: "",
+				args: [ 
+					[{flavor : "chocolate", scoops: null}, {flavor : "vanilla", sprinkles : "lots", scoops: 2}], 
+				]
+			},
+			"elementNames": {
+				description: "",
+				args: [ 
+					[{el1: document.createElement("a")}], 
+				]
+			},
+			"elements": {
+				description: "",
+				args: [ 
+					[{el1: document.createElement("a")}], 
+				]
+			},
+			"extend": {
+				description: "",
+				aliases: ["merge"],
+				args: [ 
+					[{0:'zero'}, {1:'one'}, {2:'two'}],
+					[{0:'zero', A:{}}, {1:'one'}, true, {2:'two'}],
+				]
+			},
+			"functionNames": {
+				description: "",
+				args: [ 
+					[{fn1: function(){}}], 
+				]
+			},
+			"functions": {
+				description: "",
+				args: [ 
+					[{fn1: function(){}}], 
+				]
+			},
+			"get": {
+				description: "",
+				aliases: ["getByKey"],
+				args: [ 
+					[{0: {a: 8, b: {b_1: 'Green'}}}, 'b_1'], 
+				]
+			},
+			"getByType": {
+				description: "",
+				args: [ 
+					[{0: {a: 3, b: {b_1: 'Green'}}}, '*'],
+					[{0: {a: 3, b: {b_1: 'Green'}}}, '*', true],
+					[{0: {a: 3, b: {b_1: 'Green'}}}, '*', 'b', true],  
+					[{0: {a: 3, b: {b_1: 'Green'}}}, 'number', true],
+					[{0: {a: 3, b: {b_1: 'Green'}}}, 'object', true], 
+				]
+			},
+			"howDeep": {
+				description: "",
+				args: [ 
+					[{0: {a: 22, b: {b_1: 'Green'}}}, 'b_1'], 
+				]
+			},
+			"isArguments": {
+				description: "",
+				args: [ 
+					[(function(){return arguments;})()], 
+				]
+			},
+			"isArray": {
+				description: "",
+				args: [ 
+					[[1,2,3]], 
+				]
+			},
+			"isBool": {
+				description: "",
+				args: [ 
+					[false], 
+				]
+			},
+			"isDate": {
+				description: "",
+				args: [ 
+					[new Date], 
+				]
+			},
+			"isElement": {
+				description: "",
+				args: [ 
+					[document.createElement("a")], 
+				]
+			},
+			"isEmpty": {
+				description: "",
+				args: [ 
+					[[]], 
+					[{}],
+				]
+			},
+			"isEqual": {
+				description: "",
+				args: [ 
+					[null, null], 
+					[0, 0],
+					[undefined, undefined],
+					[NaN, NaN],
+					["", ""],
+					[function(){},function(){}],
+					[[1,2,3,4],[1,2,3,4]],
+					[[1,2,3,4,[1,2]],[1,2,3,4,[1,2]]],
+					[{0: {a: 3, b: {b_1: 'Green'}}}, {0: {a: 3, b: {b_1: 'Green'}}}]
+				]
+			},
+			"isFalsy": {
+				description: "",
+				args: [ 
+					[""], 
+					[0],
+					[NaN],
+					[false],
+					[null],
+				]
+			},
+			"isFinite": {
+				description: "",
+				args: [ 
+					[Infinity], 
+					[-Infinity],
+				]
+			},
+			"isFunction": {
+				description: "",
+				args: [ 
+					[function() {}],
+					[new Function()],
+					[Date] 
+				]
+			},
+			"isNaN": {
+				description: "",
+				args: [ 
+					[NaN], 
+				]
+			},
+			"isNull": {
+				description: "",
+				args: [ 
+					[null], 
+				]
+			},
+			"isNumber": {
+				description: "",
+				args: [ 
+					[99], 
+					[-99],
+					[99.98798],
+				]
+			},
+			"isObject": {
+				description: "",
+				args: [ 
+					[{}],
+					[Math] 
+				]
+			},
+			"isPlainObject": {
+				description: "",
+				args: [ 
+					[{}],
+					[Math] 
+				]
+			},
+			"isRegExp": {
+				description: "",
+				args: [ 
+					[/[s]/],
+					[new RegExp(/[s]/)] 
+				]
+			},
+			"isString": {
+				description: "",
+				args: [ 
+					['str'], 
+				]
+			},
+			"isUndefined": {
+				description: "",
+				args: [ 
+					[undefined], 
+				]
+			},
+			"nanNames": {
+				description: "",
+				args: [ 
+					[{nan1:NaN}], 
+				]
+			},
+			"nans": {
+				description: "",
+				args: [ 
+					[{nan1:NaN}], 
+				]
+			},
+			"nest": {
+				description: "",
+				args: [ 
+					[{0: 'some value', 1: {}}], 
+					[{0: 'some value', 1: {}}, 'prefix-'], 
+				]
+			},
+			"noArrays": {
+				description: "",
+				args: [ 
+					[{0: [1,2,3], 1: 'string', 2: false, 3: {a:[3,4], b: null, c: 99}}, true], 
+				]
+			},
+			"noBools": {
+				description: "",
+				args: [ 
+					[{0: [1,2,3], 1: 'string', 2: false, 3: {a:[3,4], b: null, c: 99}}, true], 
+				]
+			},
+			"noDates": {
+				description: "",
+				args: [ 
+					[{0: [1,2,3], 1: 'string', 2: false, 3: {a:[3,4], b: null, c: new Date}}, true], 
+				]
+			},
+			"noElements": {
+				description: "",
+				args: [ 
+					[{0: [1,2,3], 1: 'string', 2: false, 3: {a:[3,4], b: null, c: document.createElement("a")}}, true], 
+				]
+			},
+			"noFunctions": {
+				description: "",
+				args: [ 
+					[{0: [1,2,3], 1: function(){console.log('fn')}, 2: {a:[3,4], b: null}}, true], 
+				]
+			},
+			"noNans": {
+				description: "",
+				args: [ 
+					[{0: NaN, 1: function(){console.log('fn')}, 2: {a:[3,4], b: null}}, true], 
+				]
+			},
+			"noNulls": {
+				description: "",
+				args: [ 
+					[{0: [1,2,3], 1: function(){console.log('fn')}, 2: {a:[3,4], b: null}}, true], 
+				]
+			},
+			"noNumbers": {
+				description: "",
+				args: [ 
+					[{0: 999, 1: function(){console.log('fn')}, 2: {a:[3,4], b: null}}, true], 
+				]
+			},
+			"noObjects": {
+				description: "",
+				args: [ 
+					[{0: 999, 1: function(){console.log('fn')}, 2: {a:[3,4], b: null}}, true], 
+				]
+			},
+			"noRegexps": {
+				description: "",
+				args: [ 
+					[{0: 999, 1: /[s]/, 2: {a:[3,4], b: null}}, true], 
+				]
+			},
+			"noStrings": {
+				description: "",
+				args: [ 
+					[{0: 'string', 1: function(){console.log('fn')}, 2: {a:[3,4], b: null}}, true], 
+				]
+			},
+			"noUndefineds": {
+				description: "",
+				args: [ 
+					[{0: 999, 1: undefined, 2: {a:undefined, b: null}}, true], 
+				]
+			},
+			"nullNames": {
+				description: "",
+				args: [ 
+					[{nu1: null}], 
+				]
+			},
+			"nulls": {
+				description: "",
+				args: [ 
+					[{nu1: null}], 
+				]
+			},
+			"numberNames": {
+				description: "",
+				args: [ 
+					[{num1: 22}], 
+				]
+			},
+			"numbers": {
+				description: "",
+				args: [ 
+					[{num1: 22}], 
+				]
+			},
+			"objectNames": {
+				description: "",
+				args: [ 
+					[{obj1:{}}], 
+				]
+			},
+			"objects": {
+				description: "",
+				args: [ 
+					[{obj1:{}}], 
+				]
+			},
+			"pairs": {
+				description: "",
+				args: [ 
+					[{'red':'#F00', 'green':'#0F0', 'blue':'#00F'}, ['green']], 
+				]
+			},
+			"parent": {
+				description: "",
+				args: [ 
+					[{0: {a: 8, b: {b_1: 'Green'}}}, 'b_1'], 
+				]
+			},
+			"paths": {
+				description: "",
+				args: [ 
+					[{0: {a: 8, b: {b_1: 'Green'}}}], 
+				]
+			},
+			"pluck": {
+				description: "",
+				aliases: ["fetch"],
+				args: [ 
+					[[{name:'Dan', age:22},{name:'Bob', age:25},{name:'Ted', age:32}], 'name'],
+				]
+			},
+			"regexpNames": {
+				description: "",
+				args: [ 
+					[{reg1:/[s]/}], 
+				]
+			},
+			"regexps": {
+				description: "",
+				args: [ 
+					[{reg1:/[s]/}], 
+				]
+			},
+			"resolve": {
+				description: "",
+				args: [ 
+					[{0: {a: 8, b: {b_1: 'Green'}}}, 'b_1'], 
+				]
+			},
+			"stringNames": {
+				description: "",
+				args: [ 
+					[{str1:'string'}], 
+				]
+			},
+			"strings": {
+				description: "",
+				args: [ 
+					[{str1:'string'}], 
+				]
+			},
+			"tap": {
+				description: "",
+				args: [ [], ]
+			},
+			"toQueryString": {
+				description: "",
+				args: [ [], ]
+			},
+			"type": {
+				description: "",
+				args: [ 
+					[[]],
+					[{}],
+					[983] 
+				]
+			},
+			"undefinedNames": {
+				description: "",
+				args: [ 
+					[{undf1:undefined}], 
+				]
+			},
+			"undefineds": {
+				description: "",
+				args: [ 
+					[{undf1:undefined}], 
+				]
+			},
+			"without": {
+				description: "",
+				aliases: ["exclude", "subtract"],
+				args: [ 
+					[[1,2,[3,4,[5,6,[7,8]]],9,10],[2,10]], 
+				]
+			},
+			"zip": {
+				description: "",
+				args: [ 
+					[['red','green','blue'],['#F00','#0F0','#00F'],['0', '1', '2']], 
+				]
+			}
+		},
+		
+		collection: {
+			"add": {
+				description: "",
+				args: [ 
+					[[1,2,3,4], 4, 5], 
+					[{0: "Green", 1: "Blue"}, 2, "Red"]
+				]
+			},
+			"all": {
+				description: "",
+				aliases: ["every"],
+				args: [ 
+					[[1,2,3,4], function(n) { return _.isNumber(n) ? true : false; }],
+					[{0: "Green", 1: "Blue"}, function(n) { return _.isString(n) ? true : false; }]
+				]
+			},
+			"any": {
+				description: "",
+				aliases: ["some"],
+				args: [ 
+					[[1,2,3,4], function(n) { return _.isNumber(n) ? true : false; }],
+					[{0: "Green", 1: "Blue"}, function(n) { return _.isString(n) ? true : false; }]
+				]
+			},
+			"average": {
+				description: "",
+				args: [ 
+					[[22,44,88]], 
+					[{0: 99, 1: 999}], 
+				]
+			},
+			"clear": {
+				description: "",
+				args: [ 
+					[{0: "Sky", 1: "Sun"}],
+					[[1,2,3,4]]
+				]
+			},
+			"clone": {
+				description: "",
+				args: [ 
+					[{0: "Sky", 1: "Sun"}],
+					[[1,2,3,4]]
+				]
+			},
+			"count": {
+				description: "",
+				args: [ 
+					[[1,2,3,4,'str'], function(v) { return _.isNumber(v) ? true : false; }],
+					[[1,2,3,4,'str'], {}, function(v) { return _.isString(v) ? true : false; }], 
+				]
+			},
+			"countBy": {
+				description: "",
+				args: [ 
+					[[1.3, 1.5, 2.1, 2.4, 3.9, 3.8, 3.2], function(num){ return Math.floor(num); }], 
+				]
+			},
+			"deep": {
+				description: "",
+				args: [ 
+					//[{0:{1:{2:{3:false}}}}, function(d, i, v, r) { console.log(i); }],
+					//[[0,[1,[2,[3]]]], function(d, i, v, r) { console.log(v); }],
+					//[{0:{1:{2:{3:[0,1,2,3,[4,5,6]]}}}}, function(d, i, v, r) { console.log(v); }, '*', true],
+				]
+			},
+			"each": {
+				description: "",
+				aliases: ["forEach"],
+				args: [ 
+					//[[1,2,3,4,5], function(i,v) { console.log(i); }], 
+				]
+			},
+			"empty": {
+				description: "",
+				args: [ 
+					[[1,2,3,4,5]], 
+					[{1:0,2:0,3:0,4:0,5:0}],
+				]
+			},
+			"filter": {
+				description: "",
+				args: [ 
+					[[1,2,3,4], function(v) {return _.isNumber(v) ? true : false}], 
+					[{0:99,1:100,2:'str'}, function(v) {return _.isNumber(v) ? true : false}], 
+				]
+			},
+			"find": {
+				description: "",
+				aliases: ["findValue"],
+				args: [ 
+					[[1,2,3,4], function(v) {return _.isNumber(v) ? true : false}], 
+					[{0:99,1:100,2:'str'}, function(v) {return _.isNumber(v) ? true : false}], 
+				]
+			},
+			"findKey": {
+				description: "",
+				args: [ 
+					[[1,2,3,4], function(v) {return v === 2 ? true : false}], 
+					[{0:99,1:100,2:'str'}, function(v) {return v == 2 ? true : false}], 
+				]
+			},
+			"flatten": {
+				description: "",
+				args: [ 
+					[[1,[2,[3,[4,[5]]]]]], 
+					[[1,[2,[3,[4,[5]]]]], 3], 
+				]
+			},
+			"groupBy": {
+				description: "",
+				args: [ 
+					[[1.3, 1.5, 2.1, 2.4, 3.9, 3.8], function(num){ return Math.floor(num); }],
+					[[{name:'Dan', age:22},{name:'Bob', age:25},{name:'Ted', age:32}], 'age'] 
+				]
+			},
+			"groupsOf": {
+				description: "",
+				args: [ 
+					[[1.3, 1.5, 2.1, 2.4, 3.9, 3.8, 4.2], 2],
+					[[1.3, 1.5, 2.1, 2.4, 3.9, 3.8, 4.2], 2, 9.9]
+				]
+			},
+			"has": {
+				description: "",
+				args: [ 
+					[[0,1,2,3,4], 3],
+					[{name:'Ted', age:33}, 'name'] 
+				]
+			},
+			"invert": {
+				description: "",
+				aliases: ["transpose"],
+				args: [ 
+					[{0: "Green", 1: "Blue", 2: "Red", 3: "Yellow"}], 
+				]
+			},
+			"invoke": {
+				description: "",
+				args: [ 
+					[{0:'Tulip', 1:'Daisy'}, function(v, a) {return v + a;}, [' is a flower.']], 
+				]
+			},
+			"isUnique": {
+				description: "",
+				args: [ 
+					[[1,2,1,2,3], 4], 
+					[{0:'green',1:'green',2:'blue'}, 0]
+				]
+			},
+			"keyExists": {
+				description: "",
+				args: [ 
+					[[0,1,2,3,4], 3],
+					[{name:'Ted', age:33}, 'name'] 
+				]
+			},
+			"keys": {
+				description: "",
+				args: [ 
+					[[0,1,2,3,4]],
+					[{name:'Ted', age:33}] 
+				]
+			},
+			"least": {
+				description: "",
+				args: [ 
+					[[1,1,2,2,3]],
+					[{0:'zero',1:'zero',2:'one',3:'two',4:'two'}] 
+				]
+			},
+			"len": {
+				description: "",
+				args: [ 
+					[[1,1,2,2,3]],
+					[{0:'zero',1:'zero',2:'one',3:'two',4:'two'}],
+					[{0:'zero',1:'zero',2:{0:'zero',0:'zero'}}, true] 
+				]
+			},
+			"map": {
+				description: "",
+				aliases: ["collect"],
+				args: [ 
+					[['Green', 'Cyan', 'Blue', 'Magenta', 'Red', 'Yellow'], function(v) {
+						if ( _.inArray(['Green', 'Blue', 'Red'], v) ) {
+							return v + ' is a primary.';
+						} else {
+							return v + ' is a sub-prime.'
+						}
+					}], 
+				]
+			},
+			"max": {
+				description: "",
+				aliases: ["maxValue"],
+				args: [ 
+					[[1,2,3,4,5,6]], 
+					[{A:99,B:1000,C:499}]
+				]
+			},
+			"min": {
+				description: "",
+				aliases: ["minValue"],
+				args: [ 
+					[[1,2,3,4,5,6]], 
+					[{A:99,B:1000,C:499}]
+				]
+			},
+			"most": {
+				description: "",
+				args: [ 
+					[[1,1,2,2,3]],
+					[{0:'zero',1:'zero',2:'one',3:'two',4:'two'}] 
+				]
+			},
+			"none": {
+				description: "",
+				args: [ 
+					[[0,1,2], function(v) {return _.isNull(v) ? true : false; }], 
+				]
+			},
+			"omit": {
+				description: "",
+				aliases: ["blacklist"],
+				args: [ 
+					[{'red':'#F00', 'green':'#0F0', 'blue':'#00F'}, ['green']], 
+				]
+			},
+			"only": {
+				description: "",
+				aliases: ["whitelist"],
+				args: [ 
+					[{'red':'#F00', 'green':'#0F0', 'blue':'#00F'}, ['green']], 
+				]
+			},
+			"reduce": {
+				description: "",
+				aliases: ["foldl"],
+				args: [ 
+					[[22,44,88], function(base, value, index) { return base * value; }], 
+				]
+			},
+			"reduceRight": {
+				description: "",
+				aliases: ["foldr"],
+				args: [ 
+					[[22,44,88], function(base, value, index) { return base * value; }], 
+				]
+			},
+			"reject": {
+				description: "",
+				args: [ 
+					[[1,2,3,4], function(v) {return _.isNumber(v) ? true : false}], 
+					[{0:99,1:100,2:'str'}, function(v) {return _.isNumber(v) ? true : false}], 
+				]
+			},
+			"remove": {
+				description: "",
+				args: [ 
+					[[1,2,3,4], 2],
+					[{'red':'#F00', 'green':'#0F0', 'blue':'#00F'}, 'green'] 
+				]
+			},
+			"replace": {
+				description: "",
+				args: [ 
+					[{'red':'#F00', 'green':'#0F0', 'blue':'#00F'}, function(v) {return v + '000';}], 
+				]
+			},
+			"sample": {
+				description: "",
+				args: [ 
+					[[1,2,3,4,5,6]], 
+					[[1,2,3,4,5,6], 3], 
+				]
+			},
+			"set": {
+				description: "",
+				args: [ 
+					[[1,2,3,4,5,6], 2, 'string'], 
+					[{'red':'#F00', 'green':'#0F0', 'blue':'#00F'}, 'yellow', '#0FF']
+				]
+			},
+			"setUndef": {
+				description: "",
+				aliases: ["setIfUndefined"],
+				args: [ 
+					[[1,2,3,undefined,5,6], 2], 
+					[{'red':'#F00', 'green':'#0F0', 'blue':'#00F', 'yellow':undefined}, '#0FF']
+				]
+			},
+			"shuffle": {
+				description: "",
+				aliases: ["randomized"],
+				args: [ 
+					[[1,2,3,4,5]], 
+				]
+			},
+			"size": {
+				description: "",
+				args: [ 
+					[[1,null,2,3,4]], 
+				]
+			},
+			"sortBy": {
+				description: "",
+				args: [ 
+					[[1, 2, 3, 4, 5, 6], function(num){ return Math.sin(num); }], 
+				]
+			},
+			"sum": {
+				description: "",
+				args: [ 
+					[[1,2,3,4]], 
+				]
+			},
+			"values": {
+				description: "",
+				args: [ 
+					[[0,1,2,3,4]],
+					[{name:'Ted', age:33}] 
+				]
+			},
+			"where": {
+				description: "",
+				args: [ 
+					[[{name: 'Ted', age: 22},{name: 'Ted', age: 29},{name: 'Bob', age: 29}], {name: 'Ted', age:22}], 
+				]
+			},
+			"whereFirst": {
+				description: "",
+				args: [ 
+					[[{name: 'Ted', age: 22},{name: 'Ted', age: 29},{name: 'Bob', age: 29}], {name: 'Ted'}], 
+				]
+			},
+		}
+		
+	}
+};
+
+function test( tests, category, print ) {
+	
+	var args, printArray = [];	
+	
+	for ( var t in tests.methods ) {
+		
+		if ( _.inArray(category, t) ) {
+			
+			for ( var c in tests.methods[t] ) {
+		
+				tests.methods[t][c].results = [];
+				tests.methods[t][c].returns = [];
+				
+				if ( print ) {
+					
+					var html = 
+						"<div id=\"method_" + t + "_" + c + "\">\r\n" +
+							"<div class=\"method_description\">"
+								"Description:"
+							"</div>"
+							"<div class=\"method_examples\">" +
+							"</div>"
+						"</div>\r\n";
+					printArray.push(html);
+					
+				} else {
+					
+					for ( var a in tests.methods[t][c].args ) {
+						
+						if ( _.isArray(args = tests.methods[t][c].args[a]) && args.length > 0 ) {
+							
+							try {
+								var result = _[c].apply(this, args);
+								tests.methods[t][c].results.push(result);
+								tests.methods[t][c].returns.push(_.type(result));
+								console.log('SUCCESS: ' + c + '(): ', tests.methods[t][c].results[a]);
+							
+							} catch (e) {
+								
+								console.log('ERROR  : ' + c + '(): '); 
+							
+							}
+							
+						}
+					
+					}
+					
+				}
+				
+			}
+		
+		}
+		
+	}
+	
+	if ( print ) {
+		console.log(printArray);
+	}
+	
+	return tests;
+}
+var all = ['utility', 'function', 'string', 'number', 'array', 'object', 'collection'];
+var category = ['array'];
+res = test(tests, category);
+console.log(res);
+</script>
+</body>
+<button id="boiler_button">Bind All</button>
+</html>
