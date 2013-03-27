@@ -2235,32 +2235,6 @@ var
 		}
 		return ret;
 	};
-				
-	/**
-	 * Returns the index at which a value can be found in the array or -1 if the value is
-	 * not in the array.
-	 * @param {array} obj
-	 * @param {...*} value
-	 * @return {integer}
-	 */
-	(l).indexOf = function( obj, value ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1:[value, [0,1]]}, [{obj:'*'}, {value:'*'}]),
-			ret, o;
-		
-		// Refactor arguments object 
-		if ( arguments.length === 1 ) {
-			args.value = args.obj;
-			args.obj = (l)._global || {};
-		}
-
-		// Find index if exists
-		for ( o in args.obj ) {
-			if ( (l).isEqual(args.value, args.obj[o]) ) {
-				ret = o;
-			}
-		}
-		return ret || -1;
-	};
 	
 	/**
 	 * Returns the index of the last occurence of a value in an array or -1 if the value is
@@ -2303,7 +2277,7 @@ var
 	 * @param {integer} from
 	 * @return {integer}
 	 */
-	(l).firstIndexOf = function( obj, value, from ) {
+	(l).indexOf = (l).firstIndexOf = function( obj, value, from ) {
 		var args = (l).fn.__args({0: [obj, [0]], 1:[value, [0,1]], 2:[from, [1,2]]}, [{obj:'array'}, {value:'*'}, {from:'number'}]);
 		return (l).lastIndexOf.call(this, args.obj, args.value, args.from, true);
 	};
