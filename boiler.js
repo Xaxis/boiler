@@ -783,15 +783,24 @@ var
 	};
 	
 	/** 
-	 * Returns true when an object type is falsy (null, false, undefined, NaN, 0, "")
+	 * Returns true when an object type is falsy (null, false, undefined, NaN, 0, "") or when an
+	 * object or array contains no values (which is the same behavior as the isEmpty method).
 	 * @param {object} obj
 	 * @return {bool}
 	 */
 	(l).isFalsy = function( obj ) {
 		var args = (l).fn.__args([obj], [{obj:'*'}]);
 		if ( arguments.length === 1 ) { args.obj = obj; }
-		return ( (l).isUndefined(args.obj) || (l).isBool(args.obj) && Boolean(args.obj) === false 
-			|| (l).isNull(args.obj) || (l).isNaN(args.obj) || args.obj === "" || args.obj === 0 );
+		return ( 
+			(l).isUndefined(args.obj) || 
+			(l).isNull(args.obj) || 
+			(l).isNaN(args.obj) || 
+			args.obj === "" || 
+			args.obj === 0 ||
+			( (l).isBool(args.obj) && Boolean(args.obj) === false ) || 
+			( (l).isPlainObject(args.obj) && (l).len(args.obj) === 0) ||
+			( (l).isArray(args.obj) && args.obj.length === 0 )
+		);
 	},
 	
 	/**
@@ -1333,6 +1342,7 @@ var
 	
 	/**
 	 * Returns the target object with a namespaced object built and attached to it.
+	 *
 	 * - At its core `builds` creates an object from a namespace string. If the `members` object is passed the deepest
 	 *   object receives all members. 
 	 * - When the `_extends` property is present in `members`, all objects in the array referenced at `_extends` will 
@@ -1343,16 +1353,29 @@ var
 	 *   all objects that match a property name in the array will extend their properties onto `members`.
 	 * - Optionally passing true through `deep` will give all nested objects in `members` the properties of the objects
 	 *   in `_extends`.
+	 *
 	 * @param {object} obj
 	 * @param {string} ns
 	 * @param {object} members
 	 * @param {boolean} deep
+	 * @param {array} fargs
 	 * @return {object}
 	 */
-	(l).build = (l).module = function( obj, ns, members, deep ) {
-		var args = (l).fn.__args({0:[obj,[0]], 1:[ns,[0,1]], 2:[members,[1,2]], 3:[deep,[2,3]]}, [{obj:'object'}, {ns:'string|number'}, {members:'object'}, {deep:'bool'}]),
+	(l).build = (l).module = function( obj, ns, members, deep, fargs ) {
+		var args = (l).fn.__args({
+			0:[obj,[0]], 
+			1:[ns,[0,1]], 
+			2:[members,[1,2,3,4]], 
+			3:[deep,[2,3,4]], 
+			4:[fargs,[2,3,4,5]]}, [
+				{obj:'object|defaultobject|function'}, 
+				{ns:'string|number'}, 
+				{members:'object'}, 
+				{deep:'bool'}, 
+				{fargs:'array'}
+			]),
 			list = args.ns.split("."), ns = list.shift(), obj = args.obj || {}, members, o;
-
+			
 		// Build namespaced object
 		obj[ns] = obj[ns] || {};
 		if ( list.length ) {
@@ -1990,17 +2013,23 @@ var
 	};
 
 	/**
-	 * Returns an array with all falsy values (false, null, 0, "", undefined, and NaN) removed.
+	 * Returns an array with all falsy values (false, null, 0, "", undefined, and NaN) removed. When
+	 * When `^all^ == true` empty arrays and objects will be removed as well.
 	 * @param {array} obj
 	 * @return {array}
 	 */
-	(l).compact = function( obj ) {
-		var args = (l).fn.__args({0: [obj, [0]]}, [{obj:'array'}]),
-			i = 0, ret = [];
-		for ( ; i < args.obj.length; i++ ) {
-			if ( !(l).isFalsy(args.obj[i]) ) { ret.push(args.obj[i]); }
-		}
-		return ret;
+	(l).compact = function( obj, all ) {
+		var args = (l).fn.__args(arguments, [{obj:'array'}, {all:'bool'}]);
+		return (l).filter(args.obj, function(value) {
+			
+			if ( !args.all ) {
+				if ( !(l).isFalsy(value) || ( ( (l).isPlainObject(value) || (l).isArray(value) ) && (l).len(value) === 0 ) ) { 
+					return value; 
+				}			
+			} else if ( !(l).isFalsy(value) ) { 
+				return value; 
+			}
+		});
 	};
 	
 	/**
@@ -2115,7 +2144,7 @@ var
 	(l).difference = function() {
 		var args = (l).fn.__args(arguments, [{'*':'arr:array'}]), 
 			arrs = [], rest;
-		(l).each(args, function(index, value) { if ( index !== "obj" && index !== "length" ) { arrs.push(value); } });
+		(l).each(args, function(index, value) { if ( index !== "obj" && index !== "length" ) { arrs.push(value); } });		
 		rest = Array.prototype.concat.apply(Array.prototype, Array.prototype.slice.call(arrs, 1));
 		return (l).fn.__chain( (l).filter((l).uniq(arrs[0]), function(value) {
 			return !(l).exists(rest, value);
@@ -2590,7 +2619,7 @@ var
 	 * Breaks chaining mode and returns the targeted object
 	 * @return {object}
 	 */
-	(l).end = (l).value = function( obj ) {
+	(l).end = (l).value = function() {
 		(l)._chain = false;
 		return (l)._global;
 	};
