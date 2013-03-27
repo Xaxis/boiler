@@ -2030,7 +2030,7 @@ var
 				return value; 
 			}
 		});
-	};
+	}; 
 	
 	/**
 	 * Flattens a nested collection (of any depth). Passing `n` will flatten a collection to
