@@ -643,7 +643,7 @@ var
 			if ( (l).isPlainObject(copy) ) {
 				keys = (l).keys(copy).reverse();
 				vals = (l).values(copy).reverse();
-				copy = (l).create(keys, vals);
+				copy = (l).object(keys, vals);
 			} else if ( (l).isArray(copy) ) {
 				copy = copy.reverse();
 			}
@@ -1423,33 +1423,6 @@ var
 	};
 	
 	/**
-	 * Returns an object created from either two arrays, one containing the keys the other the values OR
-	 * from a single array where odd values become keys and even values.
-	 * @param {object} obj
-	 * @param {array} pairs
-	 * @param {string|number} key
-	 * @return {object}
-	 */
-	(l).create = function( obj, pair, pairs, key ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1: [pair, [0,1]], 2: [pairs, [1,2]], 3: [key, [1,2,3]]}, [{obj:'object'}, {pair:'array'}, {pairs:'array'}, {key:'string|number'}]), ret = {}, i;
-		if ( (l).isArray(args.pair) && (l).isArray(args.pairs) ) {
-			for ( i = 0; i < args.pairs.length; i ++) {
-				ret[args.pair[i]] = args.pairs[i];
-			}		
-		} else {		
-			for ( i = 0; i < args.pair.length; i += 2) {
-				ret[args.pair[i]] = args.pair[i+1];
-			}
-		}
-		if ( args.key ) {
-			args.obj[args.key] = ret;
-			return (l).fn.__chain( args.obj );
-		} else {
-			return (l).fn.__chain( ret );
-		}
-	};
-	
-	/**
 	 * Returns a collection with a value added if the `key` property/index doesn't exist.
 	 * @param {object|array} obj
 	 * @param {string|number} key
@@ -2216,22 +2189,17 @@ var
 	(l).object = (l).toObject = function() {
 		var args = (l).fn.__args(arguments, [{'*':'arr:array'}]),
 			arrs = [], keys = [], ret = {}, i = 0;
-		(l).each(args, function(index, value) { 
-			if ( (l).isArray(value) ) { arrs.push(value); }
-		});
+		(l).each(args, function(index, value) { if ( (l).isArray(value) ) { arrs.push(value); }});
+		
 		if ( arrs.length === 2 ) {
 			keys = arrs[1];
-			(l).each(arrs[0], function(index, value) { 
-				ret[ value ] = keys[index]; 
-			});			
-		} else if ( arrs.length > 2 ) {
-			for ( ; i < arrs.length; i++ ) { 
-				ret[ arrs[i][0] ] = arrs[i][1]; 
-			}
+			(l).each(arrs[0], function(index, value) { ret[ value ] = keys[index]; });			
+		
+		} else if ( arrs.length === arguments.length ) {
+			for ( ; i < arrs.length; i++ ) { ret[ arrs[i][0] ] = arrs[i][1]; }
+		
 		} else {
-			for ( ; i < arguments.length; i+=2 ) { 
-				ret[ arguments[i] ] = arguments[i+1]; 
-			}
+			for ( ; i < arguments.length; i+=2 ) { ret[ arguments[i] ] = arguments[i+1]; }
 		}
 		return ret;
 	};
