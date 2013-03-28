@@ -605,7 +605,7 @@ var
 	};
 	
 	/**
-	 * Returns an array containing the average of all the values of a collection.
+	 * Returns the average of all the values of a collection.
 	 * @param {object|array} obj
 	 * @return {array}
 	 */
@@ -613,7 +613,7 @@ var
 		var args = (l).fn.__args([obj], [{obj:'object|array'}]),
 			sumTotal = 0, len = (l).isArray(args.obj) ? args.obj.length : (l).len(args.obj);
 		(l).each(args.obj, function(index, value) { sumTotal += value; });
-		return (l).fn.__chain( [ sumTotal / len ] );
+		return (l).fn.__chain( sumTotal / len );
 	};
 	
 	/**
@@ -1490,13 +1490,21 @@ var
 	}; 
 	
 	/**
-	 * Creates a shallow copy of a collection. 
+	 * Creates a deep copy of a collection. 
 	 * @param {object|array} obj
 	 * @return {object|array}
 	 */
 	(l).clone = function( obj ) {
-		var args = (l).fn.__args([obj], [{obj:'object|array'}]);
-		return !(l).isPlainObject(args.obj) ? (l).fn.__chain( args.obj ) : (l).merge({}, args.obj);
+		var args = (l).fn.__args([obj], [{obj:'object|array'}]),
+			ret = (l).isArray(args.obj) ? [] : {}, i;
+		for ( i in args.obj ) {
+			if ( (l).isPlainObject(args.obj[i]) || (l).isArray(args.obj[i]) ) {
+				ret[i] = (l).clone(args.obj[i]);
+			} else {
+				ret[i] = args.obj[i];
+			}
+		} 
+		return (l).fn.__chain( ret );
 	};
 	
 	/**
@@ -1913,16 +1921,20 @@ var
 	 * Returns an array containing elements at `index`. When multiple values are in the `index`
 	 * array values at those indices are returned.
 	 * @param {array} obj
-	 * @param {integer} index
+	 * @param {integer|array} index
 	 * @return {array}
 	 */
 	(l).at = function( obj, index ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1: [index, [0,1]]}, [{obj:'array'}, {index:'array'}]), 
+		var args = (l).fn.__args({0: [obj, [0]], 1: [index, [0,1]]}, [{obj:'array'}, {index:'array|number'}]), 
 			i = 0, ret = [];
 		if ( arguments.length === 1 ) { args.index = args.obj; args.obj = (l)._object; }
 		ret = (l).filter(args.obj, function(value, index) {
-			for ( i = 0; i < args.index.length; i++ ) {
-				if ( args.index[i] === index ) { return true; }
+			if ( (l).isArray(args.index) ) {
+				for ( i = 0; i < args.index.length; i++ ) {
+					if ( args.index[i] === index ) { return true; }
+				}
+			} else if ( (l).isNumber(args.index) ) {
+				if ( index === args.index ) { return true; }			
 			}
 			return false;
 		});
@@ -1950,7 +1962,7 @@ var
 	 * @param {integer} n
 	 * @return {array}
 	 */
-	(l).initial = function( obj, n ) {
+	(l).initial = (l).pop = function( obj, n ) {
 		var args = (l).fn.__args({0: [obj, [0]], 1: [n, [0,1]]}, [{obj:'array'}, {n:'number'}]),
 			n = args.n ? args.obj.length - args.n : args.obj.length - 1, i = 0, ret = [];
 		for ( ; i < n; i++ ) { ret.push(args.obj[i]); }
@@ -1978,7 +1990,7 @@ var
 	 * @param {integer} n
 	 * @return {array}
 	 */
-	(l).rest = (l).tail = (l).drop = function( obj, n ) {
+	(l).rest = (l).tail = (l).drop = (l).shift = function( obj, n ) {
 		var args = (l).fn.__args({0: [obj, [0]], 1: [n, [0,1]]}, [{obj:'array'}, {n:'number'}]),
 			n = args.n ? args.n : 1, i = args.obj.length, ret = [];
 		for ( ; n < i; n++ ) { ret.push(args.obj[n]); }
@@ -2275,32 +2287,6 @@ var
 			}
 			return left.index < right.index ? -1 : 1;
 		}), 'value');		
-	};
-
-	/**
-	 * Returns the modified target array with `n` elements removed from the begenning. When `n` isn't
-	 * passed 1 element is removed from the begenning of the array.
-	 * @param {array} obj
-	 * @return {array}
-	 */
-	(l).shift = function( obj, n ) {
-		var args = (l).fn.__args([obj, n], [{obj:'object|array'}, {n:'number'}]),
-			ret = (l).isPlainObject(args.obj) ? (l).toArray(args.obj) : args.obj, i;
-		for ( i = args.n || 1; i > 0;  i-- ) { ret.shift(); }
-		return ret;
-	};
-	
-	/**
-	 * Returns the modified target array with `n` elements removed from the end. When `n` isn't
-	 * passed 1 element is removed from the end of the array.
-	 * @param {array} obj
-	 * @return {array}
-	 */
-	(l).pop = function( obj, n ) {
-		var args = (l).fn.__args([obj, n], [{obj:'object|array'}, {n:'number'}]),
-			ret = (l).isPlainObject(args.obj) ? (l).toArray(args.obj) : args.obj, i;
-		for ( i = args.n || 1; i > 0;  i-- ) { ret.pop(); }
-		return ret;
 	};
 	
 	/**
