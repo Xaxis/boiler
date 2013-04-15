@@ -37,18 +37,19 @@ var
 		 */
 		__init: function( obj, key ) {			
 			if ( arguments.length >= 1 ) {
-				var args = (l).fn.__args([obj, key], [{obj:'object|array'}, {key:'string|number'}]),
-					target;
+				var args = (l).fn.__args([obj, key], [{obj:'object|array'}, {key:'string|number'}]),target;
 
-				// Retrieve targeted object
-				target = (l).get( args.obj, args.key );
-				
-				// Set whatever is passed to the global object
-				(l)._global = obj;
+        // Set whatever value is passed in `obj` to the global object
+        (l)._global = obj;
+
+				// Retrieve target when a key in a plain object is being targeted
+        if ( (l).isPlainObject(args.obj) && (l).isString(args.key) ) {
+				  target = (l).get( args.obj, args.key );
+        }
 				
 				// Attach targeted object to the library. Since 'false', 'null', and 'undefined' are
-				// all valid found values we test that a value was found not if there is a value in 
-				// the returned target.
+				// all valid target values we test that a value was found not if there is a value in
+				// the target variable. The _found property is set in the _.get() method.
 				(l)._object = (l)._found ? target : (l)._global;
 			}
 			return (l);
@@ -146,6 +147,13 @@ var
 				return ret;
 			};
 			
+			// When arguments are passed through the library method unshift them onto the args array/object
+			if ( (l)._global ) {
+				if ( typeTest(args) === "array" ) {
+					args.unshift((l)._global);
+				}
+			}
+			
 			// Build arguments object from "options" object when the list argument is a plain object.
 			if ( typeTest(list) === "object" ) {
 				for ( i = 0; i < args.length; i++ ) {
@@ -168,7 +176,7 @@ var
 						defs.push({name: a, type: list[n][a], order:[], set:false});
 					}
 				}
-					
+
 				// It is only when the first argument to the __args method is an object that a
 				// specific passed order is to be used while building the arguments object.
 				if ( typeTest(args) === "object") {
@@ -247,7 +255,7 @@ var
 							
 								if ( defs[d].order.length >= 1 ) {
 									if ( 
-											 (type === typeTest(args[a]) || type === "*" ) 
+											 (type === typeTest(args[a]) || type === "*" )
 											 && inArray(defs[d].order, parseInt(a) )
 											 && !(name in oargs)
 											 && !inArray(oargs.__set__, a)
@@ -276,7 +284,7 @@ var
 								
 								// When the type of a passed argument matches a defined type
 								// OR when type is defined as ALL and type of argument IS defined
-								( type === typeTest(args[a]) || type === "*" ) 
+								( type === typeTest(args[a]) || type === "*" )
 										 
 								// AND when the passing order definition matches the order in which the argument was passed
 								&& inArray(defs[d].order, parseInt(a) )
@@ -342,8 +350,13 @@ var
 				delete oargs.length;
 				oargs = toArray(oargs);
 			}
-			
-			// When `rule` is number equal to 0 remove the `length` and `obj` properties
+
+			// When `rule` is equal to 1 set the `obj` property of oargs to (l)._global
+			if ( typeTest(rule) === "number" && rule === 1 && !oargs.obj ) {
+				oargs.obj = (l)._global;
+			}
+					
+			// When `rule` is equal to 0 remove the `length` and `obj` properties
 			if ( typeTest(rule) === "number" && rule === 0 ) {
 				delete oargs.obj;
 				delete oargs.length;
@@ -352,7 +365,7 @@ var
 		},
 		
 		__chain: function( obj ) {
-			(l)._global = obj;
+      (l)._global = obj;
 			(l)._object = obj;
 			return (l)._chain ? (l) : obj;
 		}
@@ -360,15 +373,13 @@ var
 	};
 	
 	/** 
-	 * Apply a callback function to every member in a collection. If the iterator 
-	 * returns false the loop will break and the method will return.
 	 * @param {object} obj
 	 * @param {function} fn
 	 * @param {object|function} scope
 	 * @return {object|array}
 	 */
 	(l).each = (l).forEach = function( obj, fn, scope ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1:[fn, [0,1]], 2:[scope, [1,2]]}, [{obj:'object|array'}, {fn:'function'}, {scope:'object|function|defaultobject'}]),
+		var args = (l).fn.__args({0: [obj, [0]], 1:[fn, [0,1]], 2:[scope, [1,2]]}, [{obj:'object|array'}, {fn:'function'}, {scope:'object|function|defaultobject'}], 1),
 			key, value, i;	
 		if ( (l).type(args.obj) === "object" ) {	
 			for ( key in args.obj ) {
@@ -381,18 +392,17 @@ var
 				if ( value === false ) { break; }
 			}				
 		}
-		return (l).fn.__chain( args.obj );
+		return args.obj;
 	};
 	
 	/**
-	 * Returns an array of values transformed by an iterator function.
 	 * @param {object} obj
 	 * @param {function} fn Function iterator
 	 * @param {object|function} scope
 	 * @return {array}
 	 */
 	(l).map = (l).collect = function( obj, fn, scope ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1:[fn, [0,1]], 2:[scope, [1,2]]}, [{obj:'object|array'}, {fn:'function'}, {scope:'object|function|defaultobject'}]),
+		var args = (l).fn.__args({0: [obj, [0]], 1:[fn, [0,1]], 2:[scope, [1,2]]}, [{obj:'object|array'}, {fn:'function'}, {scope:'object|function|defaultobject'}], 1),
 			list = (l).isArray(args.obj) ? args.obj : (l).toArray(obj), ret = [];	
 		(l).each(list, function(index, value, list) {
 			ret.push( args.fn.call( args.scope || this, value, index, list ) );
@@ -401,8 +411,6 @@ var
 	};
 	
 	/**
-	 * Returns an array containing extracted property values. This is a common usage of the `map` method
-	 * where you return the value that exists at a property.
 	 * @param {object} obj
 	 * @param {string|number} key
 	 * @return {array}
@@ -413,15 +421,13 @@ var
 	};
 
 	/**
-	 * Searches through all values in a collection returning all values that passes
-	 * a truth test established by the iterator function.
 	 * @param {object|array} obj
 	 * @param {function} callback
 	 * @param {object|function} scope
 	 * @return {array}
 	 */
 	(l).filter = function( obj, fn, scope, reject ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1:[fn, [0,1]], 2:[scope, [1,2]], 3: [reject, [1,2,3]]}, [{obj:'object|array'}, {fn:'function'}, {scope:'object|function|defaultobject'}, {reject:'bool'}]),
+		var args = (l).fn.__args({0: [obj, [0]], 1:[fn, [0,1]], 2:[scope, [1,2]], 3: [reject, [1,2,3]]}, [{obj:'object|array'}, {fn:'function'}, {scope:'object|function|defaultobject'}, {reject:'bool'}], 1),
 			ret = [];
 		(l).each(args.obj, function(index, value) {
 			if ( args.reject ) {
@@ -434,19 +440,16 @@ var
 	};
 	
 	/**
-	 * Searches through all values in a collection returning all but the values that pass a 
-	 * truth test established by the iterator function (the opposite of filter).
 	 * @param {object|array} obj
 	 * @param {function} fn
 	 * @param {object|function} scope
 	 * @return {array}
 	 */
 	(l).reject = function( obj, fn, scope ) {
-		return (l).filter.call(this, obj, fn, scope, true);		
+		return (l).filter(obj, fn, scope, true);		
 	};
 		
 	/**
-	 * Returns true if any member of a collection passes a test.
 	 * @param {object} obj
 	 * @param {function} fn
 	 * @param {object|function} scope
@@ -465,15 +468,13 @@ var
 	};
 	
 	/**
-	 * Returns true if all members of a collection pass `fn`.
 	 * @param {object} obj
 	 * @param {function} fn
 	 * @param {object|function} scope
 	 * @return {boolean}
 	 */
 	(l).all = (l).every = function( obj, fn, scope ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1:[fn, [0,1]], 2:[scope, [1,2]]}, [{obj:'object|array'}, {fn:'function'}, {scope:'function|object|defaultobject'}]),
-			ret = true;
+		var args = (l).fn.__args({0: [obj, [0]], 1:[fn, [0,1]], 2:[scope, [1,2]]}, [{obj:'object|array'}, {fn:'function'}, {scope:'function|object|defaultobject'}]), ret = true;
 		(l).each(args.obj, function(index, value) {
 			if ( !args.fn.call( args.scope ? args.scope : this, value, index ) ) { ret = false; }
 		});
@@ -481,14 +482,13 @@ var
 	};
 	
 	/**
-	 * Returns true if none of the values in a collection pass `fn`.
 	 * @param {object|array} obj
 	 * @param {function} fn
 	 * @param {object|function} scope
 	 * @return {boolean}
 	 */
 	(l).none = function( obj, fn, scope ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1:[fn, [0,1]], 2:[scope, [1,2]]}, [{obj:'object|array'}, {fn:'function'}, {scope:'function|object|defaultobject'}]),
+		var args = (l).fn.__args({0: [obj, [0]], 1:[fn, [0,1]], 2:[scope, [1,2]]}, [{obj:'object|array'}, {fn:'function'}, {scope:'function|object|defaultobject'}], 1),
 			ret = true;
 		(l).each(args.obj, function(index, value) {
 			if ( args.fn.call( args.scope ? args.scope : this, value, index ) ) { ret = false; }
@@ -497,14 +497,13 @@ var
 	};
 	
 	/**
-	 * Returns the count of how many values in a collection pass `fn`.
 	 * @param {object|array} obj
 	 * @param {function} fn
 	 * @param {object|function} scope
 	 * @return {number}
 	 */
 	(l).count = function( obj, fn, scope ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1:[fn, [0,1]], 2:[scope, [1,2]]}, [{obj:'object|array'}, {fn:'function'}, {scope:'function|object|defaultobject'}]),
+		var args = (l).fn.__args({0: [obj, [0]], 1:[fn, [0,1]], 2:[scope, [1,2]]}, [{obj:'object|array'}, {fn:'function'}, {scope:'function|object|defaultobject'}], 1),
 			ret = 0;
 		(l).each(args.obj, function(index, value) {
 			if ( args.fn.call( args.scope ? args.scope : this, value, index ) ) { ret++; }
@@ -513,14 +512,13 @@ var
 	};
 
 	/**
-	 * Returns the first value in a collection that passes `fn'.
 	 * @param {object|array} obj
 	 * @param {function} fn
 	 * @param {object|function} scope
 	 * @return {...*}
 	 */
 	(l).find = (l).findValue = function( obj, fn, scope, mode ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1:[fn, [0,1]], 2:[scope, [1,2]], 3:[mode, [1,2,3]]}, [{obj:'object|array'}, {fn:'function'}, {scope:'object|function|defaultobject'}, {mode:'string'}]),
+		var args = (l).fn.__args({0: [obj, [0]], 1:[fn, [0,1]], 2:[scope, [1,2]], 3:[mode, [1,2,3]]}, [{obj:'object|array'}, {fn:'function'}, {scope:'object|function|defaultobject'}, {mode:'string'}], 1),
 			ret;
 		(l).each(args.obj, function(index, value) {
 			if ( !args.mode || args.mode === "value" ) {
@@ -539,26 +537,28 @@ var
 	};
 	
 	/**
-	 * Returns the first value at a property/index in a collection that passes `fn`.
 	 * @param {object|array} obj
 	 * @param {function} fn
 	 * @param {object|function} scope
 	 * @return {number|string}
 	 */
 	(l).findKey = function( obj, fn, scope ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1:[fn, [0,1]], 2:[scope, [1,2]]}, [{obj:'object|array'}, {fn:'function'}, {scope:'object|function|defaultobject'}]);
-		return (l).find.call( args.scope ? args.scope : this, args.obj, args.fn, args.scope, "key" );
+		return (l).find(obj, fn, scope, "key" );
 	};
 	
 	/**
-	 * Returns only the values whos properties are matched in a list.
 	 * @param {object|array} obj
 	 * @param {array} list
 	 * @return {array}
 	 */
 	(l).only = (l).whitelist = function( obj, list ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1:[list, [0,1]]}, [{obj:'object|array'}, {list:'array'}]),
-			list = (l).isString(args.list) ? args.list.split(" ") : args.list, ret = [];
+		var args = (l).fn.__args({0: [obj, [0]], 1:[list, [0,1]]}, [{obj:'object|array'}, {list:'array'}], 1),
+			ret = [];
+		if ( arguments.length === 1 ) {
+			args.list = args.obj;
+			args.obj = (l)._global;
+		}
+		var list = (l).isString(args.list) ? args.list.split(" ") : args.list;
 		(l).each(list, function(index, value) {
 			if ( (l).keyExists(args.obj, value) ) { ret.push( args.obj[value] ); }
 		});
@@ -566,14 +566,18 @@ var
 	};
 	
 	/**
-	 * Returns all values whos properties are not matched in a list.
 	 * @param {object} obj
 	 * @param {array|string} list
 	 * @return {array}
 	 */	
 	(l).omit = (l).blacklist = function( obj, list ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1:[list, [0,1]]}, [{obj:'object|array'}, {list:'string|array'}]),
-			list = (l).isString(args.list) ? args.list.split(" ") : args.list, ret = [];
+		var args = (l).fn.__args({0: [obj, [0]], 1:[list, [0,1]]}, [{obj:'object|array'}, {list:'string|array'}], 1),
+			ret = [];
+		if ( arguments.length = 1 ) {
+			args.list = args.obj;
+			args.obj = (l)._global;
+		}
+		var list = list = (l).isString(args.list) ? args.list.split(" ") : args.list;
 		(l).each(args.obj, function(index, value) {
 			if ( !(l).exists(list, index) ) { ret.push(value); }
 		});
@@ -581,7 +585,6 @@ var
 	};
 	
 	/**
-	 * Returns an array containing the minimum value in a collection.
 	 * @param {object|array} obj
 	 * @return {array}
 	 */
@@ -593,7 +596,6 @@ var
 	};
 	
 	/**
-	 * Returns an array containing the maximum value in a collection.
 	 * @param {object} obj
 	 * @return {array}
 	 */
@@ -605,7 +607,6 @@ var
 	};
 	
 	/**
-	 * Returns the average of all the values of a collection.
 	 * @param {object|array} obj
 	 * @return {array}
 	 */
@@ -617,7 +618,6 @@ var
 	};
 	
 	/**
-	 * Returns the summed value of all the values in a collection.
 	 * @param {object} obj
 	 * @return {array}
 	 */
@@ -628,14 +628,12 @@ var
 	};
 		
 	/**
-	 * Returns an array containing the reduced value from a list of values based on an 
-	 * iterator function where`base` is the initial value of the reduction.
 	 * @param {object|array} obj
 	 * @param {function} fn
 	 * @return {array}
 	 */
 	(l).reduce = (l).foldl = function( obj, fn, scope, right ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1: [fn, [0,1]], 2:[scope, [1,2]], 3: [right, [1,2,3]]}, [{obj:'object|array'}, {fn:'function'}, {scope:'object|function|defaultobject'}, {right:'bool'}]), 
+		var args = (l).fn.__args({0: [obj, [0]], 1: [fn, [0,1]], 2:[scope, [1,2]], 3: [right, [1,2,3]]}, [{obj:'object|array'}, {fn:'function'}, {scope:'object|function|defaultobject'}, {right:'bool'}], 1), 
 			copy = args.obj, i = 0, base, keys, vals;
 		
 		// When reducing from right, flip the list 
@@ -657,25 +655,21 @@ var
 	};
 	
 	/**
-	 * Returns an array containing the result from the right associative version of the reduce method.
 	 * @param {object} obj
 	 * @param {function} fn
 	 * @return {array}
 	 */
 	(l).reduceRight = (l).foldr = function( obj, fn, scope ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1:[fn, [0,1]], 2:[scope, [1,2]]}, [{obj:'object|array'}, {fn:'function'}, {scope:'object|function|defaultobject'}]);
-		return (l).reduce.call(this, args.obj, args.fn, args.scope, true);
+		return (l).reduce(obj, fn, scope, true);
 	};
 	
 	/**
-	 * Returns the value in a collection with the least occurences. 'fn' should be a function mapping
-	 * the value to be tested or a string representing the property name to test.
 	 * @param {object} obj
 	 * @param {function} fn
 	 * @return {...*}
 	 */
 	(l).least = function( obj, fn, most ) {
-		var args = (l).fn.__args([obj, fn, most], [{obj:'object|array'}, {fn:'function|string'}, {most:'bool'}]),
+		var args = (l).fn.__args([obj, fn, most], [{obj:'object|array'}, {fn:'function|string'}, {most:'bool'}], 1),
 			copy = args.obj, comparator, result, ret, leastValue;
 		if ( (l).isString(args.fn) ) { 
 			result = (l).countBy(args.obj, function(p){ return p[args.fn]; }); 
@@ -696,18 +690,15 @@ var
 	};
 	
 	/**
-	 * Returns the value in a collection with the most occurences. 'fn' should be a function mapping
-	 * the value to be tested or a string representing the property name to test.
-	 * @param {obj}
+	 * @param {object} obj
+	 * @param {function} fn
 	 * @return {...*}
 	 */
 	(l).most = function( obj, fn ) {
-		return (l).least.call(this, obj, fn, true);
+		return (l).least(obj, fn, true);
 	};
 	
 	/**
-	 * Returns an array that contains a copy of all values in a collection randomized. Implements
-	 * Fischer-Yates shuffle algorithm.
 	 * @param {object|array} obj
 	 * @return {array}
 	 */
@@ -725,8 +716,6 @@ var
 	};
 	
 	/**
-	 * Returns a random sample of values from a collection. When `n` is passed returns `n` number 
-	 * of random samples.
 	 * @param {object|array} obj
 	 * @param {number} n
 	 * @return {array}
@@ -739,13 +728,12 @@ var
 	};
 	
 	/**
-	 * Returns a boolean indicating if a property/index is in a collection.
 	 * @param {object|array} obj
 	 * @param {string} key
 	 * @return {boolean}
 	 */
 	(l).has = function( obj, key ) {
-		var args = (l).fn.__args([obj, key], [{obj:'object|array'}, {key:'string|number'}]),
+		var args = (l).fn.__args([obj, key], [{obj:'object|array'}, {key:'string|number'}], 1),
 			o, keys;
 		keys = (l).keys( args.obj );
 		for ( o in args.obj ) { 
@@ -757,34 +745,34 @@ var
 	};
 
 	/**
-	 * Returns true if a member value in a collection exists.
 	 * @param {object} obj
 	 * @param {...*} value
 	 * @return {boolean}
 	 */
 	(l).contains = (l).exists = (l).valueExists = (l).inArray = function( obj, value ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1:[value, [0,1]]}, [{obj:'object|array'}, {value:'*'}]);
+		var args = (l).fn.__args({0: [obj, [0]], 1:[value, [0,1]]}, [{obj:'object|array'}, {value:'*'}], 1);
+		if ( !args.value ) {
+			args.value = args.obj;
+			args.obj = (l)._global;
+		}
 		return (l).findValue(args.obj, function(value) {
 			return (l).isEqual(args.value, value) ? true : false;
 		}) ? true : false;
 	};
 	
 	/**
-	 * Returns true if a property/index in a collection exists.
 	 * @param {object|array} obj
 	 * @param {string|number} key
 	 * @return {boolean}
 	 */
 	(l).keyExists = function( obj, key ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1:[key, [0,1]]}, [{obj:'object|array'}, {key:'string|number'}]);
+		var args = (l).fn.__args({0: [obj, [0]], 1:[key, [0,1]]}, [{obj:'object|array'}, {key:'string|number'}], 1);
 		return (l).findKey(args.obj, function(index) {
 			return args.key === index ? true : false;
 		}) ? true : false;
 	};
 	
 	/** 
-	 * Returns true when an object type is falsy (null, false, undefined, NaN, 0, "") or when an
-	 * object or array contains no values (which is the same behavior as the isEmpty method).
 	 * @param {object} obj
 	 * @return {bool}
 	 */
@@ -804,7 +792,6 @@ var
 	},
 	
 	/**
-	 * Tests objects to be of type [type].
 	 * @param {object} obj
 	 * @return {bool}
 	 */
@@ -900,7 +887,6 @@ var
 	};
 
 	/** 
-	 * Returns true when a collection has no properties/indices.
 	 * @param {object|array} obj
 	 * @return {boolean}
 	 */			
@@ -911,7 +897,6 @@ var
 	};
 	
 	/** 
-	 * Returns true when a targeted value in an object is unique.
 	 * @param {object} obj
 	 * @param {string|number} key
 	 * @return {boolean}
@@ -934,9 +919,6 @@ var
 	};
 	
 	/**
-	 * Performs a comparison between two values of any type testing for equality and returns
-	 * true when both values are equal. Performs a deep equality test on objects such as arrays
-	 * an object literals that can contain nested values.
 	 * @param {object} obj
 	 * @param {object} objN
 	 * @return {boolean}
@@ -1007,20 +989,20 @@ var
 	 */		
 	(l).type = function( obj ) {
 		var args = (l).fn.__args([obj], [{obj:'*'}]),
-			types = "Date RegExp Element PlainObject Array Function String Bool NaN Number Null Undefined Object".split(" "), i;
+			types = "Date RegExp Element Arguments PlainObject Array Function String Bool NaN Finite Number Null Undefined Object".split(" "), i;
 		obj = arguments.length === 0 ? (l)._global : obj;
 		for ( i = 0; i < types.length; i++ ) {
 			if ( (l)["is"+types[i]].call(this, obj) ) {
-				return ( types[i].toLowerCase() === "plainobject" ) ? "object" : types[i].toLowerCase();
+				return types[i]
+					.toLowerCase()
+					.replace(/plainobject/g, "object")
+					.replace(/finite/g, "infinity");
 			}
 		}
 		return false;
 	};
 	
 	/**
-	 * Returns the value located at the `key` target property in an object. Performs a deep
-	 * search through all nested objects to find `key` of which can be a dot delimited "namespace"
-	 * string.
 	 * @param {object} obj
 	 * @param {string} key
 	 * @return {...*}
@@ -1064,8 +1046,6 @@ var
 	};
 	
 	/**
-	 * Performs a deep search and returns objects of a given type. When `type` is "*", returns
-	 * all members in the object.
 	 * @param {object} obj
 	 * @param {string} type 
 	 * @param {string} key
@@ -1095,44 +1075,46 @@ var
 	};
 	
 	/**
-	 * - Merges two or more objects together into the first. Properties with the same name will be 
-	 * 	 overriden by merged objects. 
-	 * - When called as a standalone method the first object passed will be the object that is 
-	 *   extended. 
-	 * - All passed objects will be merged into the target object when it is selected through the 
-	 *   library constructor or through the chain method.
-	 * - When a single object is passed and no target object has been selected the properties of the
-	 *   passed object will be merged with the library object itself.
 	 * @param {object} [obj1]
 	 * @param {object} [...,objN]
 	 * @param {boolean} deep
 	 * @return {object}
 	 */
 	(l).extend = (l).merge = function() {
-		var args = (l).fn.__args(arguments, [{deep:'bool'}, {'*':'obj:object'}]),
-			target = (l)._object || args.obj, keys = [],
-			obj, objs, copy, key, i, o;
-		
-		// Collect potential objects to merge
-		objs = (l).filter(args, function(value, index) {
-			if ( index !== "obj" && 
-					 (l).isPlainObject(value) && 
-					 !((l).isEqual(target, value))) { return value; }
-		});
-		
-		// When target object is not selected globally
-		if ( !args.obj ) {
-			target = objs.shift();
+		var args = (l).fn.__args(arguments, [{deep:'bool'}, {'*':'obj:object'}, {flag:'string'}]),
+			target = (l)._global || args.obj,
+      keys = [], objs = [],
+			obj, copy, key, i;
+
+    if ( args.flag === 'test' ) {
+
+      // Collect potential objects to merge
+      for ( var o in args ) {
+        if ( (l).isPlainObject(args[o]) && !(l).isEqual(target, args[o])) {
+          objs.push(args[o]);
+        }
+      }
+
+      //console.log(target, objs);
+      //console.log((l).type((l)._global));
+      //console.log('global: ',(l)._global, 'target: ', target);
+    } else {
+
+      // Collect potential objects to merge
+      objs = (l).filter(args, function(value) {
+        if ( (l).isPlainObject(value) && !(l).isEqual(target, value)) {
+          return value;
+        }
+      });
+
+    }
+
+		// When target object IS NOT selected globally
+		if ( !(l).isPlainObject((l)._global) ) {
+      target = objs.shift();
 		}
-		
-		// When target object is not selected globally and only a single object
-		// is passed extend the library itself
-		if ( !(l)._global && !objs.length ) {
-			target = this;
-			objs[0] = args.obj;
-		}
-		
-		// When a boolean is passed go deep
+
+		// When TRUE is passed perform deep iteration on target
 		if ( args.deep ) {
 
 			// Build property reference used to prevent never ending loops
@@ -1142,7 +1124,7 @@ var
 			});
 			
 			// Add properties to all nested objects
-			(l).deep(target, function( depth, index, obj, ref ) {
+			(l).deep(target, function( depth, index, obj ) {
 				if ( (l).indexOf(keys, index) === -1 ) {
 					for ( i = 0; i < objs.length; i++ ) {
 						for ( key in objs[i] ) {
@@ -1170,7 +1152,6 @@ var
 	};
 	
 	/**
-	 * Calls all functions in an object except those excluded in the `only` array. 
 	 * @param {object} obj
 	 * @param {string} key
 	 * @param {array} fargs
@@ -1179,10 +1160,10 @@ var
 	 * @return {object}
 	 */
 	(l).call = function( obj, key, fargs, deep, only ) {
-		var args = (l).fn.__args({0:[obj,[0]], 1:[key,[0,1]], 2:[fargs,[1,2]], 3:[deep,[1,2,3]], 4:[only,[1,2,3,4]]}, [{obj:'object'}, {key:'string|number'}, {fargs:'array'}, {deep:'bool'}, {only:'string'}]),
+		var args = (l).fn.__args({0:[obj,[0]], 1:[key,[0,1]], 2:[fargs,[1,2]], 3:[deep,[0,1,2,3]], 4:[only,[1,2,3,4]]}, [{obj:'object'}, {key:'string|number'}, {fargs:'array'}, {deep:'bool'}, {only:'string'}]),
 			stack = {}, only = (l).isString(args.only) ? args.only.split(" ") : args.only,
-			fns = (l).functions(args.obj, args.key, args.deep), keys = [];		
-		return (l).toObject( (l).filter(fns, function(value, index) {
+			fns = (l).functions(args.obj, args.key, args.deep), keys = [];
+		return (l).toObject( keys, (l).filter(fns, function(value, index) {
 			if ( only ) {
 				if ( (l).inArray(only, index) ) {
 					keys.push(index);
@@ -1194,12 +1175,11 @@ var
 				value.apply(this, args.fargs);
 				return true;
 			}
-		}), keys);
+		}));
 	};
 		
 	/**
 	 * [type]s(): 
-	 * Returns an object containing all found values of [type].
 	 * @param {object} obj
 	 * @param {string} key
 	 * @param {boolean} deep
@@ -1215,7 +1195,6 @@ var
 	
 	/**
 	 * no[Type]s():
-	 * Returns an object containing all found values except those of [type].
 	 * @param {object} obj
 	 * @param {string} key
 	 * @param {boolean} deep
@@ -1235,8 +1214,6 @@ var
 	
 	/**
 	 * [type]Names():
-	 * Returns a sorted list of the names of every property that references a
-	 * value of a [type].
 	 * @param {object} obj
 	 * @param {string} key
 	 * @param {boolean} deep
@@ -1251,15 +1228,13 @@ var
 	});
 
 	/**
-	 * Calls `fn` on each value in the target collection. All values in the `fargs` array are passed
-	 * to `fn` when invoked.
 	 * @param {object|array} obj
 	 * @param {function|string} fn
 	 * @param {array} fargs
 	 * @return {array}
 	 */
 	(l).invoke = function( obj, fn, fargs ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1:[fn, [0,1]], 2:[fargs, [1,2]]}, [{obj:'object|array'}, {fn:'function|string'}, {fargs:'array'}]), fargs = args.fargs || [], ret;
+		var args = (l).fn.__args({0: [obj, [0]], 1:[fn, [0,1]], 2:[fargs, [1,2]]}, [{obj:'object|array'}, {fn:'function|string'}, {fargs:'array'}], 1), fargs = args.fargs || [], ret;
 		return (l).map(args.obj, function(value) {
 			fargs.unshift(value);
 			ret = ((l).isFunction(args.fn) ? args.fn : value[args.fn]).apply(value, fargs);
@@ -1269,7 +1244,6 @@ var
 	};
 	
 	/**
-	 * Returns the parent object of value at `key`.
 	 * @param {object} obj
 	 * @param {string|number} key
 	 * @return {object}
@@ -1291,7 +1265,6 @@ var
 	};
 	
 	/**
-	 * Returns an object that is the result of flipping a collection's keys and values.
 	 * @param {object} obj
 	 * @return {object}
 	 */
@@ -1302,8 +1275,6 @@ var
 	};
 	
 	/**
-	 * Returns an object containing all of the property paths of an object. Each
-	 * property path is referenced by the property name.
 	 * @param {object} obj
 	 * @return {object}
 	 */
@@ -1313,7 +1284,6 @@ var
 			pathObj = pathObj ? pathObj : {},
 			lastKey = lastKey ? lastKey : "",
 			nextKey = nextKey ? nextKey : "";
-		
 		for ( o in args.obj ) {		
 			pathObj[o] = (nextKey + "." + lastKey + "." + o).replace(/^[.]+/g, "");
 			key = nextKey + "." + lastKey;
@@ -1323,7 +1293,6 @@ var
 	};
 	
 	/**
-	 * Returns the full namespace path to any targeted `key` property in `obj` at any depth.
 	 * @param {object} obj
 	 * @param {string} key
 	 * @return {string}
@@ -1341,19 +1310,6 @@ var
 	};
 	
 	/**
-	 * Returns the target object with a namespaced object built and attached to it.
-	 *
-	 * - At its core `builds` creates an object from a namespace string. If the `members` object is passed the deepest
-	 *   object receives all members. 
-	 * - When the `_extends` property is present in `members`, all objects in the array referenced at `_extends` will 
-	 *   be inherited.
-	 * - When the `_exposed` property is present in `members` and contains an array of property names of objects to expose, 
-	 *   all objects that match a property name in the array will have `members` properties extended onto them.
-	 * - When the `_retract` property is present in `members` and contains an array of property names of objects to retract,
-	 *   all objects that match a property name in the array will extend their properties onto `members`.
-	 * - Optionally passing true through `deep` will give all nested objects in `members` the properties of the objects
-	 *   in `_extends`.
-	 *
 	 * @param {object} obj
 	 * @param {string} ns
 	 * @param {object} members
@@ -1373,84 +1329,142 @@ var
 				{members:'object'}, 
 				{deep:'bool'}, 
 				{fargs:'array'}
-			]),
-			list = args.ns.split("."), ns = list.shift(), obj = args.obj || {}, members, o;
-			
-		// Build namespaced object
+			]);
+		
+		// When NS string is being passed to library function
+		if ( (l).isString((l)._global) && !args.ns ) {
+		  args.ns = (l)._global;
+		}
+		
+		// When a namespace string is not provided throw an error
+		if ( !args.ns ) { throw Error('_.build(): Argument `ns` is missing or not a string.'); }
+
+    // When args.obj is missing look in global otherwise create new object
+    if ( (l).isPlainObject((l)._global) ) {
+      obj = (l)._global;
+    } else {
+      obj = args.obj || {};
+    }
+
+		var members, o, list = args.ns ? args.ns.split(".") : [];
+		var ns = list ? list.shift() : (args.ns || "");
+		
+		// Build namespace object attaching it to the previous object recursively
 		obj[ns] = obj[ns] || {};
-		if ( list.length ) {
-			(l).build( obj[ns], list.join('.'), args.members, args.deep );
+		if ( list.length ) { 
+			(l).build( obj[ns], list.join('.'), args.members, args.deep ); 
 		}
 		
 		// Build namespace object with members
 		if ( args.ns.split(args.ns.length-1)[0] === ns && (l).isPlainObject(args.members) ) {	
-			obj[ns] = (l)(obj[ns]).extend(args.members);
 			
-			// When contains the `extends` property extend object with all objects at `extends`
+			// Merge newly created object with members object
+			obj[ns] = (l).extend(obj[ns], args.members);
+
+			// Extend newly created object with elements in the members object
+			(l).extend(obj, obj[ns], args.deep);
+					
+			// When members contains the `_extends` property
 			if ( '_extends' in obj[ns] ) {
 				if ( (l).isArray(obj[ns]['_extends']) ) {
-					
-					// Inherit properties from extensions with `extend`
 					var extensions = obj[ns]['_extends'];
-					var retractions = obj[ns]['_retract'];
-					var exposures = obj[ns]['_exposed'];
-					extensions.unshift(obj[ns], args.deep);
 					delete obj[ns]['_extends'];
-					delete obj[ns]['_retract'];
+					extensions.push(args.deep);
+					
+					// Extend newly created object with objects in the extensions array
+					extensions.unshift(obj[ns]);
+					(l).extend.apply(this, extensions);
+				}
+			}
+			
+			// When members contains the `_retract` property
+			if ( '_exposed' in obj[ns] ) {
+				if ( (l).isArray(obj[ns]['_exposed']) ) {
+					var exposures = obj[ns]['_exposed'];
 					delete obj[ns]['_exposed'];
-					obj[ns] = (l).extend.apply(this, extensions, args.deep);
 					
-					// Extend all children objects with their parent's properties if they are in the `exposures` list
-					members = (l).noObjects(obj[ns]);
+					// Get the parent objects non object literal members
+					members = (l).getByType(obj[ns], "*", args.deep);
 					for ( o in obj[ns] ) {
+						
+						// When we encounter an object literal who's key is in the `_exposed` array
 						if ( (l).isPlainObject(obj[ns][o]) && (l).inArray(exposures, o) ) {
-							(l).bindAll(obj[ns][o], (l).chain(obj[ns]).functions().end());
-							obj[ns][o] = (l).extend.call(this, obj[ns][o], (l).chain(obj[ns]).noObjects().end());
+						
+							// Bind all functions scopes
+							(l).bindAll(obj[o], (l).chain(obj[ns]).functions(args.deep).end());
+							
+							// Inherit properties from parent
+							(l).extend(obj[ns][o], members, args.deep);
+						}
+					}
+				}		
+			}
+			
+			// When members contains the `_exposed` property
+			if ( '_retract' in obj[ns] ) {
+				var retractions = obj[ns]['_retract'];
+				members = (l).objects(obj[ns], args.deep);
+				
+				// Retract all children members referenced in the array
+				if ( (l).isArray(obj[ns]['_retract']) ) {
+					delete obj[ns]['_retract'];
+					
+					// Get the children object members
+					for ( o in members ) {
+	
+						// If we encounter a retraction, parent inherits from children
+						if ( (l).inArray(retractions, o) ) {
+							(l).extend(obj[ns], members[o], args.deep);
+						}
+					}
+				
+				// Retract only the children members targeted in the retraction object
+				}	else if ( (l).isPlainObject(obj[ns]['_retract']) ) {
+					delete obj[ns]['_retract'];
+					
+					// Get members that exist at referenced targets
+					var targets = [];
+					for ( o in retractions ) {
+						if ( (l).isArray(retractions[o]) ) {
+							targets.push((l).get(members, o));
 						}
 					}
 					
-					// Extend parent with its children's properties if they are listed in the `retractions` list
-					members = (l).objects(obj[ns]);
-					for ( o in members ) {
-						if ( (l).inArray(retractions, o) ) {
-							obj[ns] = (l).extend.call(this, obj[ns], members[o]);
-						}
-					}
+					// Selectively inherit from children
+					targets.unshift(obj[ns], args.deep);
+					(l).extend.apply(obj[ns], targets);
 				}
 			}
 		}
+		
 		return (l).fn.__chain( obj );
 	};
 	
 	/**
-	 * Returns a collection with a value added if the `key` property/index doesn't exist.
 	 * @param {object|array} obj
 	 * @param {string|number} key
 	 * @param {...*} value
 	 * @return {object}
 	 */	
 	(l).add = function( obj, key, value ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1:[key, [0,1]], 2:[value, [1,2]]}, [{obj:'object|array'}, {key:'string|number'}, {value:'*'}]);
-		if ( args.key in args.obj ) { throw new Error('Property already exists in object.');
-		} else { args.obj[args.key] = args.value; }
+		var args = (l).fn.__args({0: [obj, [0]], 1:[key, [0,1]], 2:[value, [1,2]]}, [{obj:'object|array'}, {key:'string|number'}, {value:'*'}], 1);
+		if ( !(args.key in args.obj) ) { args.obj[args.key] = args.value; }
 		return (l).fn.__chain( args.obj );
 	};
 	
 	/**
-	 * Returns a collection with a value added regardless if the `key` property/index exists.
 	 * @param {object|array} obj
 	 * @param {string|number} key
 	 * @param {...*} value
 	 * @return {object}
 	 */
 	(l).set = function( obj, key, value ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1:[key, [0,1]], 2:[value, [1,2]]}, [{obj:'object|array'}, {key:'string|number'}, {value:'*'}]);
+		var args = (l).fn.__args({0: [obj, [0]], 1:[key, [0,1]], 2:[value, [1,2]]}, [{obj:'object|array'}, {key:'string|number'}, {value:'*'}], 1);
 		args.obj[args.key] = args.value;
 		return (l).fn.__chain( args.obj );
 	};
 	
 	/**
-	 * Sets all undefined values in a collection to `value`.
 	 * @param {object|array} obj
 	 * @param {...*} value
 	 * @return {object}
@@ -1468,8 +1482,6 @@ var
 	};
 	
 	/**
-	 * Sets null and undefined properties in object with replacement values contained in 
-	 * the defaults object. Will not override values that are already set.
 	 * @param {object} obj
 	 * @param {...*} defaults
 	 * @return {object}
@@ -1490,7 +1502,6 @@ var
 	}; 
 	
 	/**
-	 * Creates a deep copy of a collection. 
 	 * @param {object|array} obj
 	 * @return {object|array}
 	 */
@@ -1508,8 +1519,6 @@ var
 	};
 	
 	/**
-	 * Returns an object who's children have been ncapsulated within their own sub-objects. If `prefix`
-	 * is given will prepend a prefix string to the the newly nested objects property names.
 	 * @param {object} obj
 	 * @return {object}
 	 */
@@ -1525,14 +1534,12 @@ var
 	};
 	
 	/**
-	 * Removes a value from a collection at `key`. When removing values from an array, `key` should
-	 * be the index from where to remove value.
 	 * @param {object|array} obj
 	 * @param {string|number} key
 	 * @return {object}
 	 */	
 	(l).remove = function( obj, key ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1:[key, [0,1]]}, [{obj:'object|array'}, {key:'string|number|array'}]),
+		var args = (l).fn.__args({0: [obj, [0]], 1:[key, [0,1]]}, [{obj:'object|array'}, {key:'string|number|array'}], 1),
 			rest, from, i;
 		if ( (l).isPlainObject(args.obj) ) {			
 			if ( (l).isArray(args.key) ) {
@@ -1556,7 +1563,6 @@ var
 	};
 	
 	/**
-	 * Returns collection that has had all values and property/names removed.
 	 * @param {object|array} obj
 	 * @param {object|array}
 	 */	
@@ -1569,7 +1575,6 @@ var
 	};
 	
 	/**
-	 * Returns a collection that has had all values set to undefined.
 	 * @param {object|array} obj
 	 * @return {object|array}
 	 */	
@@ -1582,16 +1587,13 @@ var
 	};
 	
 	/**
-	 * Returns a collection that has had an iterator function passed over each value where the
-	 * returned result from iterator is placed at the corresponding property/index.
 	 * @param {object|array} obj
 	 * @param {function} fn
 	 * @param {object|function} scope
 	 * @return {object|array}
 	 */
 	(l).replace = function( obj, fn, scope ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1:[fn, [0,1]], 2:[scope, [1,2]]}, [{obj:'object|array'}, {fn:'function'}, {scope:'object|function|defaultobject'}]),
-			ret;
+		var args = (l).fn.__args({0: [obj, [0]], 1:[fn, [0,1]], 2:[scope, [1,2]]}, [{obj:'object|array'}, {fn:'function'}, {scope:'object|function|defaultobject'}], 1), ret;
 		if ( (l).isPlainObject(args.obj) ) {
 			ret = {};
 			(l).each(args.obj, function(index, value) {
@@ -1607,10 +1609,6 @@ var
 	};
 		
 	/**
-	 * Performs a deep iteration on the target object and calls `fn` on every nested array or 
-	 * object within a collection. When `fargs` is an array its values are passed as arguments
-	 * to `fn`. When `depth` is set will prevent the deep search from going deeper than the depth
-	 * defined. If `arrs` is true will not perform a deep search through nested arrays.
 	 * @param {object|array} obj
 	 * @param {function} fn
 	 * @param {array} fargs
@@ -1620,7 +1618,7 @@ var
 	 * @return {object}
 	 */
 	(l).deep = function( obj, fn, fargs, scope, depth, arrs ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1:[fn, [0,1]], 2:[fargs, [1,2]], 3:[scope, [1,2,3]], 4:[depth, [2,3,4]], 5:[arrs, [3,4,5]]}, [{obj:'object|array'}, {fn:'function'}, {fargs:'array'}, {scope:'object|function|defaultobject'}, {depth:'number'}, {arrs:'bool'}]),
+		var args = (l).fn.__args({0: [obj, [0]], 1:[fn, [0,1]], 2:[fargs, [1,2]], 3:[scope, [1,2,3]], 4:[depth, [2,3,4]], 5:[arrs, [3,4,5]]}, [{obj:'object|array'}, {fn:'function'}, {fargs:'array'}, {scope:'object|function|defaultobject'}, {depth:'number'}, {arrs:'bool'}], 1),
 		depth = args.depth ? args.depth : "*", o, res;
 
 		// Place passed object at the beginning of the 'fargs' array
@@ -1642,28 +1640,27 @@ var
 	};
 
 	/**
-	 * Calls a user defined function on the targeted collection. Method is useful for inserting custom 
-	 * functionality within chainned methods.
 	 * @param {object|array} obj
 	 * @param {function} fn
 	 * @return {object}
 	 */
 	(l).tap = function( obj, fn ) {
 		var args = (l).fn.__args({0: [obj, [0]], 1: [fn, [0,1]]}, [{obj:'object|array'}, {fn:'function'}]);	
-		args.fn.call(this, args.obj);
-		return (l).fn.__chain( args.obj );
+		return (l).fn.__chain( args.fn.call(this, args.obj) );
 	};
 	
 	/**
-	 * Searches through a collection, returning an array of name/value pairs that the name/value pairs
-	 * matched in the `matches` object.
 	 * @param {object} obj
 	 * @param {object} matches
 	 * @param {object|function} scope
 	 * @return {array}
 	 */
 	(l).where = function( obj, matches, find ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1:[matches, [0,1]], 2:[find, [1,2]]}, [{obj:'object|array'}, {matches:'array|object'}, {find:'bool'}]);
+		var args = (l).fn.__args({0: [obj, [0]], 1:[matches, [0,1]], 2:[find, [1,2]]}, [{obj:'object|array'}, {matches:'array|object'}, {find:'bool'}], 1);
+		if ( !args.matches ) {
+			args.matches = args.obj;
+			args.obj = (l)._global;
+		}
 		return (l)[find ? 'find' : 'filter'](args.obj, function(value, index) {
 			for ( var key in args.matches ) {
 				if (args.matches[key] !== value[key]) { return false; }
@@ -1673,27 +1670,24 @@ var
 	};
 
 	/**
-	 * Searches through a collection, returning the first value that matches all of the key value pairs 
-	 * in the `matches` object.
 	 * @param {object} obj
 	 * @param {object} matches
 	 * @param {object|function} scope
 	 * @return {object}
 	 */
 	(l).whereFirst = function( obj, matches ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1:[matches, [0,1]]}, [{obj:'object|array'}, {matches:'array|object'}]);
+		var args = (l).fn.__args({0: [obj, [0]], 1:[matches, [0,1]]}, [{obj:'object|array'}, {matches:'array|object'}], 1);
 		return (l).where(args.obj, args.matches, true);
 	};
 	
 	/**
-	 * Returns a collection in groups of `n` values. If `pad` is passed, pads the collection with `pad`.
 	 * @param {object|array} obj
 	 * @param {integer} n
 	 * @param {...*} pad
 	 * @return {object}
 	 */
 	(l).groupsOf = function( obj, n, pad ) {
-		var args = (l).fn.__args({0:[obj, [0]], 1:[n, [0,1]], 2:[pad, [1,2]]}, [{obj:'array|object'}, {n:'number'}, {pad:'*'}]),
+		var args = (l).fn.__args({0:[obj, [0]], 1:[n, [0,1]], 2:[pad, [1,2]]}, [{obj:'array|object'}, {n:'number'}, {pad:'*'}], 1),
 			res = {}, i = 0, key;
 		(l).each(args.obj, function(index, value) {
 			if ( i < args.n-1 && (l).has(res, key) ) {
@@ -1718,16 +1712,13 @@ var
 	};
 
 	/**
-	 * Returns an object containing a collection's values that have been grouped after running 
-	 * each value through `map`. When `map` is passed as a string, values are grouped by the
-	 * property name given by `map`.
 	 * @param {object|array} obj
 	 * @param {string|function} map
 	 * @param {function|object} scope
 	 * @return {object}
 	 */
 	(l).groupBy = function( obj, map, scope, count, key ) {
-		var args = (l).fn.__args({0:[obj, [0]], 1:[map, [0,1]], 2:[scope, [1,2]], 3:[count, [2,3]], 4:[key, [4]]}, [{obj:'array|object'}, {map:'function|string'}, {scope:'function|object|defaultobject'}, {count:'bool'}, {key:'bool'}]),
+		var args = (l).fn.__args({0:[obj, [0]], 1:[map, [0,1]], 2:[scope, [1,2]], 3:[count, [2,3]], 4:[key, [4]]}, [{obj:'array|object'}, {map:'function|string'}, {scope:'function|object|defaultobject'}, {count:'bool'}, {key:'bool'}], 1),
 			res = {}, key;
 		(l).each(args.obj, function(index, value) {
 			key = (l).isString(args.map) ? value[args.map] : args.map.call(args.scope || this, value, index, args.obj);	
@@ -1750,19 +1741,16 @@ var
 	};
 		
 	/**
-	 * Returns an object containing a collection sorted into groups that each contain the
-	 * number of objects in each group. 
 	 * @param {object|array} obj
-	 * @param {string|function} map Mapping function or property name string
-	 * @param {function|object} scope The scope to bind `map` to
+	 * @param {string|function} map
+	 * @param {function|object} scope
 	 * @return {object}
 	 */
 	(l).countBy = function( obj, map, scope, index ) {
-		return (l).groupBy.call(this, obj, map, scope || this, true, index);
+		return (l).groupBy(obj, map, scope || this, true, index);
 	};
 	
 	/**
-	 * Returns an array containing a collections properties/indices.
 	 * @param {object|array|function} obj
 	 * @return {array}
 	 */
@@ -1774,7 +1762,6 @@ var
 	};
 	
 	/**
-	 * Returns an array containing a collections values.
 	 * @param {object|array|function} obj
 	 * @return {array}
 	 */
@@ -1786,7 +1773,6 @@ var
 	};
 	
 	/**
-	 * Returns an array of name value pairs from an object.
 	 * @param {object} obj
 	 * @return {array}
 	 */
@@ -1802,19 +1788,22 @@ var
 	};
 	
 	/**
-	 * Returns the count of properties/indices in a collection. Performs a deep count
-	 * when the `deep` is true.
 	 * @param {object|array} obj
 	 * @param {boolean} deep
 	 * @return {integer}
 	 */
 	(l).len = function( obj, deep, count ) {	 
-		var args = (l).fn.__args([obj, deep], [{obj:'object|array'}, {deep:'bool'}]),
+		var args = (l).fn.__args([obj, deep], [{obj:'object|array'}, {deep:'bool'}], 1),
 			count = count ? (count += (l).keys(args.obj).length) : (l).keys(args.obj).length, o;
 		if ( args.deep ) {
 			for ( o in args.obj ) {
 				if ( (l).isPlainObject(args.obj[o]) || (l).isArray(args.obj[o]) ) { 
-					return (l).len( args.obj[o], args.deep, count ); 
+					var ret = (l).len( args.obj[o], args.deep, count ); 
+					if ( (l).type(args.obj[o]) === "array" ) {
+						return ret - 1;
+					} else if ( (l).type(args.obj[o]) === "object" ) {
+						return ret;
+					} 
 				}
 			}
 		}
@@ -1822,21 +1811,22 @@ var
 	};
 	
 	/**
-	 * Returns the count of all values that are not falsy (null, undefined, 0, "", NaN). Performs 
-	 * a deep count when `deep` is true.
 	 * @param {object|array} obj
 	 * @return {integer}
 	 */
 	(l).size = function( obj, deep, count ) {
 		var args = (l).fn.__args([obj, deep], [{obj:'object|array'}, {deep:'bool'}]),
 			count = count ? count : 0, o;		
-		(l).each((l).values(args.obj), function(index, value) {
-			if ( !(l).isFalsy(value) ) { count += 1; }
-		});
+		(l).each((l).values(args.obj), function(index, value) { if ( !(l).isFalsy(value) ) { count += 1; } });
 		if ( args.deep ) {
 			for ( o in args.obj ) {
 				if ( (l).isPlainObject(args.obj[o]) || (l).isArray(args.obj[o]) ) { 
-					return (l).size( args.obj[o], args.deep, count ); 
+					var ret = (l).size( args.obj[o], args.deep, count ); 
+					if ( (l).type(args.obj[o]) === "array" ) {
+						return ret - 1;
+					} else if ( (l).type(args.obj[o]) === "object" ) {
+						return ret;
+					} 
 				}
 			}
 		}
@@ -1844,7 +1834,6 @@ var
 	};
 	
 	/**
-	 * Return an integer representing how many levels deep a nested object is.
 	 * @param {object} obj
 	 * @param {string|number} key
 	 * @return {integer}
@@ -1867,8 +1856,6 @@ var
 	};
 	
 	/**
-	 * Returns an query string converted from an object literal. Will convert deeply nested objects
-	 * and arrays. When `prefix` is provided, the prefix string is prepended to each property name.
 	 * @param {object} obj
 	 * @param {prefix} str
 	 * @return {string}
@@ -1888,28 +1875,28 @@ var
 					ret += (args.prefix ? args.prefix + index : index) + "=" + value + "&"; 
 				}
 			}
-		}, "*");
+		}, "*", true);
 		ret = encodeURIComponent( ret.replace(/&$/g, '') );
 		return ret;
 	};
 	
 	/**
-	 * Returns an object that has been converted from a query string. When `deep` is passed will attempt
-	 * to assemble all arrays.
 	 * @param {object} obj
 	 * @param {boolean} deep
 	 * @return {object}
 	 */
 	(l).fromQueryString = function( obj, deep ) {
 		var args = (l).fn.__args([obj, deep], [{obj:'string'}, {deep:'bool'}]),
-			ret = {}, arr = [], parts;
-		args.obj = decodeURIComponent(args.obj);
-		(l).each( args.obj.split("&"), function(index, value) {
+			ret = {}, parts;
+		(l).each( decodeURIComponent(args.obj).split("&"), function(index, value) {
 			parts = value.split("=");
-			if ( parts[0].match(/\[\]/g) !== null ) {
+			if ( parts[0].match(/\[\]/g) && args.deep ) {
 				parts[0] = parts[0].replace(/\[\]/g, '');
-				if ( parts[0] in ret ) { ret[ parts[0] ].push(parts[1]); } 
-				else { ret[ parts[0] ] = [parts[1]]; }
+				if ( parts[0] in ret ) { 
+					ret[ parts[0] ].push(parts[1]); 
+				} else { 
+					ret[ parts[0] ] = [parts[1]]; 
+				}
 			} else {
 				ret[ parts[0] ] = parts[1];
 			}
@@ -1918,19 +1905,19 @@ var
 	};
 
 	/**
-	 * Returns an array containing elements at `index`. When multiple values are in the `index`
-	 * array values at those indices are returned.
 	 * @param {array} obj
 	 * @param {integer|array} index
 	 * @return {array}
 	 */
 	(l).at = function( obj, index ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1: [index, [0,1]]}, [{obj:'array'}, {index:'array|number'}]), 
-			i = 0, ret = [];
-		if ( arguments.length === 1 ) { args.index = args.obj; args.obj = (l)._object; }
-		ret = (l).filter(args.obj, function(value, index) {
+		var args = (l).fn.__args({0: [obj, [0]], 1: [index, [0,1]]}, [{obj:'array'}, {index:'array|number'}]);
+		if ( arguments.length === 1 ) { 
+			args.index = !(l).isNumber(args.index) ? args.obj : args.index;
+			args.obj = (l)._object;
+		}
+		return (l).filter(args.obj, function(value, index) {
 			if ( (l).isArray(args.index) ) {
-				for ( i = 0; i < args.index.length; i++ ) {
+				for ( var i = 0; i < args.index.length; i++ ) {
 					if ( args.index[i] === index ) { return true; }
 				}
 			} else if ( (l).isNumber(args.index) ) {
@@ -1938,75 +1925,64 @@ var
 			}
 			return false;
 		});
-		return ret;
 	};
 		
 	/**
-	 * Returns an array containing the first element of an array. Passing 'n' will return
-	 * the first N elements of the array.
 	 * @param {array} obj
 	 * @param {integer} n
 	 * @return {array}
 	 */
 	(l).first = function( obj, n ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1: [n, [0,1]]}, [{obj:'array'}, {n:'number'}]),
+		var args = (l).fn.__args([obj, n], [{obj:'array'}, {n:'number'}]),
 			n = args.n ? args.n : 1, i = 0, ret = [];
 		for ( ; i < n; i++ ) { ret.push(args.obj[i]); }
-		return (l).fn.__chain( ret );
+		return ret;
 	};
 	
 	/**
-	 * Returns an array containing all but the last element of an array. Passing 'n' will 
-	 * return all but the last N elements of the array.
 	 * @param {array} obj
 	 * @param {integer} n
 	 * @return {array}
 	 */
-	(l).initial = (l).pop = function( obj, n ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1: [n, [0,1]]}, [{obj:'array'}, {n:'number'}]),
+	(l).initial = function( obj, n ) {
+		var args = (l).fn.__args({0: [obj, [0]], 1: [n, [0,1]]}, [{obj:'array'}, {n:'number'}], 1),
 			n = args.n ? args.obj.length - args.n : args.obj.length - 1, i = 0, ret = [];
 		for ( ; i < n; i++ ) { ret.push(args.obj[i]); }
 		return ret;
 	};
 
 	/**
-	 * Returns an array containing the last element of an array. Passing 'n' will 
-	 * return the last N elements of the array.
 	 * @param {array} obj
 	 * @param {integer} n
 	 * @return {array}
 	 */
 	(l).last = function( obj, n ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1: [n, [0,1]]}, [{obj:'array'}, {n:'number'}]),
+		var args = (l).fn.__args({0: [obj, [0]], 1: [n, [0,1]]}, [{obj:'array'}, {n:'number'}], 1),
 			n = args.n ? args.obj.length - args.n : args.obj.length - 1, i = args.obj.length, ret = [];
 		for ( ; n < i; n++ ) { ret.push(args.obj[n]); }
 		return ret;
 	};
 	
 	/**
-	 * Returns an array containing the rest of elements of an array after the first 
-	 * element. Passing 'n' will return the rest of the elements after N as an index.
 	 * @param {array} obj
 	 * @param {integer} n
 	 * @return {array}
 	 */
 	(l).rest = (l).tail = (l).drop = (l).shift = function( obj, n ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1: [n, [0,1]]}, [{obj:'array'}, {n:'number'}]),
+		var args = (l).fn.__args({0: [obj, [0]], 1: [n, [0,1]]}, [{obj:'array'}, {n:'number'}], 1),
 			n = args.n ? args.n : 1, i = args.obj.length, ret = [];
 		for ( ; n < i; n++ ) { ret.push(args.obj[n]); }
 		return ret;
 	};
 
 	/**
-	 * Returns an array with all falsy values (false, null, 0, "", undefined, and NaN) removed. When
-	 * When `^all^ == true` empty arrays and objects will be removed as well.
 	 * @param {array} obj
+	 * @param {boolean} all
 	 * @return {array}
 	 */
 	(l).compact = function( obj, all ) {
-		var args = (l).fn.__args(arguments, [{obj:'array'}, {all:'bool'}]);
+		var args = (l).fn.__args([obj, all], [{obj:'array'}, {all:'bool'}]);
 		return (l).filter(args.obj, function(value) {
-			
 			if ( !args.all ) {
 				if ( !(l).isFalsy(value) || ( ( (l).isPlainObject(value) || (l).isArray(value) ) && (l).len(value) === 0 ) ) { 
 					return value; 
@@ -2018,14 +1994,12 @@ var
 	}; 
 	
 	/**
-	 * Flattens a nested collection (of any depth). Passing `n` will flatten a collection to
-	 * the depth specified.
 	 * @param {array|object} obj
 	 * @param {integer} n
 	 * @return {array}
 	 */
 	(l).flatten = function( obj, n ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1: [n, [0,1]]}, [{obj:'array|object'}, {n:'number|string'}]),
+		var args = (l).fn.__args({0: [obj, [0]], 1: [n, [0,1]]}, [{obj:'array|object'}, {n:'number|string'}], 1),
 			n = args.n ? args.n : "*", ret = [], type = (l).type(args.obj);
 		(l).deep(args.obj, function( depth, index, elm ) {
 			switch ( type ) {
@@ -2049,13 +2023,16 @@ var
 	};
 	
 	/**
-	 * Returns an array with all instances of `values` removed.
 	 * @param {array} obj
 	 * @param {array} values
 	 * @return {array}
 	 */
 	(l).without = (l).exclude = (l).subtract = function( obj, values ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1: [values, [0,1]]}, [{obj:'array'}, {values:'array'}]);
+		var args = (l).fn.__args({0: [obj, [0]], 1: [values, [0,1]]}, [{obj:'array'}, {values:'array'}], 1);
+		if ( (l)._global ) {
+			args.values = args.obj;
+			args.obj = (l)._global;
+		}
 		return (l).filter(args.obj, function(value, index) {
 			for ( var i = 0; i < args.values.length; i++ ) {
 				if ( (l).isEqual(args.values[i], value) ) { return false; }
@@ -2065,15 +2042,13 @@ var
 	};
 
 	/**
-	 * Returns an array with duplicate-free values, using a powerful isEquals method to test for 
-	 * equality. Unique values will be computed based on a transformation when an iterator function is passed.
 	 * @param {array} obj
 	 * @param {function} fn
 	 * @param {object|function}
 	 * @return {array}
 	 */
 	(l).uniq = (l).unique = function( obj, fn, scope ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1:[fn, [0,1]], 2:[scope, [1,2]]}, [{obj:'array'}, {fn:'function'}, {scope:'object|function|defaultobject'}]),
+		var args = (l).fn.__args({0: [obj, [0]], 1:[fn, [0,1]], 2:[scope, [1,2]]}, [{obj:'array'}, {fn:'function'}, {scope:'object|function|defaultobject'}], 1),
 			ret = [], seen = [], target;
 		target = args.fn ? (l).map(args.obj, args.fn, args.scope) : args.obj;
 		(l).each(target, function(index, value) {
@@ -2086,8 +2061,6 @@ var
 	};
 		
 	/**
-	 * Returns an array containing the computed union of passed arrays: this is an array
-	 * containing only unique items in the order they are present in passed arrays.
 	 * @param {*arrays}
 	 * @return {array}
 	 */
@@ -2096,14 +2069,12 @@ var
 	};
 	 
 	/**
-	 * Returns an array containing the values that are the intersection of all passed arrays (every 
-	 * value present in the result is present in the passed arrays).
 	 * @param {*arrays}
 	 * @return {array}
 	 */
 	(l).intersection = function() {
 		var args = (l).fn.__args(arguments, [{'*':'arr:array'}]),
-			ret, arrs = [], rest;
+			arrs = [], rest;
 
 		// Put passed arrays into arrs array
 		(l).each(args, function(index, value) {
@@ -2112,17 +2083,14 @@ var
 		
 		// Make sure target array is first element
 		rest = Array.prototype.slice.call(arrs, 1);
-		ret = (l).filter((l).uniq(arrs[0]), function(item) {
+		return (l).filter((l).uniq(arrs[0]), function(item) {
 			return (l).every(rest, function(other) {
 				return (l).indexOf(other, item) >= 0;
 			});
 		});
-		
-		return ret;
 	};
 
 	/**
-	 * Returns an array containing the values from target array that are not present in other arrays.
 	 * @param {*arrays}
 	 * @return {array}
 	 */
@@ -2137,33 +2105,38 @@ var
 	};
 
 	/**
-	 * Returns an array containing the merged values of each passed array at the corresponding positions.
 	 * @param {*arrays}
 	 * @return {array}
 	 */
 	(l).zip = function() {
 		var args = (l).fn.__args(arguments, [{'*':'arr:array'}]),
 			i = 0, arrs = [], ret = [];
-		(l).each(args, function(index, value) { if ( index !== "obj" && index !== "length" ) { arrs.push(value); } });
-		for ( ; i < arrs.length; i++ ) { ret[i] = (l).pluck(arrs, "" + i); }
+		(l).each(args, function(index, value) { 
+			if ( index !== "obj" && index !== "length" ) { arrs.push(value); } 
+		});
+		for ( ; i < arrs[0].length; i++ ) { ret[i] = (l).pluck(arrs, "" + i); }
 		return ret;
 	};
 
 	/**
-	 * Returns an array containing numbers in a range. 
 	 * @param {number} start
 	 * @param {number} stop
 	 * @param {number} step
 	 * @return {array}
 	 */
 	(l).range = function( start, stop, step ) {
-		var args = (l).fn.__args({0: [start, [0]], 1:[stop, [0,1]], 2:[step, [1,2]]}, [{start:'number'}, {stop:'number'}, {step:'number'}]),
+		var args = (l).fn.__args({0: [start, [0]], 1:[stop, [0,1]], 2:[step, [1,2]]}, [{start:'number'}, {stop:'number'}, {step:'number'}], 1),
 		i = 0, ret = [];
-		if ( arguments.length === 1 ) {
+		if ( arguments.length === 1 & !(l).isNumber((l)._global) ) {
 			args.stop = args.start || 0;
 			args.start = 0;
 		}
-		if ( arguments.length < 3 ) { args.step = 1; }
+		if ( arguments.length < 3 & !(l).isNumber((l)._global) ) { args.step = 1; }
+		if ( args.length <= 2 && (l).isNumber((l)._global) ) {
+			args.step = args.stop;
+			args.stop = args.start;
+			args.start = (l)._global;
+		}
 		len = Math.max(Math.ceil((args.stop - args.start) / args.step), 0);
 		while ( i < len ) {
 			ret[ i++ ] = args.start;
@@ -2173,8 +2146,6 @@ var
 	};
 	
 	/** 
-	 * Returns an array created from an object. When multiple arguments are passed creates
-	 * an array containing values passed as arguments. 
 	 * @param {object} obj
 	 * @return {array}
 	 */
@@ -2191,10 +2162,6 @@ var
 	};
 	
 	/** 
-	 * Returns an object created from passed array(s). When two arrays are passed the first is used
-	 * for the objects keys and the second its values. When more than two arrays are passed each array
-	 * should contain one key and one value. Additionally passing an even number of arguments will result
-	 * in all odd arguments being used as keys and all even arguments as values.
 	 * @param {*arrays}
 	 * @return {object}
 	 */
@@ -2202,14 +2169,11 @@ var
 		var args = (l).fn.__args(arguments, [{'*':'arr:array'}]),
 			arrs = [], keys = [], ret = {}, i = 0;
 		(l).each(args, function(index, value) { if ( (l).isArray(value) ) { arrs.push(value); }});
-		
 		if ( arrs.length === 2 ) {
 			keys = arrs[1];
 			(l).each(arrs[0], function(index, value) { ret[ value ] = keys[index]; });			
-		
 		} else if ( arrs.length === arguments.length ) {
 			for ( ; i < arrs.length; i++ ) { ret[ arrs[i][0] ] = arrs[i][1]; }
-		
 		} else {
 			for ( ; i < arguments.length; i+=2 ) { ret[ arguments[i] ] = arguments[i+1]; }
 		}
@@ -2217,31 +2181,20 @@ var
 	};
 	
 	/**
-	 * Returns the index of the last occurence of a value in an array or -1 if the value is
-	 * not in the array. Passing `from` will start search from the end of the array minus
-	 * the value of `from`.
 	 * @param {array} obj
 	 * @param {...*} value
 	 * @param {integer} from
 	 * @return {integer}
 	 */
 	(l).lastIndexOf = function( obj, value, from, first ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1:[value, [0,1]], 2:[from, [1,2]], 3:[first, [1,2,3]]}, [{obj:'array'}, {value:'*'}, {from:'number'}, {first:'bool'}]),
-			i, ret;
-
-		// Refactor arguments object 
-		if ( arguments.length === 1 && (l)._global ) {
-			args.value = arguments[0];
-			args.obj = (l)._global;
-		}
-		
+		var args = (l).fn.__args({0: [obj, [0]], 1:[value, [0,1]], 2:[from, [1,2]], 3:[first, [1,2,3]]}, [{obj:'array'}, {value:'*'}, {from:'number'}, {first:'bool'}], 1), ret;
 		if ( args.first ) {
-			i = args.from || 0;
+			var i = args.from || 0;
 			for ( ; i < args.obj.length; i++ ) {
 				if ( (l).isEqual(args.obj[i], args.value) ) { return i; }
 			}
 		} else {
-			i = (args.obj.length - args.from) || args.obj.length;
+			var i = (args.obj.length - args.from) || args.obj.length;
 			while ( i-- ) {
 				if ( (l).isEqual(args.obj[i], args.value) ) { return i; }
 			} 
@@ -2250,21 +2203,16 @@ var
 	};
 	
 	/**
-	 * Returns the index of the first occurence of a value in an array or -1 if the value is
-	 * not in the array. Passing `from` will start search after provided index.
 	 * @param {array} obj
 	 * @param {...*} value
 	 * @param {integer} from
 	 * @return {integer}
 	 */
 	(l).indexOf = (l).firstIndexOf = function( obj, value, from ) {
-		var args = (l).fn.__args({0: [obj, [0]], 1:[value, [0,1]], 2:[from, [1,2]]}, [{obj:'array'}, {value:'*'}, {from:'number'}]);
-		return (l).lastIndexOf.call(this, args.obj, args.value, args.from, true);
+		return (l).lastIndexOf(obj, value, from, true);
 	};
 	
 	/**
-	 * Returns a sorted array with values that have been ranked in ascending order as a reuslt
-	 * of running an iterator over a collection. Borrows from underscore.js.
 	 * @param {array} obj
 	 * @param {function} fn
 	 * @param {object|function} scope
@@ -2290,7 +2238,6 @@ var
 	};
 	
 	/**
-	 * Returns a function that will execute after `n` calls.
 	 * @param {function} fn
 	 * @param {integer} n
 	 * @param {boolean} start
@@ -2309,7 +2256,6 @@ var
 	};
 	
 	/**
-	 * Returns a function that can only be called one time.
 	 * @param {function} fn
 	 * @return {function}
 	 */
@@ -2325,7 +2271,6 @@ var
 	};
 	
 	/**
-	 * Returns a function that will execute `n` times.
 	 * @param {function} fn
 	 * @param {integer} n
 	 * @return {function}
@@ -2339,9 +2284,6 @@ var
 	};
 	
 	/**
-	 * Returns a function that has been wrapped in the `wrapper` function. The function that is 
-	 * wrapped is passed as the first argument to `wrapper`. This provides a mechanism for running
-	 * code beofre and/or after `fn` runs.
 	 * @param {function} fn
 	 * @param {function} wrapper
 	 * @return {function}
@@ -2356,9 +2298,7 @@ var
 	};
 	
 	/**
-	 * Returns a function that is the composition of passed functions. The returned value from a
-	 * function is given as the first argument of the next function in a list.
-	 * @param {functions*} Functions to compose
+	 * @param {functions*}
 	 * @return {function}
 	 */
 	(l).compose = function() {
@@ -2371,10 +2311,6 @@ var
 	},
 	
 	/**
-	 * Returns a function that is bound to the context of `scope` when called. Currying of
-	 * an unlimited number of arguments is achieved by passing `fargs` as an array of arguments
-	 * to be passed to the target function. When target function is passed additional arguments
-	 * when the function is called they are added to the end of the curried arguments.
 	 * @param {function} fn
 	 * @param {object|function} scope
 	 * @param {array} fargs
@@ -2390,9 +2326,6 @@ var
 	};
 	
 	/**
-	 * Binds one or more methods to an object of which are specified in `methods` which are
-	 * executed in the context of the target object when invoked. When `methods` is not passed 
-	 * all of the target object's function properties will be bound.
 	 * @param {object|function} obj
 	 * @param {array} methods
 	 * @return {object}
@@ -2410,8 +2343,6 @@ var
 	};
 	
 	/**
-	 * Returns a function that has been partially applied by currying its arguments without changing 
-	 * the execution context (the dynamic `this` value).
 	 * @param {function} fn
 	 * @param {...*} fargs
 	 * @return {function}
@@ -2425,9 +2356,6 @@ var
 	},
 	
 	/**
-	 * Returns a memoized function that caches the functions returned results. When passed a 
-	 * hash function through `hash` will use to determine the key, based on passed arguments
-	 * to the original function. 
 	 * @param {function} fn
 	 * @param {function} hash
 	 * @return {function}
@@ -2443,8 +2371,6 @@ var
 	};
 	
 	/**
-	 * Returns a function that executes after `ms` millaseconds when invoked. Passes `fargs` 
-	 * array as supplied arguments to `fn`.
 	 * @param {function} fn
 	 * @param {integer} ms
 	 * @param {array} fargs
@@ -2458,10 +2384,6 @@ var
 	};
 	
 	/**
-	 * Returns a function that defers invoking `fn` until the current call stack has cleared. This
-	 * is similar to using the setTimeout function with no delay. Arguments passed through `fargs` 
-	 * are passed to `fn`. This method is useful for performing computationaly expensive operations
-	 * that may block the browser UI thread from rendering.
 	 * @param {function} fn
 	 * @param {array} fargs
 	 * @return {function}
@@ -2472,9 +2394,6 @@ var
 	};
 	
 	/**
-	 * Returns a throttled version of `fn` that can only be invoked every `ms` milaseconds. This is
-	 * useful when a function is being called repeatedly where limiting the rate of its invocation
-	 * is a factor. This method borrows heavily from underscore.js.
 	 * @param {function} fn
 	 * @param {number} ms
 	 * @return {function} 
@@ -2505,9 +2424,6 @@ var
 	};
 	
 	/**
-	 * Returns a function that while it is being invoked will not execute until it hasn't been
-	 * called for `n` milaseconds. When `start` is passed `fn` is triggered on the leading vs.
-	 * the trailing edge of the interval. Borrows heavily from underscore.js.
 	 * @param {function} fn
 	 * @param {integer} n
 	 * @param {boolean} start
@@ -2531,9 +2447,6 @@ var
 	};
 	
 	/**
-	 * Returns a targeted object "wrapped" as a property of the library. Calling other 
-	 * chainable methods will continue to return wrapped objects until the end method 
-	 * is called OR a any method that breaks the chain by design.
 	 * @param {object} obj
 	 * @param {string|number} key
 	 * @return {object}
@@ -2544,7 +2457,6 @@ var
 	};
 	
 	/**
-	 * Breaks chaining mode and returns the targeted object
 	 * @return {object}
 	 */
 	(l).end = (l).value = function() {
@@ -2553,7 +2465,6 @@ var
 	};
 	
 	/**
-	 * Return `value`. If `value` is a function invoke it and return its value.
 	 * @param {...*} value
 	 * @return {...*}
 	 */
@@ -2563,17 +2474,14 @@ var
 	};
 	
 	/**
-	 * Relinquish control of the library global to its previous owner and return a reference
-	 * to the boiler.js object.
 	 * @return {object}
 	 */
 	(l).noConflict = function() {
 		root[l] = previousLib;
-		return this;
+		return (l);
 	};
 	
 	/**
-	 * Used as the default iterator function when none is provided for methods that require one.
 	 * @param {...*} value
 	 * @return {...*}
 	 */
@@ -2582,7 +2490,6 @@ var
 	};
 	
 	/**
-	 * Extends specified JavaScript array methods onto the library.
 	 * @return {function}
 	 */
 	(l).each(['sort'],			 
