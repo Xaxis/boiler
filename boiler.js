@@ -20,9 +20,11 @@ var
 	// Library definition
 	(l) = window[l] = function() {
     var args = [];
-    for ( var i = 0; i < arguments.length; i++ ) { args.push(arguments[i]); }
+    for ( var i = 0; i < arguments.length; i++ ) args.push(arguments[i]);
     (l)._global = args;
-    return (l);
+    (l)._wrapped = args[0];
+    if ( args[0] instanceof (l) ) return args[0];
+    if ( !(this instanceof (l)) ) return new (l)(args[0]);
 	};
 
   (l)._version = "0.1.0";
@@ -51,7 +53,7 @@ var
           return 'element';
         case (typeof obj === "object" && {}.toString.call(obj) === "[object Object]") :
           return 'object';
-        case (toString.call(obj) === "[object Array]") :
+        case ({}.toString.call(obj) === "[object Array]") :
           return 'array';
         case (typeof obj === "string" && toString.call(obj) === "[object String]") :
           return 'string';
@@ -167,6 +169,12 @@ var
     }
     args = clone;
 
+    // Boiler.js hack. Merge globally passed arguments
+    if ( typeTest((l)._global) === "array" ) {
+      args = (l)._global.concat(args);
+      (l)._global = false;
+    }
+
     // Detect DEFAULT values in `args` array
     if ( typeTest(types) === "array" ) {
       for ( var t = 0; t < types.length; t++ ) {
@@ -184,12 +192,6 @@ var
           types[d] = typeTest(types[d][0]);
         }
       }
-    }
-
-    // Boiler.js hack. Merge globally passed arguments
-    if ( typeTest((l)._global) === "array" ) {
-      args = (l)._global.concat(args);
-      (l)._global = false;
     }
 
     // Build the `oargs` arguments object
@@ -577,20 +579,6 @@ var
 		}) ? true : false;
 	};
 
-	(l).isFalsy = function() {
-		var args = (l).__args(arguments, {obj:'*'});
-		return ( 
-			(l).isUndefined(args.obj) || 
-			(l).isNull(args.obj) || 
-			(l).isNaN(args.obj) || 
-			args.obj === "" || 
-			args.obj === 0 ||
-			( (l).isBool(args.obj) && Boolean(args.obj) === false ) || 
-			( (l).isPlainObject(args.obj) && (l).len(args.obj) === 0) ||
-			( (l).isArray(args.obj) && args.obj.length === 0 )
-		);
-	};
-
 	(l).isArray = function() {
     var args = (l).__args(arguments, {obj:'*'});
 		return {}.toString.call(args.obj) === "[object Array]";
@@ -602,7 +590,7 @@ var
 	};
 	
 	(l).isBool = function() {
-		var args = (l).__args(arguments, {obj:'*'});
+    var args = (l).__args(arguments, {obj:'*'});
 		return {}.toString.call(args.obj) === "[object Boolean]";
 	};
 	
@@ -668,12 +656,27 @@ var
 	};
 
 	(l).isEmpty = function() {
-    var args = (l).__args(arguments, {obj:'*'});
-		return (l).keys(args.obj).length ? false : true;
+    var args = (l).__args(arguments, {obj:'object|array'});
+    return (
+      ( (l).isPlainObject(args.obj) && (l).len(args.obj) === 0) ||
+      ( (l).isArray(args.obj) && args.obj.length === 0 )
+    );
 	};
 
-	(l).isUnique = function( obj, key ) {
-		var args = (l).__args(arguments, {obj:'object|array', key:'string|number'}),
+  (l).isFalsy = function() {
+    var args = (l).__args(arguments, {obj:'*'});
+    return (
+      (l).isUndefined(args.obj) ||
+      (l).isNull(args.obj) ||
+      (l).isNaN(args.obj) ||
+      args.obj === "" ||
+      args.obj === 0 ||
+      ( (l).isBool(args.obj) && Boolean(args.obj) === false )
+    );
+  };
+
+	(l).isUnique = function() {
+    var args = (l).__args(arguments, {obj:'object|array', key:'string|number'}),
 			target, o;
 		if ( args.key in args.obj ) {
 			target = args.obj[args.key];
@@ -689,59 +692,59 @@ var
 		return true;
 	};
 
-	(l).isEqual = function( obj, objN ) {
-		var o;
-
-		// When not called as stand alone method use globally targeted object
-		if ( (l).isUndefined((l).isEqual.__count) && arguments.length === 1 ) {
-			var args = (l).__args([], [{obj:'object'}]);
-			objN = args.obj;
-			(l).isEqual.__count = 1;
-		} else {
-			(l).isEqual.__count++;
-		}
+	(l).isEqual = function( obj1, obj2 ) {
+		var args = (l).__args({0: [obj1, [0]], 1: [obj2, [1]]}, [{obj1: '*'}, {obj2: '*'}]);
 
 		// Compare objects that don't have nested objects
-		if ( (l).type(obj) === (l).type(objN) && !(l).isPlainObject(obj) && !(l).isArray(obj) ) {
-			switch ( (l).type(obj) ) {
-				case "function" : if ( obj.toString() !== objN.toString() ) {	return false; }						
-					break;
-				case "nan" : if ( obj === objN ) { return false; }
-					break;
+		if ( (l).type(args.obj1) === (l).type(args.obj2) && !(l).isPlainObject(args.obj1) && !(l).isArray(args.obj1) ) {
+			switch ( (l).type(args.obj1) ) {
+				case "function" :
+          if ( args.obj1.toString() !== args.obj2.toString() ) return false;
+          break;
+				case "nan" :
+          if ( args.obj1 === args.obj2 ) return false;
+          break;
 				default:
-					if ( obj !== objN ) {	return false; }					
+					if ( args.obj1 !== args.obj2 ) return false;
 			}
 		
 		// Compare objects that do have nested objects
 		} else {
-		
+
 			// When target or comparison is falsy we compare them directly
-			if ( (l).isFalsy(obj) || (l).isFalsy(objN) ) {
-				if ( obj !== objN ) { return false; }
+			if ( (l).isFalsy(args.obj1) || (l).isFalsy(args.obj2) ) {
+				if ( args.obj1 !== args.obj2 ) return false;
 			}
-			for ( o in obj ) {
+			for ( var o in args.obj1 ) {
 				switch ( true ) {
 					
 					// Catch comparison of element first to prevent infinite loop when caught as objects
-					case ( (l).isElement(obj[o]) ) : if ( obj[o] !== objN[o] ) { return false; }
-						break;
-					case ( typeof obj[o] === "object" ) : if ( !(l).isEqual(obj[o], objN[o]) ) { return false; }
-						break;
-					case ( typeof obj[o] === "function" ) :
-						if ( !(l).isFunction(objN[o]) ) {	return false; }
-						if ( obj[o].toString() !== objN[o].toString() ) {	return false; }
-						break;
+					case ( (l).isElement(args.obj1[o]) ) :
+            if ( args.obj1[o] !== args.obj2[o] ) return false;
+            break;
+          case ( (l).isNaN(args.obj1[o]) ) :
+            if ( !(l).isNaN(args.obj2[o]) ) return false;
+            break;
+					case ( typeof args.obj1[o] === "object" ) :
+            if ( !(l).isEqual(args.obj1[o], args.obj2[o]) ) return false;
+            break;
+					case ( typeof args.obj1[o] === "function" ) :
+						if ( !(l).isFunction(args.obj2[o]) ) return false;
+						if ( args.obj1[o].toString() !== args.obj2[o].toString() ) return false;
+            break;
 					default :
-						if ( obj[o] !== objN[o] ) { return false; }
+						if ( args.obj1[o] !== args.obj2[o] ) return false;
 				}
 			}
 			
-			// Make sure member is in both objects
-			for ( o in objN ) {
-				if ( typeof obj === "undefined" ) { return false; }
-				if ( obj === null || obj === undefined ) { return false; }
-				if ( (l).isFalsy(obj[o]) ) {
-					if ( obj[o] !== objN[o] ) { return false; }	
+			// Reverse comparison of `obj2`
+			for ( var o in args.obj2 ) {
+				if ( typeof args.obj1 === "undefined" ) return false;
+				if ( args.obj1 === null || args.obj1 === undefined ) return false;
+				if ( (l).isFalsy(args.obj1[o]) ) {
+          if ( (l).isNaN(args.obj1[o]) ) {
+            if ( !(l).isNaN(args.obj2[o]) ) return false;
+          } else if ( args.obj1[o] !== args.obj2[o] ) return false;
 				} 
 			}
 		}
@@ -795,13 +798,13 @@ var
 	};
 
 	(l).getByType = function( obj, type, key, deep ) {
-		var args = (l).__args({0:[obj,[0]], 1:[type,[0,1]], 2:[key,[1,2]], 3:[deep,[1,2,3]]}, [{obj:'object'}, {type:'string'}, {key:'string|number'}, {deep:'bool'}]),
-			stack = {}, type = args.type || "*";
+		var args = (l).__args({0:[obj,[0]], 1:[type,[0,1]], 2:[key,[1,2]], 3:[deep,[1,2,3]]}, [{obj:'object'}, {type:["*"]}, {key:'string|number'}, {deep:'bool'}]),
+			stack = {};
 			
 		// Start search starting at key when given
 		if ( args.key ) {
 			if ( !(l).isPlainObject(args.obj = (l).get( args.obj, args.key)) ) {
-				if ( args.type === (l).type(args.obj) || type === "*") {
+				if ( args.type === (l).type(args.obj) || args.type === "*") {
 					args.key = args.key.split(".");
 					stack[args.key[args.key.length-1]] = args.obj; 
 					return stack;
@@ -811,7 +814,7 @@ var
 		
 		// Perform deep search for objects of type			
 		(l).deep(args.obj, function(depth, index, elm) {
-			if ( args.type === (l).type(elm) || type === "*") { stack[index] = elm; }
+			if ( args.type === (l).type(elm) || args.type === "*") { stack[index] = elm; }
 		}, (args.deep ? "*" : 1), true );
 		return stack;
 	};
@@ -900,7 +903,7 @@ var
 
 	(l).parent = function() {
 		var args = (l).__args(arguments, {obj:'object', key:'string|number'}),
-			target = args.key ? (l).get(args.obj, args.key) : (l)._global, objs, o, p, ret;
+			target = args.key ? (l).get(args.obj, args.key) : args.obj, objs, o, p, ret;
 		objs = (l).getByType(args.obj, true);	
 		for ( o in objs ) {
 			if ( (l).isPlainObject(objs[o]) ) {
@@ -935,14 +938,8 @@ var
 	};
 
 	(l).resolve = function() {
-		var args = (l).__args(arguments, {obj:'object', key:'string|number'}),
-			o, ret;
-		if ( !args.key ) {
-			for ( o in args.obj ) {
-				args.key = o;
-				break;
-			}
-		}
+		var args = (l).__args(arguments, {obj:'object', key:'string|number'});
+		if ( !args.key ) args.key = (l).keys(args.obj)[0];
 		return (l).paths(args.obj)[args.key];
 	};
 
@@ -1094,8 +1091,8 @@ var
 
 	(l).clone = function() {
 		var args = (l).__args(arguments, {obj:'object|array'}),
-			ret = (l).isArray(args.obj) ? [] : {}, i;
-		for ( i in args.obj ) {
+			ret = (l).isArray(args.obj) ? [] : {};
+		for ( var i in args.obj ) {
 			if ( (l).isPlainObject(args.obj[i]) || (l).isArray(args.obj[i]) ) {
 				ret[i] = (l).clone(args.obj[i]);
 			} else {
@@ -1106,22 +1103,20 @@ var
 	};
 
 	(l).nest = function() {
-		var args = (l).__args(arguments, {obj:'object'}, {prefix:'string|number'}),
-			prefix = args.prefix ? args.prefix : "", newObj;
-		(l).each(args.obj, function(index, value) {
-			newObj = {};
-			newObj[prefix+index] = value;
+		var args = (l).__args(arguments, {obj:'object', prefix:["", 'string|number']});
+		return (l).each(args.obj, function(index, value) {
+			var newObj = {};
+			newObj[args.prefix+index] = value;
 			args.obj[index] = newObj;
 		});
-		return args.obj;
 	};
 
 	(l).remove = function( obj, key ) {
 		var args = (l).__args({0: [obj, [0]], 1:[key, [0,1]]}, [{obj:'object|array'}, {key:'string|number|array'}]),
-			rest, from, i;
+			rest, from;
 		if ( (l).isPlainObject(args.obj) ) {			
 			if ( (l).isArray(args.key) ) {
-				for ( i = 0; i < args.key.length; i++ ) {
+				for ( var i = 0; i < args.key.length; i++ ) {
 					if ( args.key[i] in args.obj ) { 
 						delete args.obj[args.key[i]];
 					}
@@ -1173,22 +1168,13 @@ var
 	};
 
 	(l).deep = function( obj, fn, fargs, depth, arrs ) {
-		var args = (l).__args({0: [obj, [0]], 1:[fn, [0,1]], 2:[fargs, [1,2]], 3:[depth, [1,2,3]], 4:[arrs, [2,3,4]]}, [{obj:'object|array'}, {fn:'function'}, {fargs:'array'}, {depth:'number'}, {arrs:'bool'}]),
-		  depth = args.depth ? args.depth : "*",
-      res;
-
-		// Place passed object at the beginning of the 'fargs' array
-		args.fargs = args.fargs ? args.fargs : [];
-
-		// Call iterator on every nested object/array to level specified by depth
+		var args = (l).__args({0: [obj, [0]], 1:[fn, [0,1]], 2:[fargs, [1,2,3,4]], 3:[depth, [1,2,3]], 4:[arrs, [2,3,4]]}, [{obj:'object|array'}, {fn:'function'}, {fargs:[[]]}, {depth:["*"]}, {arrs:'bool'}]);
 		for ( var o in args.obj ) {
-			if ( (l).isArray(args.fargs) ) {
-        args.fargs.unshift(depth, o, args.obj[o], args.obj);
-      }
-			res = args.fn.apply(this, args.fargs);
+      args.fargs.unshift(args.depth, o, args.obj[o], args.obj);
+			var res = args.fn.apply(this, args.fargs);
 			if ( res === false ) { break; }
 			if ( (l).isPlainObject(args.obj[o]) || ( (l).isArray(args.obj[o]) && !args.arrs ) ) {
-				args.depth = (depth === "*") ? "*" : depth-1;
+				args.depth = (args.depth === "*") ? "*" : args.depth-1;
 				args.fargs = (l).shift(args.fargs, 4);
 				if ( args.depth ) {
           (l).deep(args.obj[o], args.fn, args.fargs, args.scope, args.depth, args.arrs);
@@ -1208,7 +1194,7 @@ var
 		var args = (l).__args({0: [obj, [0]], 1:[matches, [0,1]], 2:[find, [1,2]]}, [{obj:'object|array'}, {matches:'array|object'}, {find:'bool'}]);
 		return (l)[find ? 'find' : 'filter'](args.obj, function(value, index) {
 			for ( var key in args.matches ) {
-				if (args.matches[key] !== value[key]) { return false; }
+				if (args.matches[key] !== value[key]) return false;
 			}
 			return true;
 		});
@@ -1335,17 +1321,13 @@ var
 
 	(l).howDeep = function() {
 		var args = (l).__args(arguments, {obj:'object', key:'string|number'}),
-			paths, target, o,
 			paths = (l).paths(args.obj),
-			objs = (l).getByType(args.obj, "*", true);
+			objs = (l).getByType(args.obj, true);
 		if ( args.key ) {
 			if ( args.key in paths ) { return paths[args.key].split(".").length; }
 		} else {
-			target = args.obj ? args.obj : (l)._object;
-			for ( o in objs ) {
-				if ( (l).isEqual(target, objs[o]) ) { 
-					return (l).howDeep(o); 
-				}
+			for ( var o in objs ) {
+				if ( (l).isEqual(args.obj, objs[o]) ) return (l).howDeep(o);
 			}
 		}
 	};
@@ -1552,13 +1534,13 @@ var
 				(l).each(args[i], function(index, value) { ret.push(value); });
 			}
 		} else {
-			(l).each(args.obj, function(index, value) { ret.push(value); });
+			(l).each(args[0], function(index, value) { ret.push(value); });
 		}
 		return ret;
 	};
 
 	(l).object = (l).toObject = function() {
-		var args = (l).__args(arguments, {'*':':*'}),
+		var args = (l).__args(arguments, {'*':':array|object|function'}),
 			arrs = [], keys = [], ret = {}, i = 0;
 		(l).each(args, function(index, value) { if ( (l).isArray(value) ) { arrs.push(value); }});
 		if ( arrs.length === 2 ) {
@@ -1572,17 +1554,17 @@ var
 	};
 
 	(l).lastIndexOf = function( obj, value, from, first ) {
-		var args = (l).__args({0: [obj, [0]], 1:[value, [0,1]], 2:[from, [1,2]], 3:[first, [1,2,3]]}, [{obj:'array'}, {value:'*'}, {from:'number'}, {first:'bool'}]), ret;
+		var args = (l).__args({0: [obj, [0]], 1:[value, [0,1]], 2:[from, [1,2]], 3:[first, [1,2,3]]}, [{obj:'array'}, {value:'*'}, {from:'number'}, {first:'bool'}]);
 		if ( args.first ) {
 			var i = args.from || 0;
 			for ( ; i < args.obj.length; i++ ) {
-				if ( (l).isEqual(args.obj[i], args.value) ) { return i; }
+				if ( (l).isEqual(args.obj[i], args.value) ) return i;
 			}
 		} else {
 			var i = (args.obj.length - args.from) || args.obj.length;
 			while ( i-- ) {
-				if ( (l).isEqual(args.obj[i], args.value) ) { return i; }
-			} 
+				if ( (l).isEqual(args.obj[i], args.value) ) return i;
+			}
 		}
 		return -1;
 	};
@@ -1753,18 +1735,13 @@ var
 		};
 	};
 
-	(l).chain = function( obj ) {
-    return (l)(obj).chain();
+	(l).value = function( value ) {
+		return (l).isFunction(value) ? value() : value;
 	};
 
-	(l).end = (l).value = function( obj ) {
-		return (l).chain ? (l).chain() : obj;
-	};
-
-	(l).result = function( value ) {
-		var args = (l).__args([value], [{value:'*'}]);
-		return (l).isFunction(args.value) ? args.value() : value;
-	};
+  (l).result = (l).end = function( obj ) {
+    return this._chain ? (l)(obj).chain() : obj;
+  };
 
 	(l).noConflict = function() {
 		root[l] = previousLib;
@@ -1775,36 +1752,40 @@ var
 		return value;
 	};
 
+  (l).chain = function( obj ) {
+    return (l)(obj).chain();
+  };
+
   // Generate [type]s() methods
   (l).each(['array', 'object', 'function', 'string', 'bool', 'number', 'null', 'undefined', 'date', 'regexp', 'element', 'nan'],
-      function(index, name) {
-        (l)[ name + 's' ] = function() {
-          var args = (l).__args(arguments, {obj:'object', key:'string|number', deep:'bool'});
-          return (l).getByType(args.obj, name, args.key, args.deep);
-        };
-      });
+    function(index, name) {
+      (l)[ name + 's' ] = function() {
+        var args = (l).__args(arguments, {obj:'object', key:'string|number', deep:'bool'});
+        return (l).getByType(args.obj, name, args.key, args.deep);
+      };
+  });
 
   // Generate no[Type]s() methods
   (l).each(['array', 'object', 'function', 'string', 'bool', 'number', 'null', 'undefined', 'date', 'regexp', 'element', 'nan'],
-      function(index, name) {
-        (l)[ 'no' + name.charAt(0).toUpperCase() + name.slice(1) + 's' ] = function() {
-          var args = (l).__args(arguments, {obj:'object', key:'string|number', deep:'bool'}), stack = {};
-          (l).each((l).getByType(args.obj, "*", args.key, args.deep),
-              function(index, value) { if ( !((l).type(value) === name) ) {
-                stack[ index ] = value; }
-              });
-          return stack;
-        };
-      });
+    function(index, name) {
+      (l)[ 'no' + name.charAt(0).toUpperCase() + name.slice(1) + 's' ] = function() {
+        var args = (l).__args(arguments, {obj:'object', key:'string|number', deep:'bool'}), stack = {};
+        (l).each((l).getByType(args.obj, "*", args.key, args.deep),
+            function(index, value) { if ( !((l).type(value) === name) ) {
+              stack[ index ] = value; }
+            });
+        return stack;
+      };
+  });
 
   // Generate [type]Names methods
   (l).each(['array', 'object', 'function', 'string', 'bool', 'number', 'null', 'undefined', 'date', 'regexp', 'element', 'nan'],
-      function(index, name) {
-        (l)[ name + 'Names' ] = function() {
-          var args = (l).__args(arguments, {obj:'object'}, {key:'string|number'}, {deep:'bool'});
-          return (l).keys((l).getByType(args.obj, name, args.key, args.deep)).sort();
-        };
-      });
+    function(index, name) {
+      (l)[ name + 'Names' ] = function() {
+        var args = (l).__args(arguments, {obj:'object', key:'string|number', deep:'bool'});
+        return (l).keys((l).getByType(args.obj, name, args.key, args.deep)).sort();
+      };
+  });
 
   // Defer to native JavaScript methods
 	(l).each(['sort'],			 
@@ -1813,5 +1794,29 @@ var
 				(l)[name] = !(l)[name] ? Array.prototype[name] : (l)[name]; 
 			}
 	});
+
+  // Attach library's methods to its prototype
+  (l).each((l).filter((l).keys((l)), function(value) {
+    if ( !(l).inArray(['_version', '__args'], value) ) return true;
+  }), function(index, name){
+    var fn = (l)[name];
+    (l).prototype[name] = function() {
+      var args = [this._wrapped];
+      Array.prototype.push.apply(args, arguments);
+      return (l).result.call(this, fn.apply((l), args));
+    };
+  });
+
+  // Add OOP methods to the library's prototype
+  (l).extend((l).prototype, {
+    chain: function() {
+      this._chain = true;
+      return this;
+    },
+    end: function() {
+      this._chain = false;
+      return (l)._wrapped;
+    }
+  });
 
 })();
