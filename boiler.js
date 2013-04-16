@@ -1735,22 +1735,22 @@ var
 		};
 	};
 
-	(l).value = function( value ) {
-		return (l).isFunction(value) ? value() : value;
-	};
+  (l).value = function( value ) {
+    return (l).isFunction(value) ? value() : value;
+  };
 
   (l).result = (l).end = function( obj ) {
     return this._chain ? (l)(obj).chain() : obj;
   };
 
-	(l).noConflict = function() {
-		root[l] = previousLib;
-		return (l);
-	};
+  (l).noConflict = function() {
+    root[l] = previousLib;
+    return (l);
+  };
 
-	(l).identity = function( value ) {
-		return value;
-	};
+  (l).identity = function( value ) {
+    return value;
+  };
 
   (l).chain = function( obj ) {
     return (l)(obj).chain();
