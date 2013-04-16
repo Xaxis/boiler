@@ -1788,12 +1788,11 @@ var
   });
 
   // Defer to native JavaScript methods
-	(l).each(['sort'],			 
-		function(index, name) {
-			if ( Array.prototype[name] ) {
-				(l)[name] = !(l)[name] ? Array.prototype[name] : (l)[name]; 
-			}
-	});
+  (l).each(['sort'], function(index, name) {
+    if ( Array.prototype[name] ) {
+      (l)[name] = !(l)[name] ? Array.prototype[name] : (l)[name];
+    }
+  });
 
   // Attach library's methods to its prototype
   (l).each((l).filter((l).keys((l)), function(value) {
