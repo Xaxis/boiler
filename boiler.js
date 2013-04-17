@@ -1,5 +1,5 @@
 /**
- * boiler.js v0.1.0
+ * boiler.js v0.5.0
  * https://github.com/Xaxis/boiler.js
  * http://www.boilerjs.com
  * (c) 2012-2013 Wil Neeley, Trestle Media, LLC.
@@ -27,7 +27,7 @@ var
     if ( !(this instanceof (l)) ) return new (l)(args[0]);
 	};
 
-  (l)._version = "0.1.0";
+  (l)._version = "0.5.0";
 
   (l).__args = function( args, types, rules ) {
 
