@@ -1371,6 +1371,40 @@ var
 		return ret;
 	};
 
+  (l).htmlEncode = function() {
+    var args = (l).__args(arguments, {str:'string'});
+    var entities = {
+      '\u0026'  :   ['&', 'amp'],
+      '\u0022'  :   ['"', 'quot'],
+      '\u0027'  :   ["'", 'apos'],
+      '\u003C'  :   ['<', 'lt'],
+      '\u003E'  :   ['>', 'gt'],
+      '\u00A0'  :   [' ', 'nbsp']
+    }
+    for ( var e in entities ) {
+      var entity = new RegExp(e, 'g');
+      args.str = args.str.replace(entity, '&'+entities[e][1]+';');
+    }
+    return args.str;
+  };
+
+  (l).htmlDecode = function() {
+    var args = (l).__args(arguments, {str:'string'});
+    var entities = {
+      '&quot;'  :   ['\"', 'quot'],
+      '&amp;'   :   ['&', 'amp'],
+      '&apos;'  :   ["'", 'apos'],
+      '&lt;'    :   ['<', 'lt'],
+      '&gt;'    :   ['>', 'gt'],
+      '&nbsp;'  :   [' ', 'nbsp']
+    }
+    for ( var e in entities ) {
+      var entity = new RegExp(e, 'g');
+      args.str = args.str.replace(entity, entities[e][0]);
+    }
+    return args.str;
+  };
+
 	(l).at = function( obj, index ) {
 		var args = (l).__args({0: [obj, [0]], 1: [index, [0,1]]}, [{obj:'array'}, {index:'array|number'}]);
 		return (l).filter(args.obj, function(value, index) {
