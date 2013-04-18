@@ -1120,16 +1120,6 @@ var
 		});
 	};
 
-  (l).denest = function() {
-    var args = (l).__args(arguments, {obj:'object|array'});
-    return (l).each(args.obj, function(index, value) {
-      console.log(value);
-      if ( (l).isPlainObject(value) ) {
-
-      }
-    });
-  };
-
 	(l).remove = function( obj, key ) {
 		var args = (l).__args({0: [obj, [0]], 1:[key, [0,1]]}, [{obj:'object|array'}, {key:'string|number|array'}]),
 			rest, from;
