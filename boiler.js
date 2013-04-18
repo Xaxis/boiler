@@ -18,14 +18,14 @@ var
 	previousLib = root[l];
 	
 	// Library definition
-	(l) = window[l] = function() {
+	(l) = window[l] = function( obj ) {
     var args = [];
-    for ( var i = 0; i < arguments.length; i++ ) args.push(arguments[i]);
+    for ( var i = 0; i < arguments.length; i++ ) { args.push(arguments[i]); }
     (l)._global = args;
-    (l)._wrapped = args[0];
-    if ( args[0] instanceof (l) ) return args[0];
-    if ( !(this instanceof (l)) ) return new (l)(args[0]);
-	};
+    (l)._wrapped = obj;
+    if ( obj instanceof (l) ) return obj;
+    if ( !(this instanceof (l)) ) return new (l)(arguments);
+  };
 
   (l)._version = "0.5.0";
 
@@ -43,27 +43,28 @@ var
      * Method returns a string representative of `obj`'s type.
      */
     var typeTest = function( obj ) {
+      var toString = Object.prototype.toString;
       switch ( true ) {
-        case ({}.toString.call(obj) === "[object Date]" || obj instanceof Date) :
+        case (toString.call(obj) === "[object Date]" || obj instanceof Date) :
           return 'date';
-        case ({}.toString.call(obj) === "[object RegExp]" || obj instanceof RegExp) :
+        case (toString.call(obj) === "[object RegExp]" || obj instanceof RegExp) :
           return 'regexp';
         case (typeof obj === "object" ? obj instanceof HTMLElement :
             typeof obj === "object" && obj.nodeType === 1 && typeof obj.nodeName === "string") :
           return 'element';
-        case (typeof obj === "object" && {}.toString.call(obj) === "[object Object]") :
+        case (typeof obj === "object" && toString.call(obj) === "[object Object]") :
           return 'object';
-        case ({}.toString.call(obj) === "[object Array]") :
+        case (toString.call(obj) === "[object Array]") :
           return 'array';
         case (typeof obj === "string" && toString.call(obj) === "[object String]") :
           return 'string';
-        case ({}.toString.call(obj) === "[object Boolean]") :
+        case (toString.call(obj) === "[object Boolean]") :
           return 'bool';
-        case ({}.toString.call(obj) === "[object Null]") :
+        case (toString.call(obj) === "[object Null]") :
           return 'null';
-        case ({}.toString.call(obj) === "[object Number]") :
+        case (toString.call(obj) === "[object Number]") :
           return 'number';
-        case ({}.toString.call(obj) === "[object Function]") :
+        case (toString.call(obj) === "[object Function]") :
           return 'function';
         case (typeof obj === "object") :
           return 'defaultobject';
@@ -171,7 +172,9 @@ var
 
     // Boiler.js hack. Merge globally passed arguments
     if ( typeTest((l)._global) === "array" ) {
-      args = (l)._global.concat(args);
+      var clone = [];
+      for ( var a in (l)._global[0] ) { clone.push((l)._global[0][a]); }
+      args = clone.concat(args);
       (l)._global = false;
     }
 
@@ -180,6 +183,7 @@ var
       for ( var t = 0; t < types.length; t++ ) {
         for ( var d in types[t] ) {
           if ( typeTest(types[t][d]) === "array" && !(args.length >= types.length) ) {
+            //console.log(d, types[t][d][0]);
             args.push(types[t][d][0]);
             types[t][d] = typeTest(types[t][d][0]);
           }
@@ -752,7 +756,7 @@ var
 	};
 
 	(l).type = function() {
-		var args = (l).__args(arguments, [{obj:'*'}]),
+		var args = (l).__args(arguments, {obj:'*'}),
 			types = "Date RegExp Element Arguments PlainObject Array Function String Bool NaN Finite Number Null Undefined Object".split(" "), i;
 		for ( i = 0; i < types.length; i++ ) {
 			if ( (l)["is"+types[i]].call(this, args.obj) ) {
@@ -798,11 +802,11 @@ var
 	};
 
 	(l).getByType = function( obj, type, key, deep ) {
-		var args = (l).__args({0:[obj,[0]], 1:[type,[0,1]], 2:[key,[1,2]], 3:[deep,[1,2,3]]}, [{obj:'object'}, {type:["*"]}, {key:'string|number'}, {deep:'bool'}]),
+		var args = (l).__args({0:[obj,[0]], 1:[type,[0,1]], 2:[key,[2]], 3:[deep,[0,1,2,3]]}, [{obj:'object'}, {type:["*"]}, {key:'string|number'}, {deep:'bool'}]),
 			stack = {};
-			
+
 		// Start search starting at key when given
-		if ( args.key ) {
+		if ( args.key && args.key !== "*" ) {
 			if ( !(l).isPlainObject(args.obj = (l).get( args.obj, args.key)) ) {
 				if ( args.type === (l).type(args.obj) || args.type === "*") {
 					args.key = args.key.split(".");
@@ -1786,16 +1790,16 @@ var
     return value;
   };
 
-  (l).chain = function( obj ) {
-    return (l)(obj).chain();
+  (l).chain = function() {
+    return (l).apply(this, arguments).chain();
   };
 
   // Generate [type]s() methods
   (l).each(['array', 'object', 'function', 'string', 'bool', 'number', 'null', 'undefined', 'date', 'regexp', 'element', 'nan'],
-    function(index, name) {
-      (l)[ name + 's' ] = function() {
+    function(index, type) {
+      (l)[ type + 's' ] = function() {
         var args = (l).__args(arguments, {obj:'object', key:'string|number', deep:'bool'});
-        return (l).getByType(args.obj, name, args.key, args.deep);
+        return (l).getByType(args.obj, type, args.key, args.deep);
       };
   });
 
@@ -1821,7 +1825,7 @@ var
       };
   });
 
-  // Defer to native JavaScript methods
+  // Override certain native JavaScript methods
   (l).each(['sort'], function(index, name) {
     if ( Array.prototype[name] ) {
       (l)[name] = !(l)[name] ? Array.prototype[name] : (l)[name];
@@ -1848,7 +1852,7 @@ var
     },
     end: function() {
       this._chain = false;
-      return (l)._wrapped;
+      return (l)._wrapped[0];
     }
   });
 
