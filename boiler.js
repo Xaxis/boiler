@@ -802,23 +802,29 @@ var
 	};
 
 	(l).getByType = function( obj, type, key, deep ) {
-		var args = (l).__args({0:[obj,[0]], 1:[type,[0,1]], 2:[key,[2]], 3:[deep,[0,1,2,3]]}, [{obj:'object'}, {type:["*"]}, {key:'string|number'}, {deep:'bool'}]),
-			stack = {};
+		var args = (l).__args({0:[obj,[0]], 1:[type,[1,2,3]], 2:[key,[0,1,2,3]], 3:[deep,[0,1,2,3]]}, [{obj:'object'}, {type:["*"]}, {key:'string|number'}, {deep:'bool'}]),
+			stack = [];
 
 		// Start search starting at key when given
 		if ( args.key && args.key !== "*" ) {
 			if ( !(l).isPlainObject(args.obj = (l).get( args.obj, args.key)) ) {
 				if ( args.type === (l).type(args.obj) || args.type === "*") {
+          var objWrapper = {};
 					args.key = args.key.split(".");
-					stack[args.key[args.key.length-1]] = args.obj; 
+          objWrapper[args.key[args.key.length-1]] = args.obj;
+					stack.push(objWrapper);
 					return stack;
 				}
 			}
 		}
-		
+
 		// Perform deep search for objects of type			
 		(l).deep(args.obj, function(depth, index, elm) {
-			if ( args.type === (l).type(elm) || args.type === "*") { stack[index] = elm; }
+			if ( args.type === (l).type(elm) || args.type === "*") {
+        var objWrapper = {};
+        objWrapper[index] = elm;
+        stack.push(objWrapper);
+      }
 		}, (args.deep ? "*" : 1), true );
 		return stack;
 	};
@@ -877,21 +883,20 @@ var
 
 	(l).call = function( obj, key, fargs, deep, only ) {
 		var args = (l).__args({0:[obj,[0]], 1:[key,[0,1]], 2:[fargs,[1,2]], 3:[deep,[0,1,2,3]], 4:[only,[1,2,3,4]]}, [{obj:'object'}, {key:'string|number'}, {fargs:'array'}, {deep:'bool'}, {only:'string'}]),
-			stack = {}, only = (l).isString(args.only) ? args.only.split(" ") : args.only,
-			fns = (l).functions(args.obj, args.key, args.deep), keys = [];
-		return (l).toObject( keys, (l).filter(fns, function(value, index) {
-			if ( only ) {
+        only = (l).isString(args.only) ? args.only.split(" ") : args.only,
+			fns = (l).functions(args.obj, args.key, args.deep);
+		return (l).filter(fns, function(value, index) {
+      var key = (l).keys(value)[0];
+      if ( only ) {
 				if ( (l).inArray(only, index) ) {
-					keys.push(index);
-					value.apply(this, args.fargs);
+					value[key].apply(this, args.fargs);
 					return true;
 				}
 			} else {
-				keys.push(index);
-				value.apply(this, args.fargs);
+				value[key].apply(this, args.fargs);
 				return true;
 			}
-		}));
+		});
 	};
 
 	(l).invoke = function( obj, fn, fargs ) {
@@ -907,11 +912,11 @@ var
 
 	(l).parent = function() {
 		var args = (l).__args(arguments, {obj:'object', key:'string|number'}),
-			target = args.key ? (l).get(args.obj, args.key) : args.obj, objs, o, p, ret;
-		objs = (l).getByType(args.obj, true);	
-		for ( o in objs ) {
+			target = args.key ? (l).get(args.obj, args.key) : args.obj, objs;
+		objs = (l).getByType(args.obj, true);
+		for ( var o in objs ) {
 			if ( (l).isPlainObject(objs[o]) ) {
-				for ( p in objs[o] ) {
+				for ( var p in objs[o] ) {
 					if ( (l).isEqual(objs[o][p], target) ) {
 						return objs[o];
 					}
@@ -1114,6 +1119,16 @@ var
 			args.obj[index] = newObj;
 		});
 	};
+
+  (l).denest = function() {
+    var args = (l).__args(arguments, {obj:'object|array'});
+    return (l).each(args.obj, function(index, value) {
+      console.log(value);
+      if ( (l).isPlainObject(value) ) {
+
+      }
+    });
+  };
 
 	(l).remove = function( obj, key ) {
 		var args = (l).__args({0: [obj, [0]], 1:[key, [0,1]]}, [{obj:'object|array'}, {key:'string|number|array'}]),
@@ -1808,11 +1823,12 @@ var
     function(index, name) {
       (l)[ 'no' + name.charAt(0).toUpperCase() + name.slice(1) + 's' ] = function() {
         var args = (l).__args(arguments, {obj:'object', key:'string|number', deep:'bool'}), stack = {};
-        (l).each((l).getByType(args.obj, "*", args.key, args.deep),
-            function(index, value) { if ( !((l).type(value) === name) ) {
-              stack[ index ] = value; }
-            });
-        return stack;
+        return (l).filter((l).getByType(args.obj, "*", args.key, args.deep),
+            function(index, value) {
+              if ( !((l).type(value) === name) ) {
+                return value;
+            }
+        });
       };
   });
 
@@ -1821,7 +1837,11 @@ var
     function(index, name) {
       (l)[ name + 'Names' ] = function() {
         var args = (l).__args(arguments, {obj:'object', key:'string|number', deep:'bool'});
-        return (l).keys((l).getByType(args.obj, name, args.key, args.deep)).sort();
+        var names = [];
+        (l).filter((l).getByType(args.obj, name, args.key, args.deep), function(value) {
+          names.push((l).keys(value)[0]);
+        });
+        return names;
       };
   });
 
