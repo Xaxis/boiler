@@ -1664,7 +1664,7 @@ var
 	};
 
 	(l).compose = function() {
-		var args = fns = (l).__args(arguments, {'*':'fns:function'});
+		var fns = (l).toArray((l).__args(arguments, {'*':'fns:function'}));
 		return function() {
 			var args = arguments;
 			for ( var i = fns.length - 1; i >= 0; i-- ) { args = [fns[i].apply(this, args)]; }
@@ -1749,18 +1749,18 @@ var
 	};
 
 	(l).debounce = function() {
-		var args = (l).__args(arguments, {fn:'function', n:'number', start:'bool'}),
+		var args = (l).__args(arguments, {fn:'function', n:'number', edge:'bool'}),
 			res, timeout;
 		return function() {
 			var scope = this, fargs = arguments;
 			var next = function() {
 				timeout = null;
-				if ( !args.start ) { result = args.fn.apply(scope, fargs); }
+				if ( !args.edge ) res = args.fn.apply(scope, fargs);
 			};
-			var call = args.start && !timeout;
+			var ready = args.edge && !timeout;
 			clearTimeout(timeout);
 			timeout = setTimeout(next, args.n);
-			if ( call ) { res = args.fn.apply(scope, fargs); }
+			if ( ready ) res = args.fn.apply(scope, fargs);
 			return res;
 		};
 	};
