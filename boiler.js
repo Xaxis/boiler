@@ -1712,15 +1712,16 @@ var
 	};
 
 	(l).delay = function() {
-		var args = (l).__args(arguments, {fn:'function', ms:'number', fargs:'array'});
+		var args = (l).__args(arguments, {fn:'function', ms:'number'});
 		return function() {
-			setTimeout(function() { return args.fn.apply(null, args.fargs); }, args.ms);
+      var fargs = arguments;
+			setTimeout(function() { return args.fn.apply(null, fargs); }, args.ms);
 		}
 	};
 
 	(l).defer = function() {
-		var args = (l).__args(arguments, {fn:'function', fargs:'array'});
-		return (l).delay.call((l), args.fn, 1, args.fargs);
+		var args = (l).__args(arguments, {fn:'function'});
+		return (l).delay.call(this, args.fn, 0);
 	};
 
 	(l).throttle = function() {
