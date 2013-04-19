@@ -6,4 +6,4 @@ with other libraries. Boiler IS NOT a DOM manipulation based library. In fact Bo
 useful.
 
 For more information, API, and Downloads:
-http://boilerjs.com
+http://www.boilerjs.com
