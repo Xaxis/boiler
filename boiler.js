@@ -941,7 +941,7 @@ var
 		return (l).paths(args.obj)[args.key];
 	};
 
-	(l).build = (l).module = function( obj, ns, members, deep, fargs ) {
+	(l).module = (l).build = function( obj, ns, members, deep, fargs ) {
 		var args = (l).__args({
 			0:[obj,[0]], 
 			1:[ns,[0,1]], 
@@ -965,17 +965,17 @@ var
 		// Build namespace object attaching it to the previous object recursively
 		obj[ns] = obj[ns] || {};
 		if ( list.length ) { 
-			(l).build( obj[ns], list.join('.'), args.members, args.deep ); 
+			(l).module( obj[ns], list.join('.'), args.members, args.deep );
 		}
 
 		// Build namespace object with members
 		if ( args.ns.split(args.ns.length-1)[0] === ns && (l).isPlainObject(args.members) ) {	
 			
 			// Merge newly created object with members object
-			obj[ns] = (l).extend(obj[ns], args.members);
+			obj[ns] = (l).extend(obj[ns], args.members, args.deep);
 
-			// Extend newly created object with elements in the members object
-			(l).extend(obj, obj[ns], args.deep);
+		  // Extend newly created object with elements in the members object
+		  //(l).extend(obj, obj[ns], args.deep);
 					
 			// When members contains the `_extends` property
 			if ( '_extends' in obj[ns] ) {
@@ -998,50 +998,55 @@ var
 					
 					// Get the parent objects non object literal members
 					members = (l).getByType(obj[ns], "*", args.deep);
-					for ( o in obj[ns] ) {
-						
-						// When we encounter an object literal who's key is in the `_exposed` array
-						if ( (l).isPlainObject(obj[ns][o]) && (l).inArray(exposures, o) ) {
-						
-							// Bind all functions scopes
-							(l).bindAll(obj[o], (l).chain(obj[ns]).functions(args.deep).end());
-							
-							// Inherit properties from parent
-							(l).extend(obj[ns][o], members, args.deep);
-						}
-					}
-				}		
+
+          // For every object extend the properties in the object referenced by exposures
+          for ( o in obj[ns] ) {
+            if ( !(l).inArray(exposures, o) ) {
+              (l).each(members, function(index, elm) {
+
+                // When we encounter an object literal who's key is in the `_exposed` array
+                if ( (l).isPlainObject(obj[ns][o]) && (l).inArray(exposures, o) ) {
+
+                  // Inherit properties from parent
+                  (l).extend(obj[ns][o], elm, args.deep);
+                }
+              });
+            }
+          }
+				}
 			}
 			
 			// When members contains the `_exposed` property
 			if ( '_retract' in obj[ns] ) {
 				var retractions = obj[ns]['_retract'];
 				members = (l).objects(obj[ns], args.deep);
-				
+
 				// Retract all children members referenced in the array
 				if ( (l).isArray(obj[ns]['_retract']) ) {
 					delete obj[ns]['_retract'];
-					
+
 					// Get the children object members
-					for ( o in members ) {
-	
-						// If we encounter a retraction, parent inherits from children
-						if ( (l).inArray(retractions, o) ) {
-							(l).extend(obj[ns], members[o], args.deep);
-						}
-					}
+          (l).each(members, function(index, elm) {
+            for ( o in elm ) {
+
+              // If we encounter a retraction, parent "inherits" from children
+              if ( (l).inArray(retractions, o) ) (l).extend(obj[ns], elm[o], args.deep);
+            }
+          });
 				
 				// Retract only the children members targeted in the retraction object
 				}	else if ( (l).isPlainObject(obj[ns]['_retract']) ) {
 					delete obj[ns]['_retract'];
-					
+
 					// Get members that exist at referenced targets
 					var targets = [];
-					for ( o in retractions ) {
-						if ( (l).isArray(retractions[o]) ) {
-							targets.push((l).get(members, o));
-						}
-					}
+          (l).each(members, function(index, elm) {
+            for ( o in retractions ) {
+              if ( (l).isArray(retractions[o]) ) {
+                targets.push((l).get(elm, o));
+              }
+            }
+          });
 					
 					// Selectively inherit from children
 					targets.unshift(obj[ns], args.deep);
@@ -1049,7 +1054,6 @@ var
 				}
 			}
 		}
-		
 		return obj;
 	};
 
