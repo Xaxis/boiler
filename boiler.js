@@ -1572,7 +1572,8 @@
       '\u0027' : ["'", 'apos'],
       '\u003C' : ['<', 'lt'],
       '\u003E' : ['>', 'gt'],
-      '\u00A0' : [' ', 'nbsp']
+      '\u00A0' : [' ', 'nbsp'],
+      '/'      : ['/', '#x2F']
     }
     for (var e in entities) {
       var entity = new RegExp(e, 'g');
@@ -1589,7 +1590,8 @@
       '&apos;' : ["'", 'apos'],
       '&lt;' : ['<', 'lt'],
       '&gt;' : ['>', 'gt'],
-      '&nbsp;' : [' ', 'nbsp']
+      '&nbsp;' : [' ', 'nbsp'],
+      '&#x2F;' : ['/', 'frasl']
     }
     for (var e in entities) {
       var entity = new RegExp(e, 'g');
