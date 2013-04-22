@@ -942,19 +942,7 @@ var
 	};
 
 	(l).module = (l).build = function( obj, ns, members, deep, fargs ) {
-		var args = (l).__args({
-			0:[obj,[0]], 
-			1:[ns,[0,1]], 
-			2:[members,[1,2,3,4]], 
-			3:[deep,[2,3,4,5]],
-			4:[fargs,[2,3,4,5]]},
-    [
-			{obj:'object|defaultobject|function'},
-			{ns:'string|number'},
-			{members:'object'},
-			{deep:'bool'},
-			{fargs:'array'}
-		]);
+		var args = (l).__args({0:[obj,[0]], 1:[ns,[0,1]], 2:[members,[1,2,3,4]], 3:[deep,[2,3,4,5]]},[{obj:'object|defaultobject|function'}, {ns:'string|number'}, {members:'object'}, {deep:'bool'}]);
 
 		// When a namespace string is not provided throw an error
 		if ( !args.ns ) { throw Error('_.build(): Argument `ns` is missing or not a string.'); }
@@ -968,54 +956,62 @@ var
 			(l).module( obj[ns], list.join('.'), args.members, args.deep );
 		}
 
-		// Build namespace object with members
+		// Merge `members` object and its constructs onto namespace object `obj`
 		if ( args.ns.split(args.ns.length-1)[0] === ns && (l).isPlainObject(args.members) ) {	
 			
 			// Merge newly created object with members object
 			obj[ns] = (l).extend(obj[ns], args.members, args.deep);
 
-		  // Extend newly created object with elements in the members object
-		  //(l).extend(obj, obj[ns], args.deep);
-					
 			// When members contains the `_extends` property
 			if ( '_extends' in obj[ns] ) {
 				if ( (l).isArray(obj[ns]['_extends']) ) {
 					var extensions = obj[ns]['_extends'];
 					delete obj[ns]['_extends'];
 					extensions.push(args.deep);
-					
+
 					// Extend newly created object with objects in the extensions array
 					extensions.unshift(obj[ns]);
 					(l).extend.apply(this, extensions);
 				}
 			}
-			
+
 			// When members contains the `_retract` property
 			if ( '_exposed' in obj[ns] ) {
-				if ( (l).isArray(obj[ns]['_exposed']) ) {
-					var exposures = obj[ns]['_exposed'];
-					delete obj[ns]['_exposed'];
-					
-					// Get the parent objects non object literal members
-					members = (l).getByType(obj[ns], "*", args.deep);
 
-          // For every object extend the properties in the object referenced by exposures
-          for ( o in obj[ns] ) {
-            if ( !(l).inArray(exposures, o) ) {
-              (l).each(members, function(index, elm) {
+        // Get the keys of objects to be exposed upon
+        var exposures = obj[ns]['_exposed'];
+        delete obj[ns]['_exposed'];
 
-                // When we encounter an object literal who's key is in the `_exposed` array
-                if ( (l).isPlainObject(obj[ns][o]) && (l).inArray(exposures, o) ) {
+        // Get the objects to expose properties on
+        var exposedObjects = [];
+        for ( var e in exposures ) {
+          var eObj = (l).get(obj[ns], exposures[e]);
+          if ( (l).isPlainObject(eObj) ) {
+            exposedObjects.push(eObj);
+          }
+        }
 
-                  // Inherit properties from parent
-                  (l).extend(obj[ns][o], elm, args.deep);
-                }
-              });
+        // Get the properties to extend onto the exposures
+        var members = {};
+        var propsArray = (l).getByType(obj[ns], "*", args.deep);
+        for ( var o in propsArray ) {
+          members[ o ] = propsArray[o];
+        }
+
+        // Extend the exposed objects with properties
+        for ( var o in obj[ns] ) {
+          if ( (l).isPlainObject(obj[ns][o]) && (l).inArray(exposures, o) ) {
+            for ( var e in members ) {
+              var prop = members[e];
+
+              if ( !(o in prop) ) {
+                (l).extend(obj[ns][o], prop);
+              }
             }
           }
-				}
+        }
 			}
-			
+
 			// When members contains the `_exposed` property
 			if ( '_retract' in obj[ns] ) {
 				var retractions = obj[ns]['_retract'];
@@ -1033,7 +1029,7 @@ var
               if ( (l).inArray(retractions, o) ) (l).extend(obj[ns], elm[o], args.deep);
             }
           });
-				
+
 				// Retract only the children members targeted in the retraction object
 				}	else if ( (l).isPlainObject(obj[ns]['_retract']) ) {
 					delete obj[ns]['_retract'];
@@ -1047,7 +1043,7 @@ var
               }
             }
           });
-					
+
 					// Selectively inherit from children
 					targets.unshift(obj[ns], args.deep);
 					(l).extend.apply(obj[ns], targets);
