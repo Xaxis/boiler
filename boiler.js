@@ -8,13 +8,13 @@
 (function () {
   var
 
-      // Library reference
+  // Library reference
       l = "_",
 
-      // Global root object (window or global)
+  // Global root object (window or global)
       root = this,
 
-      // Save conflict reference
+  // Save conflict reference
       previousLib = root[l];
 
   // Library definition
@@ -181,10 +181,13 @@
       args = clone.concat(args);
       (l)._global = false;
     }
+
+    // Detect DEFAULT values in `args` array
     if (typeTest(types) === "array") {
       for (var t = 0; t < types.length; t++) {
         for (var d in types[t]) {
           if (typeTest(types[t][d]) === "array" && !(args.length >= types.length)) {
+            //console.log(d, types[t][d][0]);
             args.push(types[t][d][0]);
             types[t][d] = typeTest(types[t][d][0]);
           }
@@ -198,11 +201,17 @@
         }
       }
     }
+
+    // Build the `oargs` arguments object
     for (var a = 0; a < args.length; a++) {
+
+      // Iterate over each definition on all arguments
       for (var d = 0; d < defs.length; d++) {
         var mtypes = [];
         var name = defs[d].name;
         var type = defs[d].type;
+
+        // When an UNKNOWN NUMBER of arguments passed...
         if (name === "*") {
           var mtype = type.split(":");
           name = mtype[0] + a;
@@ -220,6 +229,8 @@
               oargs[ name ] = args[a];
             }
           }
+
+          // When definition has MULTIPLE types...
         } else if (( mtypes = type.split("|")).length > 1) {
           for (var n = 0; n < mtypes.length; n++) {
             type = mtypes[n];
@@ -239,16 +250,38 @@
               }
             }
           }
+
+          // When definition has a SINGLE type...
         } else {
+
+          // ORDER RULES to validate against
           if (defs[d].order.length >= 1) {
-            if ((type === typeTest(args[a]) || type === "*" )
+
+            if ((
+
+              // When the type of an argument matches an allowed type OR any type
+                type === typeTest(args[a]) || type === "*" )
+
+              // AND when the pass order definition matches the order in which the argument was passed
                 && inArray(defs[d].order, parseInt(a))
+
+              // AND when the property has not yet been set on the 'oargs' object
                 && !(name in oargs)
-                && !inArray(oargs.__set__, a)) {
+
+              // AND when the argument has not been set yet
+                && !inArray(oargs.__set__, a)
+
+                ) {
+
+              // Set the oargs object with the current argument
               oargs[ name ] = args[a];
+
+              // Push the argument index into the __set__ array so we know not to set it again
               oargs.__set__.push(a);
               break;
             }
+
+            // No ORDER RULES to validate against
           } else {
             if (type === typeTest(args[a]) || type === "*") {
               oargs[ name ] = args[a];
@@ -258,14 +291,22 @@
         }
       }
     }
+
+    // Remove the __set__ property
     delete oargs.__set__;
+
+    // Set the length property
     Object.defineProperty(oargs, "length", {
       enumerable : false,
       configurable : true,
       writable : true,
       value : len(oargs)
     });
+
+    // Configure arguments object with rules
     if (typeTest(rules) === "object") {
+
+      // Remove the `length` property
       if ('length' in rules) {
         if (!rules.length) {
           Object.defineProperty(oargs, "length", {
@@ -277,6 +318,8 @@
           delete oargs.length;
         }
       }
+
+      // Convert `oargs` to an array
       if ('array' in rules) {
         oargs = [];
         for (var a in args) {
@@ -525,7 +568,7 @@
         ]),
         copy = args.obj, i = 0, base, keys, vals;
 
-    // When reducing from right, flip the list 
+    // When reducing from right, flip the list
     if (args.right) {
       if ((l).isPlainObject(copy)) {
         keys = (l).keys(copy).reverse();
@@ -816,7 +859,7 @@
     var args = (l).__args(arguments, {obj : 'object', key : 'string|number'}),
         ns, ret;
 
-    // Split property key into namespace		
+    // Split property key into namespace
     ns = ( (l).type(args.key) !== "string" ) ? false : args.key.split(".");
 
     // When no key just return the target object
@@ -868,7 +911,7 @@
       }
     }
 
-    // Perform deep search for objects of type			
+    // Perform deep search for objects of type
     (l).deep(args.obj, function (depth, index, elm) {
       if (args.type === (l).type(elm) || args.type === "*") {
         var objWrapper = {};
@@ -1753,12 +1796,25 @@
           {step : 'number'}
         ]),
         i = 0, ret = [];
-    len = Math.max(Math.ceil((args.stop - args.start) / args.step), 0);
+    var len = Math.max(Math.ceil((args.stop - args.start) / args.step), 0);
     while (i < len) {
       ret[ i++ ] = args.start;
       args.start += args.step;
     }
     return ret;
+  };
+
+  (l).uniqueId = function() {
+    var args = (l).__args(arguments, {prefix:["", 'number|string']}),
+        self = (l).uniqueId;
+    if ( !('uuids' in self) ) self.uuids = [];
+    var newId = args.prefix + Math.floor((1 + Math.random()) * 0x10000).toString(10).substring(1);
+    if ( !(l).inArray(self.uuids, newId) ) {
+      self.uuids.push(newId);
+      return newId;
+    } else {
+      (l).uniqueId();
+    }
   };
 
   (l).array = (l).toArray = function () {
