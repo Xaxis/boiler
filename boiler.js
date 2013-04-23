@@ -83,9 +83,7 @@
      */
     var inArray = function (arr, val) {
       for (var i = 0; i < arr.length; i++) {
-        if (arr[i] === val) {
-          return true;
-        }
+        if (arr[i] === val) return true;
       }
       return false;
     };
@@ -300,7 +298,6 @@
         }
       }
     }
-
     return oargs;
   };
 
@@ -310,16 +307,12 @@
     if ((l).type(args.obj) === "object") {
       for (key in args.obj) {
         value = args.fn.call(args.scope || args.obj[key], key, args.obj[key], args.obj);
-        if (value === false) {
-          break;
-        }
+        if (value === false) break;
       }
     } else if ((l).type(args.obj) === "array") {
       for (i = 0; i < args.obj.length; i++) {
         value = args.fn.call(args.scope || args.obj[i], i, args.obj[i], args.obj);
-        if (value === false) {
-          break;
-        }
+        if (value === false) break;
       }
     }
     return args.obj;
@@ -394,9 +387,7 @@
       {scope : 'function|object|defaultobject'}
     ]), ret = true;
     (l).each(args.obj, function (index, value) {
-      if (!args.fn.call(args.scope ? args.scope : this, value, index)) {
-        ret = false;
-      }
+      if (!args.fn.call(args.scope ? args.scope : this, value, index)) ret = false;
     });
     return ret;
   };
@@ -409,9 +400,7 @@
         ]),
         ret = true;
     (l).each(args.obj, function (index, value) {
-      if (args.fn.call(args.scope ? args.scope : this, value, index)) {
-        ret = false;
-      }
+      if (args.fn.call(args.scope ? args.scope : this, value, index)) ret = false;
     });
     return ret;
   };
@@ -424,9 +413,7 @@
         ]),
         ret = 0;
     (l).each(args.obj, function (index, value) {
-      if (args.fn.call(args.scope ? args.scope : this, value, index)) {
-        ret++;
-      }
+      if (args.fn.call(args.scope ? args.scope : this, value, index)) ret++;
     });
     return ret;
   };
@@ -471,9 +458,7 @@
     }
     var list = (l).isString(args.list) ? args.list.split(" ") : args.list;
     (l).each(list, function (index, value) {
-      if ((l).keyExists(args.obj, value)) {
-        ret.push(args.obj[value]);
-      }
+      if ((l).keyExists(args.obj, value)) ret.push(args.obj[value]);
     });
     return ret;
   };
@@ -486,9 +471,7 @@
         ret = [];
     var list = list = (l).isString(args.list) ? args.list.split(" ") : args.list;
     (l).each(args.obj, function (index, value) {
-      if (!(l).inArray(list, index)) {
-        ret.push(value);
-      }
+      if (!(l).inArray(list, index)) ret.push(value);
     });
     return ret;
   };
@@ -497,9 +480,7 @@
     var args = (l).__args(arguments, {obj : 'object|array'}),
         vals = (l).isPlainObject(args.obj) ? (l).values(args.obj) : args.obj, minVals = [];
     (l).each(vals, function (index, value) {
-      if ((l).isNumber(value)) {
-        minVals.push(value);
-      }
+      if ((l).isNumber(value)) minVals.push(value);
     });
     return Math.min.apply(this, minVals);
   };
@@ -508,9 +489,7 @@
     var args = (l).__args(arguments, {obj : 'object|array'}),
         vals = (l).isPlainObject(args.obj) ? (l).values(args.obj) : args.obj, maxVals = [];
     (l).each(vals, function (index, value) {
-      if ((l).isNumber(value)) {
-        maxVals.push(value);
-      }
+      if ((l).isNumber(value)) maxVals.push(value);
     });
     return Math.max.apply(this, maxVals);
   };
@@ -555,9 +534,7 @@
       return value;
     });
     (l).each(copy, function (index, value) {
-      if (i !== 0) {
-        base = args.fn.call(args.scope || this, base, value, index);
-      }
+      if (i !== 0) base = args.fn.call(args.scope || this, base, value, index);
       i++;
     });
     return (l).isArray(base) ? base[0] : base;
@@ -569,7 +546,7 @@
 
   (l).least = function () {
     var args = (l).__args(arguments, {obj : 'object|array', fn : 'function|string', most : 'bool'}),
-        copy = args.obj, comparator, result, ret, leastValue;
+        comparator, result, ret, leastValue;
     if ((l).isString(args.fn)) {
       result = (l).countBy(args.obj, function (p) {
         return p[args.fn];
@@ -742,9 +719,7 @@
       target = args.obj[args.key];
       args.key = args.key.toString();
       for (o in args.obj) {
-        if ((l).isEqual(target, args.obj[o]) && o !== args.key) {
-          return false;
-        }
+        if ((l).isEqual(target, args.obj[o]) && o !== args.key) return false;
       }
     } else {
       throw Error('isUnique(): Target `key` not in collection.');
@@ -851,9 +826,7 @@
       } else {
         for (var o in args.obj) {
           if ((l).isPlainObject(args.obj[o])) {
-            if (ret = (l).get(args.obj[o], args.key)) {
-              return ret;
-            }
+            if (ret = (l).get(args.obj[o], args.key)) return ret;
           }
         }
       }
@@ -936,9 +909,7 @@
       if (( obj = objs[i] ) !== null) {
         for (key in obj) {
           copy = obj[key];
-          if (target === copy) {
-            continue;
-          }
+          if (target === copy) continue;
           target[ key ] = copy;
         }
       }
@@ -992,9 +963,7 @@
     for (var o in objs) {
       if ((l).isPlainObject(objs[o])) {
         for (var p in objs[o]) {
-          if ((l).isEqual(objs[o][p], target)) {
-            return objs[o];
-          }
+          if ((l).isEqual(objs[o][p], target)) return objs[o];
         }
       }
     }
@@ -1018,9 +987,7 @@
     for (o in args.obj) {
       pathObj[o] = (nextKey + "." + lastKey + "." + o).replace(/^[.]+/g, "");
       key = nextKey + "." + lastKey;
-      if ((l).isPlainObject(args.obj[o])) {
-        (l).paths(args.obj[o], pathObj, o, key);
-      }
+      if ((l).isPlainObject(args.obj[o])) (l).paths(args.obj[o], pathObj, o, key);
     }
     return pathObj;
   };
@@ -1038,18 +1005,14 @@
       {members : 'object|function'},
       {deep : 'bool'}
     ]);
-    if (!args.ns) {
-      throw Error('_.build(): Argument `ns` is missing or not a string.');
-    }
+    if (!args.ns) throw Error('_.build(): Argument `ns` is missing or not a string.');
     var members, o, list = args.ns ? args.ns.split(".") : [];
     var ns = list ? list.shift() : (args.ns || "");
     obj = args.obj || {};
 
     // Build namespace object attaching it to the previous object recursively
     obj[ns] = obj[ns] || {};
-    if (list.length) {
-      (l).module(obj[ns], list.join('.'), args.members, args.deep);
-    }
+    if (list.length) (l).module(obj[ns], list.join('.'), args.members, args.deep);
 
     // Merge `members` object and its constructs onto namespace object `obj`
     if (args.ns.split(args.ns.length - 1)[0] === ns && (l).isPlainObject(args.members)) {
@@ -1081,9 +1044,7 @@
         var exposedObjects = [];
         for (var e in exposures) {
           var eObj = (l).get(obj[ns], exposures[e]);
-          if ((l).isPlainObject(eObj)) {
-            exposedObjects.push(eObj);
-          }
+          if ((l).isPlainObject(eObj)) exposedObjects.push(eObj);
         }
 
         // Get the properties to extend onto the exposures
@@ -1099,9 +1060,7 @@
             for (var e in members) {
               var prop = members[e];
 
-              if (!(o in prop)) {
-                (l).extend(obj[ns][o], prop);
-              }
+              if (!(o in prop)) (l).extend(obj[ns][o], prop);
             }
           }
         }
@@ -1133,9 +1092,7 @@
           var targets = [];
           (l).each(members, function (index, elm) {
             for (o in retractions) {
-              if ((l).isArray(retractions[o])) {
-                targets.push((l).get(elm, o));
-              }
+              if ((l).isArray(retractions[o])) targets.push((l).get(elm, o));
             }
           });
 
@@ -1154,9 +1111,7 @@
       {key : 'string|number'},
       {value : '*'}
     ]);
-    if (!(args.key in args.obj)) {
-      args.obj[args.key] = args.value;
-    }
+    if (!(args.key in args.obj)) args.obj[args.key] = args.value;
     return args.obj;
   };
 
@@ -1176,9 +1131,7 @@
       {value : '*'}
     ]);
     (l).each(args.obj, function (index, value) {
-      if ((l).isUndefined(value)) {
-        args.obj[index] = args.value;
-      }
+      if ((l).isUndefined(value)) args.obj[index] = args.value;
     });
     return args.obj;
   };
@@ -1192,9 +1145,7 @@
       if (!(index in args.obj)) {
         args.obj[ index ] = value;
       } else if (index in args.obj) {
-        if ((l).isNull(args.obj[index]) || (l).isUndefined(args.obj[index])) {
-          args.obj[ index ] = value;
-        }
+        if ((l).isNull(args.obj[index]) || (l).isUndefined(args.obj[index])) args.obj[ index ] = value;
       }
     });
     return args.obj;
@@ -1231,14 +1182,10 @@
     if ((l).isPlainObject(args.obj)) {
       if ((l).isArray(args.key)) {
         for (var i = 0; i < args.key.length; i++) {
-          if (args.key[i] in args.obj) {
-            delete args.obj[args.key[i]];
-          }
+          if (args.key[i] in args.obj) delete args.obj[args.key[i]];
         }
       } else {
-        if (args.key in args.obj) {
-          delete args.obj[args.key];
-        }
+        if (args.key in args.obj) delete args.obj[args.key];
       }
     } else if ((l).isArray(args.obj)) {
       from = parseInt(args.key);
@@ -1304,15 +1251,11 @@
     for (var o in args.obj) {
       args.fargs.unshift(args.depth, o, args.obj[o], args.obj);
       var res = args.fn.apply(this, args.fargs);
-      if (res === false) {
-        break;
-      }
+      if (res === false) break;
       if ((l).isPlainObject(args.obj[o]) || ( (l).isArray(args.obj[o]) && !args.arrs )) {
         args.depth = (args.depth === "*") ? "*" : args.depth - 1;
         args.fargs = (l).tail(args.fargs, 4);
-        if (args.depth) {
-          (l).deep(args.obj[o], args.fn, args.fargs, args.scope, args.depth, args.arrs);
-        }
+        if (args.depth) (l).deep(args.obj[o], args.fn, args.fargs, args.scope, args.depth, args.arrs);
       }
       args.fargs = (l).tail(args.fargs, 4);
     }
@@ -1388,8 +1331,7 @@
       key = (l).isString(args.map) ? value[args.map] : args.map.call(args.scope || this, value, index, args.obj);
       if ((l).has(res, key)) {
         res[key].push(value);
-      }
-      else {
+      } else {
         res[key] = [value];
       }
     });
@@ -1463,9 +1405,7 @@
     var args = (l).__args([obj, deep], {obj : 'object|array', deep : 'bool'}),
         count = count ? count : 0, o;
     (l).each((l).values(args.obj), function (index, value) {
-      if (!(l).isFalsy(value)) {
-        count += 1;
-      }
+      if (!(l).isFalsy(value)) count += 1;
     });
     if (args.deep) {
       for (o in args.obj) {
@@ -1487,9 +1427,7 @@
         paths = (l).paths(args.obj),
         objs = (l).getByType(args.obj, true);
     if (args.key) {
-      if (args.key in paths) {
-        return paths[args.key].split(".").length;
-      }
+      if (args.key in paths) return paths[args.key].split(".").length;
     } else {
       for (var o in objs) {
         if ((l).isEqual(args.obj, objs[o])) return (l).howDeep(o);
@@ -1580,14 +1518,10 @@
     return (l).filter(args.obj, function (value, index) {
       if ((l).isArray(args.index)) {
         for (var i = 0; i < args.index.length; i++) {
-          if (args.index[i] === index) {
-            return true;
-          }
+          if (args.index[i] === index) return true;
         }
       } else if ((l).isNumber(args.index)) {
-        if (index === args.index) {
-          return true;
-        }
+        if (index === args.index) return true;
       }
       return false;
     });
@@ -1633,9 +1567,7 @@
     var args = (l).__args(arguments, {obj : 'array', all : 'bool'});
     return (l).filter(args.obj, function (value) {
       if (!args.all) {
-        if (!(l).isFalsy(value) || ( ( (l).isPlainObject(value) || (l).isArray(value) ) && (l).len(value) === 0 )) {
-          return value;
-        }
+        if (!(l).isFalsy(value) || ( ( (l).isPlainObject(value) || (l).isArray(value) ) && (l).len(value) === 0 )) return value;
       } else if (!(l).isFalsy(value) && !(l).isEmpty(value)) {
         return value;
       }
@@ -1649,26 +1581,18 @@
       switch (type) {
         case "array" :
           if (n === "*") {
-            if (!(l).isArray(elm)) {
-              ret.push(elm);
-            }
+            if (!(l).isArray(elm)) ret.push(elm);
           } else if (depth > 1) {
-            if (!(l).isArray(elm)) {
-              ret.push(elm);
-            }
+            if (!(l).isArray(elm)) ret.push(elm);
           } else {
             ret.push(elm);
           }
           break;
         case "object" :
           if (n === "*") {
-            if (!(l).isPlainObject(elm)) {
-              ret[index] = elm;
-            }
+            if (!(l).isPlainObject(elm)) ret[index] = elm;
           } else if (depth > 1) {
-            if (!(l).isPlainObject(elm)) {
-              ret[index] = elm;
-            }
+            if (!(l).isPlainObject(elm)) ret[index] = elm;
           } else {
             ret[index] = elm;
           }
@@ -1685,9 +1609,7 @@
     ]);
     return (l).filter(args.obj, function (value) {
       for (var i = 0; i < args.values.length; i++) {
-        if ((l).isEqual(args.values[i], value)) {
-          return false;
-        }
+        if ((l).isEqual(args.values[i], value)) return false;
       }
       return true;
     });
@@ -1739,9 +1661,7 @@
     var args = (l).__args(arguments, {'*' : 'arr:array'}),
         arrs = [], rest;
     (l).each(args, function (index, value) {
-      if (index !== "obj" && index !== "length") {
-        arrs.push(value);
-      }
+      if (index !== "obj" && index !== "length") arrs.push(value);
     });
     rest = Array.prototype.concat.apply(Array.prototype, Array.prototype.slice.call(arrs, 1));
     return (l).filter((l).uniq(arrs[0]), function (value) {
@@ -1753,9 +1673,7 @@
     var args = (l).__args(arguments, {'*' : 'arr:array'}),
         i = 0, arrs = [], ret = [];
     (l).each(args, function (index, value) {
-      if (index !== "obj" && index !== "length") {
-        arrs.push(value);
-      }
+      if (index !== "obj" && index !== "length") arrs.push(value);
     });
     for (; i < arrs[0].length; i++) {
       ret[i] = (l).pluck(arrs, "" + i);
@@ -1877,12 +1795,8 @@
           var a = left.criteria;
           var b = right.criteria;
           if (a !== b) {
-            if (a > b || a === void 0) {
-              return 1;
-            }
-            if (a < b || b === void 0) {
-              return -1;
-            }
+            if (a > b || a === void 0) return 1;
+            if (a < b || b === void 0) return -1;
           }
           return left.index < right.index ? -1 : 1;
         }), 'value');
@@ -1894,8 +1808,7 @@
     return function () {
       if (args.fn.n > 1) {
         args.fn.n--;
-      }
-      else {
+      } else {
         args.fn.apply(this, arguments);
         args.fn.n = args.fn.after;
       }
@@ -1953,9 +1866,7 @@
       {scope : 'object|function|defaultobject'},
       {fargs : 'array'}
     ]);
-    if (!args.fargs) {
-      args.fargs = [];
-    }
+    if (!args.fargs) args.fargs = [];
     return function () {
       for (var i = 0; i < arguments.length; i++) {
         args.fargs.push(arguments[i]);
@@ -1971,9 +1882,7 @@
     ]);
     if (args.length === 1 && args.obj) {
       (l).each(args.obj, function (f) {
-        if ((l).isFunction(args.obj[f])) {
-          args.obj[f] = (l).bind(args.obj[f], args.obj);
-        }
+        if ((l).isFunction(args.obj[f])) args.obj[f] = (l).bind(args.obj[f], args.obj);
       });
     } else if (args.length === 2) {
       (l).each(args.methods, function (f) {
@@ -2095,30 +2004,30 @@
 
   // Generate no[Type]s() methods
   (l).each(['array', 'object', 'function', 'string', 'bool', 'number', 'null', 'undefined', 'date', 'regexp', 'element', 'nan'],
-      function (index, name) {
-        (l)[ 'no' + name.charAt(0).toUpperCase() + name.slice(1) + 's' ] = function () {
-          var args = (l).__args(arguments, {obj : 'object', key : 'string|number', deep : 'bool'});
-          return (l).filter((l).getByType(args.obj, "*", args.key, args.deep),
-              function (index, value) {
-                if (!((l).type(value) === name)) {
-                  return value;
-                }
-              });
-        };
-      });
+    function (index, name) {
+      (l)[ 'no' + name.charAt(0).toUpperCase() + name.slice(1) + 's' ] = function () {
+        var args = (l).__args(arguments, {obj : 'object', key : 'string|number', deep : 'bool'});
+        return (l).filter((l).getByType(args.obj, "*", args.key, args.deep),
+          function (index, value) {
+            if (!((l).type(value) === name)) {
+              return value;
+            }
+          });
+      };
+    });
 
   // Generate [type]Names methods
   (l).each(['array', 'object', 'function', 'string', 'bool', 'number', 'null', 'undefined', 'date', 'regexp', 'element', 'nan'],
-      function (index, name) {
-        (l)[ name + 'Names' ] = function () {
-          var args = (l).__args(arguments, {obj : 'object', key : 'string|number', deep : 'bool'});
-          var names = [];
-          (l).filter((l).getByType(args.obj, name, args.key, args.deep), function (value) {
-            names.push((l).keys(value)[0]);
-          });
-          return names;
-        };
-      });
+    function (index, name) {
+      (l)[ name + 'Names' ] = function () {
+        var args = (l).__args(arguments, {obj : 'object', key : 'string|number', deep : 'bool'});
+        var names = [];
+        (l).filter((l).getByType(args.obj, name, args.key, args.deep), function (value) {
+          names.push((l).keys(value)[0]);
+        });
+        return names;
+      };
+    });
 
   // Override certain native JavaScript methods
   (l).each(['sort'], function (index, name) {
@@ -2142,11 +2051,9 @@
   // Add OOP methods to the library's prototype
   (l).extend((l).prototype, {
     chain : function () {
-      this._chain = true;
       return this;
     },
     end : function () {
-      this._chain = false;
       return (l)._wrapped[0];
     }
   });
