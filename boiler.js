@@ -30,7 +30,7 @@
   };
 
   // Library version
-  (l)._version = "0.5.0";
+  (l)._version = "0.5.1";
 
   // Documentation: https://github.com/Xaxis/args.js/blob/master/args/args.js
   (l).__args = function (args, types, rules) {
@@ -189,7 +189,6 @@
       for (var t = 0; t < types.length; t++) {
         for (var d in types[t]) {
           if (typeTest(types[t][d]) === "array" && !(args.length >= types.length)) {
-            //console.log(d, types[t][d][0]);
             args.push(types[t][d][0]);
             types[t][d] = typeTest(types[t][d][0]);
           }
@@ -487,14 +486,14 @@
         ret = [];
     var list = list = (l).isString(args.list) ? args.list.split(" ") : args.list;
     (l).each(args.obj, function (index, value) {
-      if (!(l).exists(list, index)) {
+      if (!(l).inArray(list, index)) {
         ret.push(value);
       }
     });
     return ret;
   };
 
-  (l).min = (l).minValue = function () {
+  (l).min  = function () {
     var args = (l).__args(arguments, {obj : 'object|array'}),
         vals = (l).isPlainObject(args.obj) ? (l).values(args.obj) : args.obj, minVals = [];
     (l).each(vals, function (index, value) {
@@ -505,7 +504,7 @@
     return Math.min.apply(this, minVals);
   };
 
-  (l).max = (l).maxValue = function () {
+  (l).max  = function () {
     var args = (l).__args(arguments, {obj : 'object|array'}),
         vals = (l).isPlainObject(args.obj) ? (l).values(args.obj) : args.obj, maxVals = [];
     (l).each(vals, function (index, value) {
@@ -601,7 +600,7 @@
     return (l).least(obj, fn, true);
   };
 
-  (l).shuffle = (l).randomized = function () {
+  (l).shuffle  = function () {
     var args = (l).__args(arguments, {obj : 'object|array'}),
         ret, i, n, copy;
     ret = (l).isPlainObject(args.obj) ? (l).toArray(args.obj) : args.obj;
@@ -630,7 +629,7 @@
     }) ? true : false;
   };
 
-  (l).contains = (l).exists = (l).valueExists = (l).inArray = function (obj, value) {
+  (l).contains = (l).inArray = function (obj, value) {
     var args = (l).__args({0 : [obj, [0]], 1 : [value, [0, 1]]}, [
       {obj : 'object|array'},
       {value : '*'}
@@ -829,7 +828,7 @@
     return false;
   };
 
-  (l).get = (l).getByKey = function () {
+  (l).get = function () {
     var args = (l).__args(arguments, {obj : 'object', key : 'string|number'}),
         ns, ret;
 
@@ -1003,7 +1002,7 @@
     return args.obj;
   };
 
-  (l).invert = (l).transpose = function () {
+  (l).invert = function () {
     var args = (l).__args(arguments, {obj : 'object|array'}), invertedObj = {};
     (l).each(args.obj, function (index, value) {
       invertedObj[value] = index;
@@ -1172,7 +1171,7 @@
     return args.obj;
   };
 
-  (l).setUndef = (l).setIfUndefined = function (obj, value) {
+  (l).setUndef = function (obj, value) {
     var args = (l).__args({0 : [obj, [0]], 1 : [value, [0, 1]]}, [
       {obj : 'object|array'},
       {value : '*'}
@@ -1311,12 +1310,12 @@
       }
       if ((l).isPlainObject(args.obj[o]) || ( (l).isArray(args.obj[o]) && !args.arrs )) {
         args.depth = (args.depth === "*") ? "*" : args.depth - 1;
-        args.fargs = (l).shift(args.fargs, 4);
+        args.fargs = (l).tail(args.fargs, 4);
         if (args.depth) {
           (l).deep(args.obj[o], args.fn, args.fargs, args.scope, args.depth, args.arrs);
         }
       }
-      args.fargs = (l).shift(args.fargs, 4);
+      args.fargs = (l).tail(args.fargs, 4);
     }
     return args.obj;
   };
@@ -1622,7 +1621,7 @@
     return ret;
   };
 
-  (l).rest = (l).tail = (l).drop = (l).shift = function () {
+  (l).rest = (l).tail = function () {
     var args = (l).__args(arguments, {obj : 'array', n : 'number'}),
         n = args.n ? args.n : 1, i = args.obj.length, ret = [];
     for (; n < i; n++) {
@@ -1680,7 +1679,7 @@
     return ret;
   };
 
-  (l).without = (l).exclude = (l).subtract = function (obj, values) {
+  (l).without = (l).exclude = function (obj, values) {
     var args = (l).__args({0 : [obj, [0]], 1 : [values, [0, 1]]}, [
       {obj : 'array'},
       {values : 'array'}
@@ -1747,7 +1746,7 @@
     });
     rest = Array.prototype.concat.apply(Array.prototype, Array.prototype.slice.call(arrs, 1));
     return (l).filter((l).uniq(arrs[0]), function (value) {
-      return !(l).exists(rest, value);
+      return !(l).inArray(rest, value);
     });
   };
 
@@ -2089,7 +2088,7 @@
   (l).each(['array', 'object', 'function', 'string', 'bool', 'number', 'null', 'undefined', 'date', 'regexp', 'element', 'nan'],
       function (index, name) {
         (l)[ 'no' + name.charAt(0).toUpperCase() + name.slice(1) + 's' ] = function () {
-          var args = (l).__args(arguments, {obj : 'object', key : 'string|number', deep : 'bool'}), stack = {};
+          var args = (l).__args(arguments, {obj : 'object', key : 'string|number', deep : 'bool'});
           return (l).filter((l).getByType(args.obj, "*", args.key, args.deep),
               function (index, value) {
                 if (!((l).type(value) === name)) {
