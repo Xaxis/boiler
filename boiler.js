@@ -8,21 +8,19 @@
 (function () {
   var
 
-      // Library reference
-      l = "_",
+    // Library reference
+    l = "_",
 
-      // Global root object (window or global)
-      root = this,
+    // Global root object (window or global)
+    root = this,
 
-      // Save conflict reference
-      previousLib = root[l];
+    // Save conflict reference
+    previousLib = root[l];
 
   // Library definition
   (l) = window[l] = function (obj) {
     var args = [];
-    for (var i = 0; i < arguments.length; i++) {
-      args.push(arguments[i]);
-    }
+    for (var i = 0; i < arguments.length; i++) { args.push(arguments[i]); }
     (l)._global = args;
     (l)._wrapped = obj;
     if (obj instanceof (l)) return obj;
@@ -36,9 +34,7 @@
   (l).__args = function (args, types, rules) {
 
     // The arguments object
-    var oargs = {
-      __set__ : []
-    };
+    var oargs = { __set__ : [] };
 
     // Stores definition rules
     var defs = [];
@@ -93,9 +89,7 @@
      */
     var len = function (obj) {
       var length = 0;
-      for (var i in obj) {
-        length++;
-      }
+      for (var i in obj) { length++; }
       return length;
     };
 
@@ -166,18 +160,14 @@
     // Remove all UNDEFINED values from `args` array
     var clone = [];
     for (var a in args) {
-      if (typeTest(args[a]) !== 'undefined') {
-        clone.push(args[a]);
-      }
+      if (typeTest(args[a]) !== 'undefined') clone.push(args[a]);
     }
     args = clone;
 
     // Boiler.js hack. Merge globally passed arguments
     if (typeTest((l)._global) === "array") {
       var clone = [];
-      for (var a in (l)._global[0]) {
-        clone.push((l)._global[0][a]);
-      }
+      for (var a in (l)._global[0]) { clone.push((l)._global[0][a]); }
       args = clone.concat(args);
       (l)._global = false;
     }
@@ -293,9 +283,7 @@
       // Convert `oargs` to an array
       if ('array' in rules) {
         oargs = [];
-        for (var a in args) {
-          oargs.push(args[a]);
-        }
+        for (var a in args) { oargs.push(args[a]); }
       }
     }
     return oargs;
@@ -348,13 +336,9 @@
         ret = [];
     (l).each(args.obj, function (index, value) {
       if (args.reject) {
-        if (!args.fn.call(args.scope ? args.scope : this, value, index)) {
-          ret.push(value);
-        }
+        if (!args.fn.call(args.scope ? args.scope : this, value, index)) ret.push(value);
       } else {
-        if (args.fn.call(args.scope ? args.scope : this, value, index)) {
-          ret.push(value);
-        }
+        if (args.fn.call(args.scope ? args.scope : this, value, index)) ret.push(value);
       }
     });
     return ret;
@@ -497,17 +481,13 @@
   (l).average = function () {
     var args = (l).__args(arguments, {obj : 'object|array'}),
         sumTotal = 0, len = (l).isArray(args.obj) ? args.obj.length : (l).len(args.obj);
-    (l).each(args.obj, function (index, value) {
-      sumTotal += value;
-    });
+    (l).each(args.obj, function (index, value) { sumTotal += value; });
     return sumTotal / len;
   };
 
   (l).sum = function () {
     var args = (l).__args(arguments, {obj : 'object|array'}), ret = 0;
-    (l).each(args.obj, function (index, value) {
-      ret += value;
-    });
+    (l).each(args.obj, function (index, value) { ret += value; });
     return ret;
   };
 
@@ -593,9 +573,7 @@
   (l).sample = function () {
     var args = (l).__args(arguments, {obj : 'object|array', n : 'number'}),
         ret = [], i;
-    for (i = args.n || 1; i > 0; i--) {
-      ret.push((l).shuffle(args.obj)[0]);
-    }
+    for (i = args.n || 1; i > 0; i--) { ret.push((l).shuffle(args.obj)[0]); }
     return ret;
   };
 
@@ -616,14 +594,14 @@
     }) ? true : false;
   };
 
-  (l).isArray = function () {
-    var args = (l).__args(arguments, {obj : '*'});
-    return {}.toString.call(args.obj) === "[object Array]";
-  };
-
   (l).isString = function () {
     var args = (l).__args(arguments, {obj : '*'});
     return typeof args.obj === "string" && {}.toString.call(args.obj) === "[object String]";
+  };
+
+  (l).isArray = function () {
+    var args = (l).__args(arguments, {obj : '*'});
+    return {}.toString.call(args.obj) === "[object Array]";
   };
 
   (l).isBool = function () {
@@ -695,9 +673,9 @@
   (l).isEmpty = function () {
     var args = (l).__args(arguments, {obj : 'object|array'});
     return (
-        ( (l).isPlainObject(args.obj) && (l).len(args.obj) === 0) ||
-            ( (l).isArray(args.obj) && args.obj.length === 0 )
-        );
+      ( (l).isPlainObject(args.obj) && (l).len(args.obj) === 0) ||
+          ( (l).isArray(args.obj) && args.obj.length === 0 )
+      );
   };
 
   (l).isFalsy = function () {
@@ -958,8 +936,8 @@
 
   (l).parent = function () {
     var args = (l).__args(arguments, {obj : 'object', key : 'string|number'}),
-        target = args.key ? (l).get(args.obj, args.key) : args.obj, objs;
-    objs = (l).getByType(args.obj, true);
+        target = args.key ? (l).get(args.obj, args.key) : args.obj,
+        objs = (l).getByType(args.obj, true);
     for (var o in objs) {
       if ((l).isPlainObject(objs[o])) {
         for (var p in objs[o]) {
@@ -1199,9 +1177,7 @@
   (l).clear = function (obj) {
     var args = (l).__args(arguments, {obj : 'object|array'});
     if ((l).isPlainObject(args.obj)) {
-      (l).each(args.obj, function (index) {
-        delete args.obj[index];
-      });
+      (l).each(args.obj, function (index) { delete args.obj[index]; });
     } else if ((l).isArray(args.obj)) {
       args.obj.length = 0;
     }
@@ -1211,9 +1187,7 @@
   (l).empty = function (obj) {
     var args = (l).__args(arguments, {obj : 'object|array'});
     if ((l).isPlainObject(args.obj) || (l).isArray(args.obj)) {
-      (l).each(args.obj, function (index) {
-        args.obj[index] = undefined;
-      });
+      (l).each(args.obj, function (index) { args.obj[index] = undefined; });
     }
     return args.obj;
   };
@@ -1226,14 +1200,10 @@
     ]), ret;
     if ((l).isPlainObject(args.obj)) {
       ret = {};
-      (l).each(args.obj, function (index, value) {
-        ret[index] = args.fn.call(this, value);
-      });
+      (l).each(args.obj, function (index, value) { ret[index] = args.fn.call(this, value); });
     } else if ((l).isArray(args.obj)) {
       ret = [];
-      (l).each(args.obj, function (index, value) {
-        ret.push(args.fn.call(this, value));
-      });
+      (l).each(args.obj, function (index, value) { ret.push(args.fn.call(this, value)); });
     }
     return ret;
   };
@@ -1357,18 +1327,14 @@
   (l).keys = function () {
     var args = (l).__args(arguments, {obj : 'object|array|function|defaultobject'}),
         o, keys = [];
-    for (o in args.obj) {
-      keys.push(o);
-    }
+    for (o in args.obj) { keys.push(o); }
     return keys;
   };
 
   (l).values = function () {
     var args = (l).__args(arguments, {obj : 'object|array|function|defaultobject'}),
         o, vals = [];
-    for (o in args.obj) {
-      vals.push(args.obj[o]);
-    }
+    for (o in args.obj) { vals.push(args.obj[o]); }
     return vals;
   };
 
@@ -1376,9 +1342,7 @@
     var args = (l).__args(arguments, {obj : 'object'}),
         pairs = [];
     if ((l).isPlainObject(args.obj)) {
-      (l).each(args.obj, function (index, value) {
-        pairs.push([index, value]);
-      });
+      (l).each(args.obj, function (index, value) { pairs.push([index, value]); });
     }
     return pairs;
   };
@@ -1530,36 +1494,28 @@
   (l).first = function () {
     var args = (l).__args(arguments, {obj : 'array', n : 'number'}),
         n = args.n ? args.n : 1, i = 0, ret = [];
-    for (; i < n; i++) {
-      ret.push(args.obj[i]);
-    }
+    for (; i < n; i++) { ret.push(args.obj[i]); }
     return ret;
   };
 
   (l).initial = function () {
     var args = (l).__args(arguments, {obj : 'array', n : 'number'}),
         n = args.n ? args.obj.length - args.n : args.obj.length - 1, i = 0, ret = [];
-    for (; i < n; i++) {
-      ret.push(args.obj[i]);
-    }
+    for (; i < n; i++) { ret.push(args.obj[i]); }
     return ret;
   };
 
   (l).last = function () {
     var args = (l).__args(arguments, {obj : 'array', n : 'number'}),
         n = args.n ? args.obj.length - args.n : args.obj.length - 1, i = args.obj.length, ret = [];
-    for (; n < i; n++) {
-      ret.push(args.obj[n]);
-    }
+    for (; n < i; n++) { ret.push(args.obj[n]); }
     return ret;
   };
 
   (l).rest = (l).tail = function () {
     var args = (l).__args(arguments, {obj : 'array', n : 'number'}),
         n = args.n ? args.n : 1, i = args.obj.length, ret = [];
-    for (; n < i; n++) {
-      ret.push(args.obj[n]);
-    }
+    for (; n < i; n++) { ret.push(args.obj[n]); }
     return ret;
   };
 
@@ -1643,9 +1599,7 @@
 
     // Put passed arrays into arrs array
     (l).each(args, function (index, value) {
-      if (index !== "obj" && index !== "length") {
-        arrs.push(value);
-      }
+      if (index !== "obj" && index !== "length") arrs.push(value);
     });
 
     // Make sure target array is first element
@@ -1675,9 +1629,7 @@
     (l).each(args, function (index, value) {
       if (index !== "obj" && index !== "length") arrs.push(value);
     });
-    for (; i < arrs[0].length; i++) {
-      ret[i] = (l).pluck(arrs, "" + i);
-    }
+    for (; i < arrs[0].length; i++) { ret[i] = (l).pluck(arrs, "" + i); }
     return ret;
   };
 
@@ -1713,14 +1665,10 @@
     var args = (l).__args(arguments, {'*' : ':object'}), ret = [];
     if (args.length > 1) {
       for (var i = 0; i < args.length; i++) {
-        (l).each(args[i], function (index, value) {
-          ret.push(value);
-        });
+        (l).each(args[i], function (index, value) { ret.push(value); });
       }
     } else {
-      (l).each(args[0], function (index, value) {
-        ret.push(value);
-      });
+      (l).each(args[0], function (index, value) { ret.push(value); });
     }
     return ret;
   };
@@ -1737,9 +1685,7 @@
     });
     if (arrs.length === 2) {
       keys = arrs[1];
-      (l).each(arrs[0], function (index, value) {
-        ret[ value ] = keys[index];
-      });
+      (l).each(arrs[0], function (index, value) { ret[ value ] = keys[index]; });
     } else if ( allArrays ) {
       for (var i = 0; i < arrs.length; i ++) {
         var key = arrs[i][0];
@@ -1747,9 +1693,7 @@
         ret[ key ] = val;
       }
     } else {
-      for (var i = 0; i < args.length; i += 2) {
-        ret[ args[i] ] = args[i + 1];
-      }
+      for (var i = 0; i < args.length; i += 2) { ret[ args[i] ] = args[i + 1]; }
     }
     return ret;
   };
@@ -1830,9 +1774,7 @@
     var args = (l).__args(arguments, {fn : 'function', n : 'number'});
     args.fn.n = args.n;
     return function () {
-      for (var i = 0; i < args.fn.n; i++) {
-        args.fn.apply(this, arguments);
-      }
+      for (var i = 0; i < args.fn.n; i++) { args.fn.apply(this, arguments); }
     };
   };
 
@@ -1852,9 +1794,7 @@
     var fns = (l).toArray((l).__args(arguments, {'*' : 'fns:function'}));
     return function () {
       var args = arguments;
-      for (var i = fns.length - 1; i >= 0; i--) {
-        args = [fns[i].apply(this, args)];
-      }
+      for (var i = fns.length - 1; i >= 0; i--) { args = [fns[i].apply(this, args)]; }
       return args[0];
     };
   };
@@ -1868,9 +1808,7 @@
     ]);
     if (!args.fargs) args.fargs = [];
     return function () {
-      for (var i = 0; i < arguments.length; i++) {
-        args.fargs.push(arguments[i]);
-      }
+      for (var i = 0; i < arguments.length; i++) { args.fargs.push(arguments[i]); }
       return args.fn.apply(args.scope, args.fargs);
     };
   };
@@ -1885,9 +1823,7 @@
         if ((l).isFunction(args.obj[f])) args.obj[f] = (l).bind(args.obj[f], args.obj);
       });
     } else if (args.length === 2) {
-      (l).each(args.methods, function (f) {
-        args.obj[f] = (l).bind(args.obj[f], args.obj);
-      });
+      (l).each(args.methods, function (f) { args.obj[f] = (l).bind(args.obj[f], args.obj); });
     }
     return args.obj;
   };
@@ -1895,9 +1831,7 @@
   (l).fill = (l).partial = function () {
     var args = (l).__args(arguments, {fn : 'function', fargs : 'array'});
     return function () {
-      for (var i = 0; i < arguments.length; i++) {
-        args.fargs.push(arguments[i]);
-      }
+      for (var i = 0; i < arguments.length; i++) { args.fargs.push(arguments[i]); }
       return args.fn.apply(this, args.fargs);
     };
   };
@@ -1932,7 +1866,7 @@
 
   (l).throttle = function () {
     var args = (l).__args(arguments, {fn : 'function', ms : 'number'}),
-        scope, last, timeout, fargs, res, later;
+        scope, last, timeout, fargs, ret, res, later;
     later = function () {
       last = new Date;
       timeout = null;
@@ -2009,9 +1943,7 @@
         var args = (l).__args(arguments, {obj : 'object', key : 'string|number', deep : 'bool'});
         return (l).filter((l).getByType(args.obj, "*", args.key, args.deep),
           function (index, value) {
-            if (!((l).type(value) === name)) {
-              return value;
-            }
+            if (!((l).type(value) === name)) return value;
           });
       };
     });
@@ -2029,7 +1961,7 @@
       };
     });
 
-  // Override certain native JavaScript methods
+  // Add native sort method to library
   (l).each(['sort'], function (index, name) {
     if (Array.prototype[name]) {
       (l)[name] = !(l)[name] ? Array.prototype[name] : (l)[name];
@@ -2050,12 +1982,8 @@
 
   // Add OOP methods to the library's prototype
   (l).extend((l).prototype, {
-    chain : function () {
-      return this;
-    },
-    end : function () {
-      return (l)._wrapped[0];
-    }
+    chain : function () { return this; },
+    end : function () { return (l)._wrapped[0]; }
   });
 
 })();
