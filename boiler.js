@@ -615,7 +615,7 @@
 
   (l).sample = function () {
     var args = (l).__args(arguments, {obj : 'object|array', n : 'number'}),
-        arr = (l).isPlainObject(args.obj) ? (l).toArray(args.obj) : args.obj, ret = [], i;
+        ret = [], i;
     for (i = args.n || 1; i > 0; i--) {
       ret.push((l).shuffle(args.obj)[0]);
     }
@@ -758,7 +758,7 @@
       {obj2 : '*'}
     ]);
 
-    // Compare objects that don't have nested objects
+    // Quick compare of objects that don't have nested objects or arrays
     if ((l).type(args.obj1) === (l).type(args.obj2) && !(l).isPlainObject(args.obj1) && !(l).isArray(args.obj1)) {
       switch ((l).type(args.obj1)) {
         case "function" :
@@ -771,7 +771,7 @@
           if (args.obj1 !== args.obj2) return false;
       }
 
-      // Compare objects that do have nested objects
+    // Compare objects that do have nested objects
     } else {
 
       // When target or comparison is falsy we compare them directly
@@ -844,7 +844,7 @@
       args.key = ns.pop();
     }
 
-    // Look for a property in the object
+    // Attempt to find property in object
     if ((l).isPlainObject(args.obj)) {
       if (args.key in args.obj) {
         return args.obj[args.key];
@@ -858,7 +858,6 @@
         }
       }
     }
-
     return false;
   };
 
@@ -1637,7 +1636,7 @@
         if (!(l).isFalsy(value) || ( ( (l).isPlainObject(value) || (l).isArray(value) ) && (l).len(value) === 0 )) {
           return value;
         }
-      } else if (!(l).isFalsy(value)) {
+      } else if (!(l).isFalsy(value) && !(l).isEmpty(value)) {
         return value;
       }
     });
