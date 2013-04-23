@@ -1243,7 +1243,7 @@
       {matches : 'array|object'},
       {find : 'bool'}
     ]);
-    return (l)[find ? 'find' : 'filter'](args.obj, function (value, index) {
+    return (l)[find ? 'find' : 'filter'](args.obj, function (value) {
       for (var key in args.matches) {
         if (args.matches[key] !== value[key]) return false;
       }
@@ -1265,23 +1265,21 @@
           {n : 'number'},
           {pad : '*'}
         ]),
-        res = {}, i = 0, key;
+        res = [], i = 1, key;
     (l).each(args.obj, function (index, value) {
-      if (i < args.n - 1 && (l).has(res, key)) {
-        i += 1;
+      if ( (key in res) && i < args.n ) {
         res[key].push(value);
+        i += 1;
       } else {
-        i = 0;
-        key = index;
+        key = (l).len(res);
         res[key] = [value];
+        i = 1;
       }
     });
     if (args.pad) {
       (l).each(res, function (index, value) {
         if (value.length < args.n) {
-          for (i = value.length; i < args.n; i++) {
-            res[index].push(args.pad);
-          }
+          for (i = value.length; i < args.n; i++) { res[index].push(args.pad); }
         }
       });
     }
