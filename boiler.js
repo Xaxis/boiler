@@ -1,5 +1,5 @@
 /**
- * boiler.js v0.5.0
+ * boiler.js v0.5.1
  * https://github.com/Xaxis/boiler.js
  * http://www.boilerjs.com
  * (c) 2012-2013 Wil Neeley, Trestle Media, LLC.
@@ -8,13 +8,13 @@
 (function () {
   var
 
-  // Library reference
+      // Library reference
       l = "_",
 
-  // Global root object (window or global)
+      // Global root object (window or global)
       root = this,
 
-  // Save conflict reference
+      // Save conflict reference
       previousLib = root[l];
 
   // Library definition
@@ -29,8 +29,10 @@
     if (!(this instanceof (l))) return new (l)(arguments);
   };
 
+  // Library version
   (l)._version = "0.5.0";
 
+  // Documentation: https://github.com/Xaxis/args.js/blob/master/args/args.js
   (l).__args = function (args, types, rules) {
 
     // The arguments object
@@ -204,14 +206,10 @@
 
     // Build the `oargs` arguments object
     for (var a = 0; a < args.length; a++) {
-
-      // Iterate over each definition on all arguments
       for (var d = 0; d < defs.length; d++) {
         var mtypes = [];
         var name = defs[d].name;
         var type = defs[d].type;
-
-        // When an UNKNOWN NUMBER of arguments passed...
         if (name === "*") {
           var mtype = type.split(":");
           name = mtype[0] + a;
@@ -229,8 +227,6 @@
               oargs[ name ] = args[a];
             }
           }
-
-          // When definition has MULTIPLE types...
         } else if (( mtypes = type.split("|")).length > 1) {
           for (var n = 0; n < mtypes.length; n++) {
             type = mtypes[n];
@@ -250,38 +246,16 @@
               }
             }
           }
-
-          // When definition has a SINGLE type...
         } else {
-
-          // ORDER RULES to validate against
           if (defs[d].order.length >= 1) {
-
-            if ((
-
-              // When the type of an argument matches an allowed type OR any type
-                type === typeTest(args[a]) || type === "*" )
-
-              // AND when the pass order definition matches the order in which the argument was passed
+            if ((type === typeTest(args[a]) || type === "*" )
                 && inArray(defs[d].order, parseInt(a))
-
-              // AND when the property has not yet been set on the 'oargs' object
                 && !(name in oargs)
-
-              // AND when the argument has not been set yet
-                && !inArray(oargs.__set__, a)
-
-                ) {
-
-              // Set the oargs object with the current argument
+                && !inArray(oargs.__set__, a)) {
               oargs[ name ] = args[a];
-
-              // Push the argument index into the __set__ array so we know not to set it again
               oargs.__set__.push(a);
               break;
             }
-
-            // No ORDER RULES to validate against
           } else {
             if (type === typeTest(args[a]) || type === "*") {
               oargs[ name ] = args[a];
@@ -1059,11 +1033,11 @@
     return (l).paths(args.obj)[args.key];
   };
 
-  (l).module = (l).build = function (obj, ns, members, deep, fargs) {
+  (l).module = (l).build = function ( obj, ns, members, deep ) {
     var args = (l).__args({0 : [obj, [0]], 1 : [ns, [0, 1]], 2 : [members, [1, 2, 3, 4]], 3 : [deep, [2, 3, 4, 5]]}, [
       {obj : 'object|defaultobject|function'},
       {ns : 'string|number'},
-      {members : 'object'},
+      {members : 'object|function'},
       {deep : 'bool'}
     ]);
     if (!args.ns) {
@@ -1574,7 +1548,7 @@
       '\u003E' : ['>', 'gt'],
       '\u00A0' : [' ', 'nbsp'],
       '/'      : ['/', '#x2F']
-    }
+    };
     for (var e in entities) {
       var entity = new RegExp(e, 'g');
       args.str = args.str.replace(entity, '&' + entities[e][1] + ';');
@@ -1592,7 +1566,7 @@
       '&gt;' : ['>', 'gt'],
       '&nbsp;' : [' ', 'nbsp'],
       '&#x2F;' : ['/', 'frasl']
-    }
+    };
     for (var e in entities) {
       var entity = new RegExp(e, 'g');
       args.str = args.str.replace(entity, entities[e][0]);
