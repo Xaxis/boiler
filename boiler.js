@@ -1809,17 +1809,27 @@
 
   (l).object = (l).toObject = function () {
     var args = (l).__args(arguments, {'*' : ':*'}),
-        arrs = [], keys = [], ret = {}, i = 0;
+        arrs = [], keys = [], ret = {}, allArrays = true;
     (l).each(args, function (index, value) {
-      if ((l).isArray(value)) arrs.push(value);
+      if ((l).isArray(value)) {
+        arrs.push(value);
+      } else {
+        allArrays = false;
+      }
     });
     if (arrs.length === 2) {
       keys = arrs[1];
       (l).each(arrs[0], function (index, value) {
         ret[ value ] = keys[index];
       });
+    } else if ( allArrays ) {
+      for (var i = 0; i < arrs.length; i ++) {
+        var key = arrs[i][0];
+        var val = arrs[i][1];
+        ret[ key ] = val;
+      }
     } else {
-      for (; i < args.length; i += 2) {
+      for (var i = 0; i < args.length; i += 2) {
         ret[ args[i] ] = args[i + 1];
       }
     }
