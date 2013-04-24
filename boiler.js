@@ -450,14 +450,12 @@
   (l).omit = (l).blacklist = function (obj, list) {
     var args = (l).__args({0 : [obj, [0]], 1 : [list, [0, 1]]}, [
           {obj : 'object|array'},
-          {list : 'string|array'}
-        ]),
-        ret = [];
-    var list = list = (l).isString(args.list) ? args.list.split(" ") : args.list;
-    (l).each(args.obj, function (index, value) {
-      if (!(l).inArray(list, index)) ret.push(value);
+          {list : 'string|array|number'}
+        ]);
+    var props = (l).isArray(args.list) ? args.list : [args.list];
+    return (l).filter(args.obj, function(value, index) {
+      if (!(index in props) && !((l).inArray(props, index))) return value;
     });
-    return ret;
   };
 
   (l).min  = function () {
@@ -1294,9 +1292,9 @@
           {count : 'bool'},
           {key : 'bool'}
         ]),
-        res = {}, key;
+        res = {};
     (l).each(args.obj, function (index, value) {
-      key = (l).isString(args.map) ? value[args.map] : args.map.call(args.scope || this, value, index, args.obj);
+      var key = (l).isString(args.map) ? value[args.map] : args.map.call(args.scope || this, value, index, args.obj);
       if ((l).has(res, key)) {
         res[key].push(value);
       } else {
