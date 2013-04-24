@@ -1437,17 +1437,12 @@
   (l).htmlEncode = function () {
     var args = (l).__args(arguments, {str : 'string'});
     var entities = {
-      '\u0026' : ['&', 'amp'],
-      '\u0022' : ['"', 'quot'],
-      '\u0027' : ["'", 'apos'],
-      '\u003C' : ['<', 'lt'],
-      '\u003E' : ['>', 'gt'],
-      '\u00A0' : [' ', 'nbsp'],
-      '/'      : ['/', '#x2F']
+      '\u0026':['amp'], '\u0022':['quot'], '\u0027':['apos'], '\u003C':['lt'],
+      '\u003E':['gt'], '\u00A0':['nbsp'], '/':['#x2F']
     };
     for (var e in entities) {
       var entity = new RegExp(e, 'g');
-      args.str = args.str.replace(entity, '&' + entities[e][1] + ';');
+      args.str = args.str.replace(entity, '&' + entities[e][0] + ';');
     }
     return args.str;
   };
@@ -1455,8 +1450,8 @@
   (l).htmlDecode = function () {
     var args = (l).__args(arguments, {str : 'string'});
     var entities = {
-      '&quot;' : ['\"'], '&amp;' : ['&'], '&apos;' : ["'"], '&lt;' : ['<'],
-      '&gt;' : ['>'], '&nbsp;' : [' '], '&#x2F;' : ['/']
+      '&quot;':['\"'], '&amp;':['&'], '&apos;':["'"], '&lt;':['<'],
+      '&gt;':['>'], '&nbsp;':[' '], '&#x2F;':['/']
     };
     for (var e in entities) {
       var entity = new RegExp(e, 'g');
