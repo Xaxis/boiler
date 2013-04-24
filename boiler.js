@@ -1,5 +1,5 @@
 /**
- * boiler.js v0.5.1
+ * boiler.js v0.5.2
  * https://github.com/Xaxis/boiler.js
  * http://www.boilerjs.com
  * (c) 2012-2013 Wil Neeley, Trestle Media, LLC.
@@ -28,7 +28,7 @@
   };
 
   // Library version
-  (l)._version = "0.5.1";
+  (l)._version = "0.5.2";
 
   // Documentation: https://github.com/Xaxis/args.js/blob/master/args/args.js
   (l).__args = function (args, types, rules) {
