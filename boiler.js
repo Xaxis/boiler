@@ -1795,7 +1795,7 @@
     };
   };
 
-  (l).bind = function (fn, scope, fargs) {
+  (l).bind = function (obj, fn, scope, fargs) {
     var args = (l).__args({0 : [obj, [0]], 1 : [fn, [0, 1]], 2 : [scope, [1, 2]], 3 : [fargs, [2, 3]]}, [
       {obj : 'object'},
       {fn : '*'},
