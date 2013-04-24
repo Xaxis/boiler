@@ -781,21 +781,13 @@
 
   (l).get = function () {
     var args = (l).__args(arguments, {obj : 'object', key : 'string|number'}),
-        ns, ret;
-
-    // Split property key into namespace
-    ns = ( (l).type(args.key) !== "string" ) ? false : args.key.split(".");
-
-    // When no key just return the target object
+        ns = ( (l).type(args.key) !== "string" ) ? false : args.key.split("."),
+        ret;
     if (!args.key) return args.obj;
-
-    // Search starting with namespace if given
     if (ns.length > 1) {
       args.obj = (l).get(args.obj, ns.shift());
       args.key = ns.pop();
     }
-
-    // Attempt to find property in object
     if ((l).isPlainObject(args.obj)) {
       if (args.key in args.obj) {
         return args.obj[args.key];
