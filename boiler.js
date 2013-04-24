@@ -1455,13 +1455,8 @@
   (l).htmlDecode = function () {
     var args = (l).__args(arguments, {str : 'string'});
     var entities = {
-      '&quot;' : ['\"', 'quot'],
-      '&amp;' : ['&', 'amp'],
-      '&apos;' : ["'", 'apos'],
-      '&lt;' : ['<', 'lt'],
-      '&gt;' : ['>', 'gt'],
-      '&nbsp;' : [' ', 'nbsp'],
-      '&#x2F;' : ['/', 'frasl']
+      '&quot;' : ['\"'], '&amp;' : ['&'], '&apos;' : ["'"], '&lt;' : ['<'],
+      '&gt;' : ['>'], '&nbsp;' : [' '], '&#x2F;' : ['/']
     };
     for (var e in entities) {
       var entity = new RegExp(e, 'g');
