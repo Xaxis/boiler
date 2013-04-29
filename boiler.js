@@ -164,7 +164,7 @@
     }
     args = clone;
 
-    // Boiler.js hack. Merge globally passed arguments
+    // Boiler.js hack - Merge globally passed arguments
     if (typeTest((l)._global) === "array") {
       var clone = [];
       for (var a in (l)._global[0]) { clone.push((l)._global[0][a]); }
@@ -306,17 +306,20 @@
     return args.obj;
   };
 
-  (l).map = (l).collect = function (obj, fn, scope) {
-    var args = (l).__args({0 : [obj, [0]], 1 : [fn, [0, 1]], 2 : [scope, [1, 2]]}, [
+  (l).map = (l).collect = function (obj, fn, scope, deep) {
+    var args = (l).__args({0 : [obj, [0]], 1 : [fn, [0, 1]], 2 : [scope, [1, 2]], 3 : [deep, [0,1,2,3]]}, [
           {obj : 'object|array'},
           {fn : 'function'},
-          {scope : 'object|function|defaultobject'}
+          {scope : 'object|function|defaultobject'},
+          {deep : 'bool'}
         ]),
-        list = (l).isArray(args.obj) ? args.obj : (l).toArray(obj), ret = [];
-    (l).each(list, function (index, value, list) {
-      ret.push(args.fn.call(args.scope || this, value, index, list));
-    });
-    return ret;
+        list = (l).isArray(args.obj) ? args.obj : (l).toArray(obj);
+    return (l).deep(list, function(depth, index, value, ref) {
+      if ( !(l).isArray(value) && !(l).isPlainObject(value) ) {
+        console.log(value, index, ref);
+        ref[index] = args.fn.call(args.scope || this, value, index, ref);
+      }
+    }, !args.deep ? 1 : "*");
   };
 
   (l).pluck = (l).fetch = function () {
