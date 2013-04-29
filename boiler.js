@@ -358,19 +358,20 @@
     return (l).filter(obj, fn, scope, true);
   };
 
-  (l).any = (l).some = function (obj, fn, scope) {
-    var args = (l).__args({0 : [obj, [0]], 1 : [fn, [0, 1]], 2 : [scope, [1, 2]]}, [
+  (l).any = (l).some = function (obj, fn, scope, deep) {
+    var args = (l).__args({0 : [obj, [0]], 1 : [fn, [0, 1]], 2 : [scope, [1, 2]], 3 : [deep, [0, 1, 2, 3]]}, [
           {obj : 'object|array'},
           {fn : 'function'},
-          {scope : 'object|function|defaultobject'}
+          {scope : 'object|function|defaultobject'},
+          {deep : 'bool'}
         ]),
         ret = false;
-    (l).each(args.obj, function (index, value) {
-      if (args.fn.call(args.scope ? args.scope : this, value, index)) {
+    (l).deep(args.obj, function(depth, index, value) {
+      if ( args.fn.call(args.scope ? args.scope : this, value, index) ) {
         ret = true;
         return false;
       }
-    });
+    }, args.deep ? "*" : 1);
     return ret;
   };
 
@@ -1212,9 +1213,7 @@
     var args = (l).__args({0 : [obj, [0]], 1 : [fn, [0, 1]], 2 : [fargs, [1, 2, 3, 4]], 3 : [depth, [1, 2, 3]], 4 : [arrs, [2, 3, 4]]}, [
       {obj : 'object|array'},
       {fn : 'function'},
-      {fargs : [
-        []
-      ]},
+      {fargs : [[]]},
       {depth : ["*"]},
       {arrs : 'bool'}
     ]);
