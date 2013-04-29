@@ -500,16 +500,16 @@
         minVals = [];
     (l).deep(args.obj, function(depth, index, value) {
       if ( (l).isNumber(value) ) minVals.push(value);
-    });
+    }, args.deep ? "*" : 1);
     return Math.min.apply(this, minVals);
   };
 
   (l).max  = function () {
-    var args = (l).__args(arguments, {obj : 'object|array'}),
+    var args = (l).__args(arguments, {obj : 'object|array', deep: 'bool'}),
         maxVals = [];
     (l).deep(args.obj, function (depth, index, value) {
       if ((l).isNumber(value)) maxVals.push(value);
-    });
+    }, args.deep ? "*" : 1);
     return Math.max.apply(this, maxVals);
   };
 
@@ -521,8 +521,10 @@
   };
 
   (l).sum = function () {
-    var args = (l).__args(arguments, {obj : 'object|array'}), ret = 0;
-    (l).each(args.obj, function (index, value) { ret += value; });
+    var args = (l).__args(arguments, {obj : 'object|array', deep : 'bool'}), ret = 0;
+    (l).deep(args.obj, function (depth, index, value) {
+      if ((l).isNumber(value)) ret += value;
+    }, args.deep ? "*" : 1);
     return ret;
   };
 
