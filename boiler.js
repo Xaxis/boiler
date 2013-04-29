@@ -452,20 +452,12 @@
           {obj : 'object|array'},
           {fn : 'function'},
           {scope : 'object|function|defaultobject'},
-          {mode : 'string'}
-        ]),
-        ret;
+          {mode : ['value']}
+        ]),ret;
     (l).each(args.obj, function (index, value) {
-      if (!args.mode || args.mode === "value") {
-        if (args.fn.call(args.scope ? args.scope : this, value, index)) {
-          ret = value;
-          return false;
-        }
-      } else if (args.mode === "key") {
-        if (args.fn.call(args.scope ? args.scope : this, index, index)) {
-          ret = value;
-          return false;
-        }
+      if (args.fn.call(args.scope ? args.scope : this, args.mode === "value" ? value : index, index)) {
+        ret = value;
+        return false;
       }
     });
     return ret;
