@@ -496,10 +496,10 @@
   };
 
   (l).min  = function () {
-    var args = (l).__args(arguments, {obj : 'object|array'}),
-        vals = (l).isPlainObject(args.obj) ? (l).values(args.obj) : args.obj, minVals = [];
-    (l).each(vals, function (index, value) {
-      if ((l).isNumber(value)) minVals.push(value);
+    var args = (l).__args(arguments, {obj : 'object|array', deep: 'bool'}),
+        minVals = [];
+    (l).deep(args.obj, function(depth, index, value) {
+      if ( (l).isNumber(value) ) minVals.push(value);
     });
     return Math.min.apply(this, minVals);
   };
