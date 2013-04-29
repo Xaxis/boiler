@@ -514,10 +514,12 @@
   };
 
   (l).average = function () {
-    var args = (l).__args(arguments, {obj : 'object|array'}),
-        sumTotal = 0, len = (l).isArray(args.obj) ? args.obj.length : (l).len(args.obj);
-    (l).each(args.obj, function (index, value) { sumTotal += value; });
-    return sumTotal / len;
+    var args = (l).__args(arguments, {obj : 'object|array', deep : 'bool'}),
+        sumTotal = 0;
+    (l).deep(args.obj, function (depth, index, value) {
+      if ((l).isNumber(value)) sumTotal += value;
+    }, args.deep ? "*" : 1);
+    return sumTotal / (l).len(args.obj, args.deep);
   };
 
   (l).sum = function () {
