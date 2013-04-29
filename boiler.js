@@ -425,16 +425,25 @@
     return ret;
   };
 
-  (l).count = function (obj, fn, scope) {
-    var args = (l).__args({0 : [obj, [0]], 1 : [fn, [0, 1]], 2 : [scope, [1, 2]]}, [
+  (l).count = function (obj, fn, scope, deep) {
+    var args = (l).__args({0 : [obj, [0]], 1 : [fn, [0, 1]], 2 : [scope, [1, 2]], 3 : [deep, [0,1,2,3]]}, [
           {obj : 'object|array'},
           {fn : 'function'},
-          {scope : 'function|object|defaultobject'}
+          {scope : 'function|object|defaultobject'},
+          {deep : 'bool'}
         ]),
         ret = 0;
-    (l).each(args.obj, function (index, value) {
-      if (args.fn.call(args.scope ? args.scope : this, value, index)) ret++;
-    });
+    if ( args.deep ) {
+      (l).deep(args.obj, function(depth, index, value) {
+        if ( !(l).isArray(value) && !(l).isPlainObject(value) ) {
+          if (args.fn.call(args.scope ? args.scope : this, value, index)) ret++;
+        }
+      });
+    } else {
+      (l).each(args.obj, function (index, value) {
+        if (args.fn.call(args.scope ? args.scope : this, value, index)) ret++;
+      });
+    }
     return ret;
   };
 
