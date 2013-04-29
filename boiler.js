@@ -313,17 +313,24 @@
           {scope : 'object|function|defaultobject'},
           {deep : 'bool'}
         ]),
-        list = (l).isArray(args.obj) ? args.obj : (l).toArray(obj);
-    return (l).deep(list, function(depth, index, value, ref) {
-      if ( !(l).isArray(value) && !(l).isPlainObject(value) ) {
-        console.log(value, index, ref);
-        ref[index] = args.fn.call(args.scope || this, value, index, ref);
-      }
-    }, !args.deep ? 1 : "*");
+        list = (l).isArray(args.obj) ? args.obj : (l).toArray(obj),
+        ret = [];
+    if ( args.deep ) {
+      return (l).deep(list, function(depth, index, value, ref) {
+        if ( !(l).isArray(value) && !(l).isPlainObject(value) ) {
+          ref[index] = args.fn.call(args.scope || this, value, index, ref);
+        }
+      }, !args.deep ? 1 : "*");
+    } else {
+      (l).each(list, function(index, value, ref) {
+        ret.push(args.fn.call(args.scope || this, value, index, ref));
+      });
+      return ret;
+    }
   };
 
   (l).pluck = (l).fetch = function () {
-    var args = (l).__args(arguments, {obj : 'object|array', key : 'string|number'});
+    var args = (l).__args(arguments, {obj : 'object|array', key : 'string|number', deep : 'bool'});
     return (l).map(args.obj, function (value) {
       return value[args.key];
     });
