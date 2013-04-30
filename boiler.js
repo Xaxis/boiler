@@ -1999,8 +1999,14 @@
 
   // Add OOP methods to the library's prototype
   (l).extend((l).prototype, {
-    chain : function () { return this; },
-    end : function () { return (l)._wrapped[0]; }
+    chain : function () {
+      this._chain = true;
+      return this;
+    },
+    end : function () {
+      this._chain = false;
+      return (l)._wrapped[0];
+    }
   });
 
 })();
