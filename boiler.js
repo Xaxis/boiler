@@ -8,14 +8,14 @@
 (function () {
   var
 
-    // Library reference
-    l = "_",
+  // Library reference
+  l = "_",
 
-    // Global root object (window or global)
-    root = this,
+  // Global root object (window or global)
+  root = this,
 
-    // Save conflict reference
-    previousLib = root[l];
+  // Save conflict reference
+  previousLib = root[l];
 
   // Library definition
   (l) = window[l] = function (obj) {
@@ -290,17 +290,15 @@
   };
 
   (l).each = (l).forEach = function (obj, fn, scope) {
-    var args = (l).__args({0 : [obj, [0]], 1 : [fn, [0, 1]], 2 : [scope, [1, 2]]}, {obj : 'object|array', fn : 'function', scope : 'object|function|defaultobject'}),
-        key, value, i;
-    if ((l).type(args.obj) === "object") {
-      for (key in args.obj) {
-        value = args.fn.call(args.scope || args.obj[key], key, args.obj[key], args.obj);
-        if (value === false) break;
+    var args = (l).__args({0 : [obj, [0]], 1 : [fn, [0, 1]], 2 : [scope, [1, 2]]}, {obj : 'object|array', fn : 'function', scope : 'object|function|defaultobject'});
+    if (args.obj === null) return;
+    if ((l).isArray(args.obj)) {
+      for (var i = 0; i < args.obj.length; i++) {
+        if (args.fn.call(args.scope || args.obj[i], i, args.obj[i], args.obj) === false) break;
       }
-    } else if ((l).type(args.obj) === "array") {
-      for (i = 0; i < args.obj.length; i++) {
-        value = args.fn.call(args.scope || args.obj[i], i, args.obj[i], args.obj);
-        if (value === false) break;
+    } else {
+      for (var key in args.obj) {
+        if (args.fn.call(args.scope || args.obj[key], key, args.obj[key], args.obj) === false) break;
       }
     }
     return args.obj;
@@ -449,11 +447,11 @@
 
   (l).find = (l).findValue = function (obj, fn, scope, mode) {
     var args = (l).__args({0 : [obj, [0]], 1 : [fn, [0, 1]], 2 : [scope, [1, 2]], 3 : [mode, [1, 2, 3]]}, [
-          {obj : 'object|array'},
-          {fn : 'function'},
-          {scope : 'object|function|defaultobject'},
-          {mode : ['value']}
-        ]),ret;
+      {obj : 'object|array'},
+      {fn : 'function'},
+      {scope : 'object|function|defaultobject'},
+      {mode : ['value']}
+    ]),ret;
     (l).each(args.obj, function (index, value) {
       if (args.fn.call(args.scope ? args.scope : this, args.mode === "value" ? value : index, index)) {
         ret = value;
@@ -486,9 +484,9 @@
 
   (l).omit = (l).blacklist = function (obj, list) {
     var args = (l).__args({0 : [obj, [0]], 1 : [list, [0, 1]]}, [
-          {obj : 'object|array'},
-          {list : 'string|array|number'}
-        ]);
+      {obj : 'object|array'},
+      {list : 'string|array|number'}
+    ]);
     var props = (l).isArray(args.list) ? args.list : [args.list];
     return (l).filter(args.obj, function(value, index) {
       if (!(index in props) && !((l).inArray(props, index))) return value;
@@ -712,9 +710,9 @@
   (l).isEmpty = function () {
     var args = (l).__args(arguments, {obj : 'object|array'});
     return (
-      ( (l).isPlainObject(args.obj) && (l).len(args.obj) === 0) ||
-          ( (l).isArray(args.obj) && args.obj.length === 0 )
-      );
+        ( (l).isPlainObject(args.obj) && (l).len(args.obj) === 0) ||
+            ( (l).isArray(args.obj) && args.obj.length === 0 )
+        );
   };
 
   (l).isFalsy = function () {
@@ -763,7 +761,7 @@
           if (args.obj1 !== args.obj2) return false;
       }
 
-    // Compare objects that do have nested objects
+      // Compare objects that do have nested objects
     } else {
 
       // When target or comparison is falsy we compare them directly
@@ -1932,7 +1930,7 @@
   };
 
   (l).noConflict = function () {
-    root[l] = previousLib;
+    root['_'] = previousLib;
     return (l);
   };
 
@@ -1955,28 +1953,28 @@
 
   // Generate no[Type]s() methods
   (l).each(['array', 'object', 'function', 'string', 'bool', 'number', 'null', 'undefined', 'date', 'regexp', 'element', 'nan'],
-    function (index, name) {
-      (l)[ 'no' + name.charAt(0).toUpperCase() + name.slice(1) + 's' ] = function () {
-        var args = (l).__args(arguments, {obj : 'object', key : 'string|number', deep : 'bool'});
-        return (l).filter((l).getByType(args.obj, "*", args.key, args.deep),
-          function (index, value) {
-            if (!((l).type(value) === name)) return value;
-          });
-      };
-    });
+      function (index, name) {
+        (l)[ 'no' + name.charAt(0).toUpperCase() + name.slice(1) + 's' ] = function () {
+          var args = (l).__args(arguments, {obj : 'object', key : 'string|number', deep : 'bool'});
+          return (l).filter((l).getByType(args.obj, "*", args.key, args.deep),
+              function (index, value) {
+                if (!((l).type(value) === name)) return value;
+              });
+        };
+      });
 
   // Generate [type]Names methods
   (l).each(['array', 'object', 'function', 'string', 'bool', 'number', 'null', 'undefined', 'date', 'regexp', 'element', 'nan'],
-    function (index, name) {
-      (l)[ name + 'Names' ] = function () {
-        var args = (l).__args(arguments, {obj : 'object', key : 'string|number', deep : 'bool'});
-        var names = [];
-        (l).filter((l).getByType(args.obj, name, args.key, args.deep), function (value) {
-          names.push((l).keys(value)[0]);
-        });
-        return names;
-      };
-    });
+      function (index, name) {
+        (l)[ name + 'Names' ] = function () {
+          var args = (l).__args(arguments, {obj : 'object', key : 'string|number', deep : 'bool'});
+          var names = [];
+          (l).filter((l).getByType(args.obj, name, args.key, args.deep), function (value) {
+            names.push((l).keys(value)[0]);
+          });
+          return names;
+        };
+      });
 
   // Add native sort method to library
   (l).each(['sort'], function (index, name) {
