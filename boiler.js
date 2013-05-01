@@ -298,7 +298,7 @@
   };
 
   (l).each = (l).forEach = function (obj, fn, scope) {
-    var args = (l).__args({0 : [obj, [0]], 1 : [fn, [0, 1]], 2 : [scope, [1, 2]]}, {obj : 'object|array|defaultobject', fn : 'function', scope : 'object|function|defaultobject'});
+    var args = (l).__args({0 : [obj, [0]], 1 : [fn, [0, 1]], 2 : [scope, [1, 2]]}, {obj : '*', fn : 'function', scope : 'object|function|defaultobject'});
     if (args.obj === null) return;
     if ((l).isArray(args.obj)) {
       for (var i = 0; i < args.obj.length; i++) {
@@ -306,33 +306,35 @@
       }
     } else {
       for (var key in args.obj) {
-        if (args.fn.call(args.scope || args.obj[key], key, args.obj[key], args.obj) === false) break;
+        if (args.obj.hasOwnProperty(key)) {
+          if (args.fn.call(args.scope || args.obj[key], key, args.obj[key], args.obj) === false) break;
+        }
       }
     }
     return args.obj;
   };
 
   (l).map = (l).collect = function (obj, fn, scope, deep) {
-    var args = (l).__args({0 : [obj, [0]], 1 : [fn, [0, 1]], 2 : [scope, [1, 2]], 3 : [deep, [0,1,2,3]]}, [
-          {obj : 'object|array'},
-          {fn : 'function'},
-          {scope : 'object|function|defaultobject'},
-          {deep : 'bool'}
-        ]),
-        list = (l).isArray(args.obj) ? args.obj : (l).toArray(obj),
+    var args = (l).__args({0 : [obj, [0]], 1 : [fn, [0, 1]], 2 : [scope, [1, 2]], 3 : [deep, [0,1,2,3]]}, [{obj : '*'},{fn : 'function'},{scope : 'object|function|defaultobject'},{deep : 'bool'}]),
+        list = (l).isArray(args.obj) ? args.obj : (l).toArray(args.obj),
         ret = [];
+    if ( args.obj === null ) return ret;
     if ( args.deep ) {
-      return (l).deep(list, function(depth, index, value, ref) {
+      (l).deep(list, function(depth, index, value, ref) {
         if ( !(l).isArray(value) && !(l).isPlainObject(value) ) {
-          ref[index] = args.fn.call(args.scope || this, value, index, ref);
+          if ((l).isArray(args.obj)) {
+            ret.push(args.fn.call(args.scope || this, value, index, ref));
+          } else {
+            ret[index] = args.fn.call(args.scope || this, value, index, ref);
+          }
         }
-      }, !args.deep ? 1 : "*");
+      }, args.deep ? "*" : 1);
     } else {
       (l).each(list, function(index, value, ref) {
         ret.push(args.fn.call(args.scope || this, value, index, ref));
       });
-      return ret;
     }
+    return ret;
   };
 
   (l).pluck = (l).fetch = function () {
@@ -1685,7 +1687,7 @@
   };
 
   (l).array = (l).toArray = function () {
-    var args = (l).__args(arguments, {'*' : ':object'}), ret = [];
+    var args = (l).__args(arguments, {'*' : ':*'}), ret = [];
     if (args.length > 1) {
       for (var i = 0; i < args.length; i++) {
         (l).each(args[i], function (index, value) { ret.push(value); });
