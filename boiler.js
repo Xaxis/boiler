@@ -97,15 +97,40 @@
     if (typeTest(types) === "array") {
       for (var t = 0; t < types.length; t++) {
         for (var d in types[t]) {
-          var typeValue = "";
-          if (typeTest(types[t][d]) === "array") {
-            if (types[t][d].length === 2) {
-              typeValue = types[t][d][1];
+          if (types[t].hasOwnProperty(d)) {
+            var typeValue = "";
+            if (typeTest(types[t][d]) === "array") {
+              if (types[t][d].length === 2) {
+                typeValue = types[t][d][1];
+              } else {
+                typeValue = typeTest(types[t][d][0]);
+              }
             } else {
-              typeValue = typeTest(types[t][d][0]);
+              typeValue = types[t][d];
+            }
+            defs.push({
+              name : d,
+              type : typeValue,
+              order : [],
+              set : false
+            });
+          }
+        }
+      }
+
+      // Build definitions object from types OBJECT
+    } else if (typeTest(types) === "object") {
+      for (var d in types) {
+        if (types.hasOwnProperty(d)) {
+          var typeValue = "";
+          if (typeTest(types[d]) === "array") {
+            if (types[d].length === 2) {
+              typeValue = types[d][1];
+            } else {
+              typeValue = typeTest(types[d][0]);
             }
           } else {
-            typeValue = types[t][d];
+            typeValue = types[d];
           }
           defs.push({
             name : d,
@@ -115,35 +140,16 @@
           });
         }
       }
-
-      // Build definitions object from types OBJECT
-    } else if (typeTest(types) === "object") {
-      for (var d in types) {
-        var typeValue = "";
-        if (typeTest(types[d]) === "array") {
-          if (types[d].length === 2) {
-            typeValue = types[d][1];
-          } else {
-            typeValue = typeTest(types[d][0]);
-          }
-        } else {
-          typeValue = types[d];
-        }
-        defs.push({
-          name : d,
-          type : typeValue,
-          order : [],
-          set : false
-        });
-      }
     }
 
     // Get ORDER data from `args` when an object literal
     if (typeTest(args) === "object") {
       var clone = [];
       for (var d in args) {
-        clone.push(args[d][0]);
-        defs[d].order = args[d][1];
+        if (args.hasOwnProperty(d)) {
+          clone.push(args[d][0]);
+          defs[d].order = args[d][1];
+        }
       }
       args = clone;
     }
@@ -160,7 +166,9 @@
     // Remove all UNDEFINED values from `args` array
     var clone = [];
     for (var a in args) {
-      if (typeTest(args[a]) !== 'undefined') clone.push(args[a]);
+      if (args.hasOwnProperty(a)) {
+        if (typeTest(args[a]) !== 'undefined') clone.push(args[a]);
+      }
     }
     args = clone;
 
@@ -290,7 +298,7 @@
   };
 
   (l).each = (l).forEach = function (obj, fn, scope) {
-    var args = (l).__args({0 : [obj, [0]], 1 : [fn, [0, 1]], 2 : [scope, [1, 2]]}, {obj : 'object|array', fn : 'function', scope : 'object|function|defaultobject'});
+    var args = (l).__args({0 : [obj, [0]], 1 : [fn, [0, 1]], 2 : [scope, [1, 2]]}, {obj : 'object|array|defaultobject', fn : 'function', scope : 'object|function|defaultobject'});
     if (args.obj === null) return;
     if ((l).isArray(args.obj)) {
       for (var i = 0; i < args.obj.length; i++) {
