@@ -297,6 +297,136 @@
     return oargs;
   };
 
+  /* ARRAY METHODS */
+
+  (l).at = function (arr, index) {
+    return (l).filter(arr, function (value, key) {
+      if ((l).isArray(index)) {
+        for (var i = 0; i < index.length; i++) { if (index[i] === key) return true; }
+      } else if ((l).isNumber(index)) { if (key === index) return true; }
+      return false;
+    });
+  };
+
+  (l).compact = function (arr, all) {
+    return (l).filter(arr, function (value) {
+      if (!all) {
+        if (!(l).isFalsy(value) || ( ( (l).isPlainObject(value) || (l).isArray(value) ) && (l).len(value) === 0 )) return value;
+      } else if (!(l).isFalsy(value) && !(l).isEmpty(value)) {
+        return value;
+      }
+    });
+  };
+
+  (l).difference = function () {
+    var arrs = [], rest;
+    (l).each(arguments, function (index, value) { if ((l).isArray(value)) arrs.push(value); });
+    rest = Array.prototype.concat.apply(Array.prototype, Array.prototype.slice.call(arrs, 1));
+    return (l).filter((l).uniq(arrs[0]), function (value) {
+      return !(l).inArray(rest, value);
+    });
+  };
+
+  (l).first = function (arr, n) {
+    var n = n ? n : 1, i = 0, ret = [];
+    for (; i < n; i++) { ret.push(arr[i]); }
+    return ret;
+  };
+
+  (l).indexOf = (l).firstIndexOf = function (arr, value, from) {
+    var i = from || 0;
+    for (; i < arr.length; i++) {
+      if ((l).isEqual(arr[i], value)) return i;
+    }
+  };
+
+  (l).initial = function (arr, n) {
+    var n = n ? arr.length - n : arr.length - 1, i = 0, ret = [];
+    for (; i < n; i++) { ret.push(arr[i]); }
+    return ret;
+  };
+
+  (l).intersection = function () {
+    var arrs, rest;
+    arrs = (l).filter((l).toArray(arguments), function (value) { if ((l).isArray(value)) return true; });
+    rest = Array.prototype.slice.call(arrs, 1);
+    return (l).filter((l).uniq(arrs[0]), function (item) {
+      return (l).every(rest, function (other) {
+        return (l).indexOf(other, item) >= 0;
+      });
+    });
+  };
+
+  (l).last = function (arr, n) {
+    var n = n ? arr.length - n : arr.length - 1, i = arr.length, ret = [];
+    for (; n < i; n++) { ret.push(arr[n]); }
+    return ret;
+  };
+
+  (l).lastIndexOf = function (arr, value, from) {
+    var i = from ? (arr.length - from) : arr.length;
+    while (i--) { if ((l).isEqual(arr[i], value)) return i; }
+    return -1;
+  };
+
+  (l).object = (l).toObject = function () {
+    var arrs = [], keys = [], ret = {}, allArrays = true, i;
+    (l).each(arguments, function (index, value) {
+      if ((l).isArray(value)) arrs.push(value);
+      else allArrays = false;
+    });
+    if (arrs.length === 2) {
+      keys = arrs[1];
+      (l).each(arrs[0], function (index, value) { ret[ value ] = keys[index]; });
+    } else if ( allArrays && arrs.length > 1 ) {
+      for (i = 0; i < arrs.length; i ++) {
+        var key = arrs[i][0];
+        ret[key] = arrs[i][1];
+      }
+    } else {
+      for (i = 0; i < arrs[0].length; i += 2) {
+        ret[arrs[0][i]] = arrs[0][i + 1];
+      }
+    }
+    return ret;
+  };
+
+  (l).rest = (l).tail = function (arr, n) {
+    var n = n ? n : 1, i = arr.length, ret = [];
+    for (; n < i; n++) { ret.push(arr[n]); }
+    return ret;
+  };
+
+  (l).union = function () {
+    return (l).uniq((l).flatten((l).toArray(arguments)));
+  };
+
+  (l).uniq = (l).unique = function (arr, fn, scope) {
+    var ret = [], seen = [], target;
+    target = fn ? (l).map(arr, fn, scope) : arr;
+    (l).each(target, function (index, value) {
+      if (!(l).contains(seen, value)) {
+        seen.push(value);
+        ret.push(value);
+      }
+    });
+    return ret;
+  };
+
+  (l).without = (l).exclude = function (arr, values) {
+    return (l).filter(arr, function (value) {
+      for (var i = 0; i < values.length; i++) { if ((l).isEqual(values[i], value)) return false; }
+      return true;
+    });
+  };
+
+  (l).zip = function () {
+    var i = 0, ret = [], arrs;
+    arrs = (l).filter((l).toArray(arguments), function (value) { if ((l).isArray(value)) return true; });
+    for (; i < arrs[0].length; i++) { ret[i] = (l).pluck(arrs, "" + i); }
+    return ret;
+  };
+
   (l).each = (l).forEach = function (obj, fn, scope) {
     var args = (l).__args({0 : [obj, [0]], 1 : [fn, [0, 1]], 2 : [scope, [1, 2]]}, {obj : '*', fn : 'function', scope : 'object|function|defaultobject'});
     if (args.obj === null) return;
@@ -1482,62 +1612,6 @@
     return args.str;
   };
 
-  (l).at = function (obj, index) {
-    var args = (l).__args({0 : [obj, [0]], 1 : [index, [0, 1]]}, [
-      {obj : 'array'},
-      {index : 'array|number'}
-    ]);
-    return (l).filter(args.obj, function (value, index) {
-      if ((l).isArray(args.index)) {
-        for (var i = 0; i < args.index.length; i++) {
-          if (args.index[i] === index) return true;
-        }
-      } else if ((l).isNumber(args.index)) {
-        if (index === args.index) return true;
-      }
-      return false;
-    });
-  };
-
-  (l).first = function () {
-    var args = (l).__args(arguments, {obj : 'array', n : 'number'}),
-        n = args.n ? args.n : 1, i = 0, ret = [];
-    for (; i < n; i++) { ret.push(args.obj[i]); }
-    return ret;
-  };
-
-  (l).initial = function () {
-    var args = (l).__args(arguments, {obj : 'array', n : 'number'}),
-        n = args.n ? args.obj.length - args.n : args.obj.length - 1, i = 0, ret = [];
-    for (; i < n; i++) { ret.push(args.obj[i]); }
-    return ret;
-  };
-
-  (l).last = function () {
-    var args = (l).__args(arguments, {obj : 'array', n : 'number'}),
-        n = args.n ? args.obj.length - args.n : args.obj.length - 1, i = args.obj.length, ret = [];
-    for (; n < i; n++) { ret.push(args.obj[n]); }
-    return ret;
-  };
-
-  (l).rest = (l).tail = function () {
-    var args = (l).__args(arguments, {obj : 'array', n : 'number'}),
-        n = args.n ? args.n : 1, i = args.obj.length, ret = [];
-    for (; n < i; n++) { ret.push(args.obj[n]); }
-    return ret;
-  };
-
-  (l).compact = function () {
-    var args = (l).__args(arguments, {obj : 'array', all : 'bool'});
-    return (l).filter(args.obj, function (value) {
-      if (!args.all) {
-        if (!(l).isFalsy(value) || ( ( (l).isPlainObject(value) || (l).isArray(value) ) && (l).len(value) === 0 )) return value;
-      } else if (!(l).isFalsy(value) && !(l).isEmpty(value)) {
-        return value;
-      }
-    });
-  };
-
   (l).flatten = function () {
     var args = (l).__args(arguments, {obj : 'array|object', n : 'number|string'}),
         n = args.n ? args.n : "*", ret = [], type = (l).type(args.obj);
@@ -1563,81 +1637,6 @@
           break;
       }
     }, n);
-    return ret;
-  };
-
-  (l).without = (l).exclude = function (obj, values) {
-    var args = (l).__args({0 : [obj, [0]], 1 : [values, [0, 1]]}, [
-      {obj : 'array'},
-      {values : 'array'}
-    ]);
-    return (l).filter(args.obj, function (value) {
-      for (var i = 0; i < args.values.length; i++) {
-        if ((l).isEqual(args.values[i], value)) return false;
-      }
-      return true;
-    });
-  };
-
-  (l).uniq = (l).unique = function (obj, fn, scope) {
-    var args = (l).__args({0 : [obj, [0]], 1 : [fn, [0, 1]], 2 : [scope, [1, 2]]}, [
-          {obj : 'array'},
-          {fn : 'function'},
-          {scope : 'object|function|defaultobject'}
-        ]),
-        ret = [], seen = [], target;
-    target = args.fn ? (l).map(args.obj, args.fn, args.scope) : args.obj;
-    (l).each(target, function (index, value) {
-      if (!(l).contains(seen, value)) {
-        seen.push(value);
-        ret.push(value);
-      }
-    });
-    return ret;
-  };
-
-  (l).union = function () {
-    var args = (l).__args(arguments, {'*' : ':*'});
-    return (l).uniq((l).flatten((l).toArray(args)));
-  };
-
-  (l).intersection = function () {
-    var args = (l).__args(arguments, {'*' : 'arr:array'}),
-        arrs = [], rest;
-
-    // Put passed arrays into arrs array
-    (l).each(args, function (index, value) {
-      if (index !== "obj" && index !== "length") arrs.push(value);
-    });
-
-    // Make sure target array is first element
-    rest = Array.prototype.slice.call(arrs, 1);
-    return (l).filter((l).uniq(arrs[0]), function (item) {
-      return (l).every(rest, function (other) {
-        return (l).indexOf(other, item) >= 0;
-      });
-    });
-  };
-
-  (l).difference = function () {
-    var args = (l).__args(arguments, {'*' : 'arr:array'}),
-        arrs = [], rest;
-    (l).each(args, function (index, value) {
-      if (index !== "obj" && index !== "length") arrs.push(value);
-    });
-    rest = Array.prototype.concat.apply(Array.prototype, Array.prototype.slice.call(arrs, 1));
-    return (l).filter((l).uniq(arrs[0]), function (value) {
-      return !(l).inArray(rest, value);
-    });
-  };
-
-  (l).zip = function () {
-    var args = (l).__args(arguments, {'*' : 'arr:array'}),
-        i = 0, arrs = [], ret = [];
-    (l).each(args, function (index, value) {
-      if (index !== "obj" && index !== "length") arrs.push(value);
-    });
-    for (; i < arrs[0].length; i++) { ret[i] = (l).pluck(arrs, "" + i); }
     return ret;
   };
 
@@ -1679,56 +1678,6 @@
       (l).each(args[0], function (index, value) { ret.push(value); });
     }
     return ret;
-  };
-
-  (l).object = (l).toObject = function () {
-    var args = (l).__args(arguments, {'*' : ':*'}),
-        arrs = [], keys = [], ret = {}, allArrays = true;
-    (l).each(args, function (index, value) {
-      if ((l).isArray(value)) {
-        arrs.push(value);
-      } else {
-        allArrays = false;
-      }
-    });
-    if (arrs.length === 2) {
-      keys = arrs[1];
-      (l).each(arrs[0], function (index, value) { ret[ value ] = keys[index]; });
-    } else if ( allArrays ) {
-      for (var i = 0; i < arrs.length; i ++) {
-        var key = arrs[i][0];
-        var val = arrs[i][1];
-        ret[ key ] = val;
-      }
-    } else {
-      for (var i = 0; i < args.length; i += 2) { ret[ args[i] ] = args[i + 1]; }
-    }
-    return ret;
-  };
-
-  (l).lastIndexOf = function (obj, value, from, first) {
-    var args = (l).__args({0 : [obj, [0]], 1 : [value, [0, 1]], 2 : [from, [1, 2]], 3 : [first, [1, 2, 3]]}, [
-      {obj : 'array'},
-      {value : '*'},
-      {from : 'number'},
-      {first : 'bool'}
-    ]);
-    if (args.first) {
-      var i = args.from || 0;
-      for (; i < args.obj.length; i++) {
-        if ((l).isEqual(args.obj[i], args.value)) return i;
-      }
-    } else {
-      var i = (args.obj.length - args.from) || args.obj.length;
-      while (i--) {
-        if ((l).isEqual(args.obj[i], args.value)) return i;
-      }
-    }
-    return -1;
-  };
-
-  (l).indexOf = (l).firstIndexOf = function (obj, value, from) {
-    return (l).lastIndexOf(obj, value, from, true);
   };
 
   (l).sortBy = function (obj, fn, scope) {
