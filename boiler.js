@@ -641,99 +641,82 @@
     }) ? true : false;
   };
 
-  (l).isString = function () {
-    var args = (l).__args(arguments, {obj : '*'});
-    return typeof args.obj === "string" && {}.toString.call(args.obj) === "[object String]";
+  (l).isString = function (obj) {
+    return typeof obj === "string" && {}.toString.call(obj) === "[object String]";
   };
 
-  (l).isArray = function () {
-    var args = (l).__args(arguments, {obj : '*'});
-    return {}.toString.call(args.obj) === "[object Array]";
+  (l).isArray = function (obj) {
+    return {}.toString.call(obj) === "[object Array]";
   };
 
-  (l).isBool = function () {
-    var args = (l).__args(arguments, {obj : '*'});
-    return {}.toString.call(args.obj) === "[object Boolean]";
+  (l).isBool = function (obj) {
+    return {}.toString.call(obj) === "[object Boolean]";
   };
 
-  (l).isNull = function () {
-    var args = (l).__args(arguments, {obj : '*'});
-    return {}.toString.call(args.obj) === "[object Null]";
+  (l).isNull = function (obj) {
+    return {}.toString.call(obj) === "[object Null]";
   };
 
-  (l).isNumber = function () {
-    var args = (l).__args(arguments, {obj : '*'});
-    return {}.toString.call(args.obj) === "[object Number]";
+  (l).isNumber = function (obj) {
+    return {}.toString.call(obj) === "[object Number]";
   };
 
-  (l).isFunction = function () {
-    var args = (l).__args(arguments, {obj : '*'});
-    return {}.toString.call(args.obj) === "[object Function]";
+  (l).isFunction = function (obj) {
+    return {}.toString.call(obj) === "[object Function]";
   };
 
-  (l).isArguments = function () {
-    var args = (l).__args(arguments, {obj : '*'});
-    return {}.toString.call(args.obj) === "[object Arguments]";
+  (l).isArguments = function (obj) {
+    return {}.toString.call(obj) === "[object Arguments]";
   };
 
-  (l).isUndefined = function () {
-    var args = (l).__args(arguments, {obj : '*'});
-    return typeof args.obj === "undefined";
+  (l).isUndefined = function (obj) {
+    return typeof obj === "undefined";
   };
 
-  (l).isDate = function () {
-    var args = (l).__args(arguments, {obj : '*'});
-    return {}.toString.call(args.obj) === "[object Date]" || args.obj instanceof Date;
+  (l).isDate = function (obj) {
+    return {}.toString.call(obj) === "[object Date]" || obj instanceof Date;
   };
 
-  (l).isRegExp = function () {
-    var args = (l).__args(arguments, {obj : '*'});
-    return {}.toString.call(args.obj) === "[object RegExp]" || args.obj instanceof RegExp;
+  (l).isRegExp = function (obj) {
+    return {}.toString.call(obj) === "[object RegExp]" || obj instanceof RegExp;
   };
 
-  (l).isPlainObject = function () {
-    var args = (l).__args(arguments, {obj : '*'});
-    return typeof args.obj === "object" && {}.toString.call(args.obj) === "[object Object]";
+  (l).isPlainObject = function (obj) {
+    return typeof obj === "object" && {}.toString.call(obj) === "[object Object]";
   };
 
-  (l).isObject = function () {
-    var args = (l).__args(arguments, {obj : '*'});
-    return typeof args.obj === "object";
+  (l).isObject = function (obj) {
+    return typeof obj === "object";
   };
 
-  (l).isElement = function () {
-    var args = (l).__args(arguments, {obj : '*'});
-    return typeof args.obj === "object" ? args.obj instanceof HTMLElement :
-        args.obj && typeof args.obj === "object" && args.obj.nodeType === 1 && typeof args.obj.nodeName === "string";
+  (l).isElement = function (obj) {
+    return typeof obj === "object" ? obj instanceof HTMLElement :
+        obj && typeof obj === "object" && obj.nodeType === 1 && typeof obj.nodeName === "string";
   };
 
-  (l).isNaN = function () {
-    var args = (l).__args(arguments, {obj : '*'});
-    return typeof args.obj === "number" && args.obj !== args.obj;
+  (l).isNaN = function (obj) {
+    return typeof obj === "number" && obj !== obj;
   };
 
-  (l).isFinite = function () {
-    var args = (l).__args(arguments, {obj : '*'});
-    return args.obj === Infinity || args.obj === -Infinity;
+  (l).isFinite = function (obj) {
+    return obj === Infinity || obj === -Infinity;
   };
 
-  (l).isEmpty = function () {
-    var args = (l).__args(arguments, {obj : 'object|array'});
+  (l).isEmpty = function (obj) {
     return (
-        ( (l).isPlainObject(args.obj) && (l).len(args.obj) === 0) ||
-            ( (l).isArray(args.obj) && args.obj.length === 0 )
+        ( (l).isPlainObject(obj) && (l).len(obj) === 0) ||
+            ( (l).isArray(obj) && obj.length === 0 )
         );
   };
 
-  (l).isFalsy = function () {
-    var args = (l).__args(arguments, {obj : '*'});
+  (l).isFalsy = function (obj) {
     return (
-        (l).isUndefined(args.obj) ||
-            (l).isNull(args.obj) ||
-            (l).isNaN(args.obj) ||
-            args.obj === "" ||
-            args.obj === 0 ||
-            ( (l).isBool(args.obj) && Boolean(args.obj) === false )
+        (l).isUndefined(obj) ||
+            (l).isNull(obj) ||
+            (l).isNaN(obj) ||
+            obj === "" ||
+            obj === 0 ||
+            ( (l).isBool(obj) && Boolean(obj) === false )
         );
   };
 
