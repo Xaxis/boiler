@@ -1136,26 +1136,20 @@
   /* NUMBER METHODS */
 
   (l).range = function (start, stop, step) {
-    var args = (l).__args({0 : [start, [0]], 1 : [stop, [0, 1]], 2 : [step, [1, 2]]}, [
-          {start : 'number'},
-          {stop : 'number'},
-          {step : 'number'}
-        ]),
-        i = 0, ret = [];
-    var len = Math.max(Math.ceil((args.stop - args.start) / args.step), 0);
+    var i = 0, ret = [];
+    var len = Math.max(Math.ceil((stop - start) / step), 0);
     while (i < len) {
-      ret[ i++ ] = args.start;
-      args.start += args.step;
+      ret[ i++ ] = start;
+      start += step;
     }
     return ret;
   };
 
-  (l).uniqueId = function() {
-    var args = (l).__args(arguments, {prefix:["", 'number|string']}),
-        self = (l).uniqueId;
-    if ( !('uuids' in self) ) self.uuids = [];
-    var newId = args.prefix + Math.floor((1 + Math.random()) * 0x10000).toString(10).substring(1);
-    if ( !(l).inArray(self.uuids, newId) ) {
+  (l).uniqueId = function(prefix) {
+    var prefix = prefix || "", self = (l).uniqueId;
+    if (!('uuids' in self)) self.uuids = [];
+    var newId = prefix + Math.floor((1 + Math.random()) * 0x10000).toString(10).substring(1);
+    if (!(l).inArray(self.uuids, newId)) {
       self.uuids.push(newId);
       return newId;
     } else {
