@@ -966,81 +966,72 @@
       var scope = this, fargs = arguments;
       var next = function () {
         timeout = null;
-        if (!args.edge) res = args.fn.apply(scope, fargs);
+        if (!edge) res = fn.apply(scope, fargs);
       };
-      var ready = args.edge && !timeout;
+      var ready = edge && !timeout;
       clearTimeout(timeout);
       timeout = setTimeout(next, args.n);
-      if (ready) res = args.fn.apply(scope, fargs);
+      if (ready) res = fn.apply(scope, fargs);
       return res;
     };
   };
 
-  (l).defer = function () {
-    var args = (l).__args(arguments, {fn : 'function'});
-    return (l).delay.call(this, args.fn, 0);
+  (l).defer = function (fn) {
+    return (l).delay.call(this, fn, 0);
   };
 
-  (l).delay = function () {
-    var args = (l).__args(arguments, {fn : 'function', ms : 'number'});
+  (l).delay = function (fn, ms) {
     return function () {
       var fargs = arguments;
       setTimeout(function () {
-        return args.fn.apply(null, fargs);
-      }, args.ms);
+        return fn.apply(null, fargs);
+      }, ms);
     }
   };
 
-  (l).fill = (l).partial = function () {
-    var args = (l).__args(arguments, {fn : 'function', fargs : 'array'});
+  (l).fill = (l).partial = function (fn, args) {
     return function () {
-      for (var i = 0; i < arguments.length; i++) { args.fargs.push(arguments[i]); }
-      return args.fn.apply(this, args.fargs);
+      for (var i = 0; i < arguments.length; i++) { args.push(arguments[i]); }
+      return fn.apply(this, args);
     };
   };
 
   (l).memoize = function (fn, hash) {
-    var args = (l).__args({0 : [fn, [0]], 1 : [hash, [1]]}, [
-          {fn : 'function'},
-          {hash : 'function'}
-        ]),
-        memo = {};
-    args.hash || (args.hash = (l).identity);
+    var memo = {};
+    hash = hash || (l).identity;
     return function () {
-      var key = args.hash.apply(this, arguments);
-      return (l).has(memo, key) ? memo[key] : (memo[key] = args.fn.apply(this, arguments));
+      var key = hash.apply(this, arguments);
+      return (l).has(memo, key) ? memo[key] : (memo[key] = fn.apply(this, arguments));
     };
   };
 
-  (l).once = function () {
-    var args = (l).__args(arguments, {fn : 'function'});
-    args.fn.n = args.fn.once = 1;
+  (l).once = function (fn) {
+    fn.n = fn.once = 1;
     return function () {
-      if (args.fn.n) {
-        args.fn.n--;
-        return args.fn.apply(this, arguments);
+      if (fn.n) {
+        fn.n--;
+        return fn.apply(this, arguments);
       }
     };
   };
 
-  (l).throttle = function () {
-    var args = (l).__args(arguments, {fn : 'function', ms : 'number'}),
-        scope, last, timeout, fargs, ret, res, later;
+  (l).throttle = function (fn, ms) {
+    var scope, last, timeout, fargs, ret, res, later;
     later = function () {
       last = new Date;
       timeout = null;
-      ret = args.fn.apply(scope, fargs);
+      ret = fn.apply(scope, fargs);
     };
     return function () {
       var now = new Date();
-      var left = args.ms - (now - last);
+      var left = ms - (now - last);
       scope = this;
       fargs = arguments;
       if (left <= 0) {
         clearTimeout(timeout);
         timeout = null;
         last = now;
-        res = args.fn.apply(scope, fargs);
+        res = fn.apply(scope, fargs);
       } else if (!timeout) {
         timeout = setTimeout(later, left);
       }
@@ -1048,23 +1039,16 @@
     }
   };
 
-  (l).times = function () {
-    var args = (l).__args(arguments, {fn : 'function', n : 'number'});
-    args.fn.n = args.n;
-    return function () {
-      for (var i = 0; i < args.fn.n; i++) { args.fn.apply(this, arguments); }
-    };
+  (l).times = function (fn, n) {
+    fn.n = n;
+    return function () { for (var i = 0; i < fn.n; i++) { fn.apply(this, arguments); } };
   };
 
   (l).wrap = function (fn, wrapper) {
-    var args = (l).__args({0 : [fn, [0]], 1 : [wrapper, [1]]}, [
-      {fn : 'function'},
-      {wrapper : 'function'}
-    ]);
     return function () {
-      var fargs = [args.fn];
-      fargs.push.apply(fargs, arguments);
-      return args.wrapper.apply(this, fargs);
+      var args = [fn];
+      args.push.apply(args, arguments);
+      return wrapper.apply(this, args);
     };
   };
 
@@ -1651,7 +1635,7 @@
 
   // Attach library's methods to its prototype
   (l).each((l).filter((l).keys((l)), function (value) {
-    if (!(l).inArray(['_version', '__args'], value)) return true;
+    if (!(l).inArray(['_version'], value)) return true;
   }), function (index, name) {
     var fn = (l)[name];
     (l).prototype[name] = function () {
