@@ -1668,12 +1668,11 @@
 
   /* STRING METHODS */
 
-  (l).fromQueryString = function () {
-    var args = (l).__args(arguments, {obj : 'string', deep : 'bool'}),
-        ret = {}, parts;
-    (l).each(decodeURIComponent(args.obj).split("&"), function (index, value) {
+  (l).fromQueryString = function (str, deep) {
+    var ret = {}, parts;
+    (l).each(decodeURIComponent(str).split("&"), function (index, value) {
       parts = value.split("=");
-      if (parts[0].match(/\[\]/g) && args.deep) {
+      if (parts[0].match(/\[\]/g) && deep) {
         parts[0] = parts[0].replace(/\[\]/g, '');
         if (parts[0] in ret) {
           ret[ parts[0] ].push(parts[1]);
@@ -1687,30 +1686,28 @@
     return ret;
   };
 
-  (l).htmlEncode = function () {
-    var args = (l).__args(arguments, {str : 'string'});
+  (l).htmlEncode = function (str) {
     var entities = {
       '\u0026':['amp'], '\u0022':['quot'], '\u0027':['apos'], '\u003C':['lt'],
       '\u003E':['gt'], '\u00A0':['nbsp'], '/':['#x2F']
     };
     for (var e in entities) {
       var entity = new RegExp(e, 'g');
-      args.str = args.str.replace(entity, '&' + entities[e][0] + ';');
+      str = str.replace(entity, '&' + entities[e][0] + ';');
     }
-    return args.str;
+    return str;
   };
 
-  (l).htmlDecode = function () {
-    var args = (l).__args(arguments, {str : 'string'});
+  (l).htmlDecode = function (str) {
     var entities = {
       '&quot;':['\"'], '&amp;':['&'], '&apos;':["'"], '&lt;':['<'],
       '&gt;':['>'], '&nbsp;':[' '], '&#x2F;':['/']
     };
     for (var e in entities) {
       var entity = new RegExp(e, 'g');
-      args.str = args.str.replace(entity, entities[e][0]);
+      str = str.replace(entity, entities[e][0]);
     }
-    return args.str;
+    return str;
   };
 
   /* UTILITY METHODS */
