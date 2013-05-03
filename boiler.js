@@ -20,7 +20,7 @@
   // Library definition
   (l) = window[l] = function (obj) {
     var args = [];
-    for (var i = 0; i < arguments.length; i++) { args.push(arguments[i]); }
+    for (var i = 0; i < arguments.length; i++) { push(arguments[i]); }
     (l)._global = args;
     (l)._wrapped = obj;
     if (obj instanceof (l)) return obj;
@@ -30,7 +30,7 @@
   // Library version
   (l)._version = "0.5.3";
 
-  // Documentation: https://github.com/Xaxis/args.js/blob/master/args/args.js
+  // Documentation: https://github.com/Xaxis/js/blob/master/args/args.js
   (l).__args = function (args, types, rules) {
 
     // The arguments object
@@ -515,8 +515,8 @@
     return ret;
   };
 
-  (l).countBy = function (col, map, scope, index) {
-    return (l).groupBy(col, map, scope || this, true, index);
+  (l).countBy = function (col, map, scope) {
+    return (l).groupBy(col, map, scope || this, true);
   };
 
   (l).deep = function (col, fn, depth, args, noArrays) {
@@ -605,35 +605,15 @@
     return ret;
   };
 
-  (l).groupBy = function (obj, map, scope, count, key) {
-    var args = (l).__args({0 : [obj, [0]], 1 : [map, [0, 1]], 2 : [scope, [1, 2]], 3 : [count, [2, 3]], 4 : [key, [4]]}, [
-          {obj : 'array|object'},
-          {map : 'function|string'},
-          {scope : 'function|object|defaultobject'},
-          {count : 'bool'},
-          {key : 'bool'}
-        ]),
-        res = {};
-    (l).each(args.obj, function (index, value) {
-      var key = (l).isString(args.map) ? value[args.map] : args.map.call(args.scope || this, value, index, args.obj);
-      if ((l).has(res, key)) {
-        res[key].push(value);
-      } else {
-        res[key] = [value];
-      }
+  (l).groupBy = function (col, map, scope, count) {
+    count = count || (l).isBool(scope) ? scope : false;
+    var res = {};
+    (l).each(col, function (index, value) {
+      var key = (l).isString(map) ? value[map] : map.call(scope || this, value, index, col);
+      if ((l).has(res, key)) res[key].push(value);
+      else res[key] = [value];
     });
-    if (args.count) {
-      (l).each(res, function (index, value) {
-        if (args.key) {
-          res[index] = {};
-          res[index].len = value.length;
-          res[index].val = value;
-          res[index].key = index;
-        } else {
-          res[index] = value.length;
-        }
-      });
-    }
+    if (count) { (l).each(res, function (index, value) { res[index] = value.length; }); }
     return res;
   };
 
@@ -701,26 +681,17 @@
     return keys;
   };
 
-  (l).least = function () {
-    var args = (l).__args(arguments, {obj : 'object|array', fn : 'function|string', most : 'bool'}),
-        comparator, result, ret, leastValue;
-    if ((l).isString(args.fn)) {
-      result = (l).countBy(args.obj, function (p) {
-        return p[args.fn];
-      });
-      comparator = (l).countBy(args.obj, function (p) {
-        return p[args.fn];
-      }, this, true);
+  (l).least = function (col, fn, most) {
+    var comparator, result, ret, leastValue;
+    if ((l).isString(fn)) {
+      result = (l).countBy(col, function (p) { return p[fn]; });
+      comparator = (l).countBy(col, function (p) { return p[fn]; }, this, true);
     }
     else {
-      result = (l).countBy(args.obj, args.fn || function (num) {
-        return num;
-      });
-      comparator = (l).countBy(args.obj, args.fn || function (num) {
-        return num;
-      }, this, true);
+      result = (l).countBy(col, fn || function (num) { return num; });
+      comparator = (l).countBy(col, fn || function (num) { return num; }, this, true);
     }
-    leastValue = (args.most) ? [(l).max(result)] : [(l).min(result)];
+    leastValue = (most) ? [(l).max(result)] : [(l).min(result)];
     (l).each(result, function (index, value) {
       if (leastValue[0] == value) {
         ret = comparator[index].val[0];
@@ -730,16 +701,15 @@
     return ret;
   };
 
-  (l).len = function (obj, deep, count) {
-    var args = (l).__args([obj, deep], {obj : 'object|array', deep : 'bool'}),
-        count = count ? (count += (l).keys(args.obj).length) : (l).keys(args.obj).length, o;
-    if (args.deep) {
-      for (o in args.obj) {
-        if ((l).isPlainObject(args.obj[o]) || (l).isArray(args.obj[o])) {
-          var ret = (l).len(args.obj[o], args.deep, count);
-          if ((l).type(args.obj[o]) === "array") {
+  (l).len = function (col, deep, count) {
+    var count = count ? (count += (l).keys(col).length) : (l).keys(col).length;
+    if (deep) {
+      for (var o in col) {
+        if ((l).isPlainObject(col[o]) || (l).isArray(col[o])) {
+          var ret = (l).len(col[o], deep, count);
+          if ((l).type(col[o]) === "array") {
             return ret - 1;
-          } else if ((l).type(args.obj[o]) === "object") {
+          } else if ((l).type(col[o]) === "object") {
             return ret;
           }
         }
@@ -748,24 +718,24 @@
     return count;
   };
 
-  (l).map = (l).collect = function (obj, fn, scope, deep) {
-    var args = (l).__args({0 : [obj, [0]], 1 : [fn, [0, 1]], 2 : [scope, [1, 2]], 3 : [deep, [0,1,2,3]]}, [{obj : '*'},{fn : 'function'},{scope : 'object|function|defaultobject'},{deep : 'bool'}]),
-        list = (l).isArray(args.obj) ? args.obj : (l).toArray(args.obj),
+  (l).map = (l).collect = function (col, fn, scope, deep) {
+    deep = deep || (l).isBool(scope) ? scope : false;
+    var list = (l).isArray(col) ? col : (l).toArray(col),
         ret = [];
-    if ( args.obj === null ) return ret;
-    if ( args.deep ) {
+    if ( col === null ) return ret;
+    if ( deep ) {
       (l).deep(list, function(depth, index, value, ref) {
         if ( !(l).isArray(value) && !(l).isPlainObject(value) ) {
-          if ((l).isArray(args.obj)) {
-            ret.push(args.fn.call(args.scope || this, value, index, ref));
+          if ((l).isArray(col)) {
+            ret.push(fn.call(scope || this, value, index, ref));
           } else {
-            ret[index] = args.fn.call(args.scope || this, value, index, ref);
+            ret[index] = fn.call(scope || this, value, index, ref);
           }
         }
-      }, args.deep ? "*" : 1);
+      }, deep ? "*" : 1);
     } else {
       (l).each(list, function(index, value, ref) {
-        ret.push(args.fn.call(args.scope || this, value, index, ref));
+        ret.push(fn.call(scope || this, value, index, ref));
       });
     }
     return ret;
@@ -791,22 +761,13 @@
     return (l).least(obj, fn, true);
   };
 
-  (l).none = function (obj, fn, scope, deep) {
-    var args = (l).__args({0 : [obj, [0]], 1 : [fn, [0, 1]], 2 : [scope, [1, 2]], 3 : [deep, [0,1,2,3]]}, [
-          {obj : 'object|array'},
-          {fn : 'function'},
-          {scope : 'function|object|defaultobject'},
-          {deep : 'bool'}
-        ]),
-        ret = true;
-    if ( args.deep ) {
-      (l).deep(args.obj, function(depth, index, value) {
-        if (args.fn.call(args.scope ? args.scope : this, value, index)) ret = false;
-      });
+  (l).none = function (col, fn, scope, deep) {
+    deep = deep || (l).isBool(scope) ? scope : false;
+    var ret = true;
+    if (deep) {
+      (l).deep(col, function(depth, index, value) { if (fn.call(scope ? scope : this, value, index)) ret = false; });
     } else {
-      (l).each(args.obj, function (index, value) {
-        if (args.fn.call(args.scope ? args.scope : this, value, index)) ret = false;
-      });
+      (l).each(col, function (index, value) { if (fn.call(scope ? scope : this, value, index)) ret = false; });
     }
     return ret;
   };
@@ -825,17 +786,9 @@
     });
   };
 
-  (l).reduce = (l).foldl = function (obj, fn, scope, right) {
-    var args = (l).__args({0 : [obj, [0]], 1 : [fn, [0, 1]], 2 : [scope, [1, 2]], 3 : [right, [1, 2, 3]]}, [
-          {obj : 'object|array'},
-          {fn : 'function'},
-          {scope : 'object|function|defaultobject'},
-          {right : 'bool'}
-        ]),
-        copy = args.obj, i = 0, base, keys, vals;
-
-    // When reducing from right, flip the list
-    if (args.right) {
+  (l).reduce = (l).foldl = function (col, fn, scope, right) {
+    var copy = col, i = 0, base, keys, vals;
+    if (right) {
       if ((l).isPlainObject(copy)) {
         keys = (l).keys(copy).reverse();
         vals = (l).values(copy).reverse();
@@ -844,11 +797,9 @@
         copy = copy.reverse();
       }
     }
-    base = (l).find(copy, function (value) {
-      return value;
-    });
+    base = (l).find(copy, function (value) { return value; });
     (l).each(copy, function (index, value) {
-      if (i !== 0) base = args.fn.call(args.scope || this, base, value, index);
+      if (i !== 0) base = fn.call(scope || this, base, value, index);
       i++;
     });
     return (l).isArray(base) ? base[0] : base;
@@ -994,22 +945,14 @@
   };
 
   (l).bindAll = function (obj, methods) {
-    var args = (l).__args({0 : [obj, [0]], 1 : [methods, [0, 1]]}, [
-      {obj : 'object'},
-      {methods : 'array|object'}
-    ]);
-    if (args.length === 1 && args.obj) {
-      (l).each(args.obj, function (f) {
-        if ((l).isFunction(args.obj[f])) args.obj[f] = (l).bind(args.obj[f], args.obj);
-      });
-    } else if (args.length === 2) {
-      (l).each(args.methods, function (f) { args.obj[f] = (l).bind(args.obj[f], args.obj); });
-    }
-    return args.obj;
+    if (arguments.length === 1 && obj) {
+      (l).each(obj, function (f) { if ((l).isFunction(obj[f])) obj[f] = (l).bind(obj[f], obj); });
+    } else if (arguments.length === 2) { (l).each(args.methods, function (f) { obj[f] = (l).bind(obj[f], obj); }); }
+    return obj;
   };
 
   (l).compose = function () {
-    var fns = (l).toArray((l).__args(arguments, {'*' : 'fns:function'}));
+    var fns = (l).filter((l).toArray(arguments), function(value) { if ((l).isFunction(value)) return true; });
     return function () {
       var args = arguments;
       for (var i = fns.length - 1; i >= 0; i--) { args = [fns[i].apply(this, args)]; }
@@ -1017,9 +960,8 @@
     };
   };
 
-  (l).debounce = function () {
-    var args = (l).__args(arguments, {fn : 'function', n : 'number', edge : 'bool'}),
-        res, timeout;
+  (l).debounce = function (fn, n, edge) {
+    var res, timeout;
     return function () {
       var scope = this, fargs = arguments;
       var next = function () {
