@@ -509,8 +509,7 @@
   (l).only = (l).whitelist = function (col, list) {
     var list = (l).isString(list) ? list.split(" ") : list;
     return (l).filter(col, function (value, index) {
-      console.log(list, index, (l).inArray(list, index));
-      if ((l).keyExists(list, value)) return true;
+      if ((l).inArray(list, index)) return true;
     });
   };
 
