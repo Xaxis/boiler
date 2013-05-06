@@ -533,7 +533,7 @@
   };
 
   (l).reduceRight = (l).foldr = function (col, fn, scope) {
-    return (l).reduce(col, fn, scope || this, true);
+    return (l).reduce((l).values(col), fn, scope || this, true);
   };
 
   (l).reject = function (col, fn, scope) {
@@ -543,11 +543,8 @@
   (l).remove = function (col, key) {
     var rest, from;
     if ((l).isPlainObject(col)) {
-      if ((l).isArray(key)) {
-        for (var i = 0; i < key.length; i++) { if (key[i] in col) delete col[key[i]]; }
-      } else {
-        if (key in col) delete col[key];
-      }
+      if ((l).isArray(key)) { for (var i = 0; i < key.length; i++) { if (key[i] in col) delete col[key[i]]; }
+      } else { if (key in col) delete col[key]; }
     } else if ((l).isArray(col)) {
       from = parseInt(key);
       rest = col.slice((from) + 1);
@@ -568,7 +565,8 @@
   };
 
   (l).set = function (col, key, value) {
-    return col[key] = value;
+    col[key] = value;
+    return col;
   };
 
   (l).setUndef = function (col, value) {
