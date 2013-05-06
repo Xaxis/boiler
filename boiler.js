@@ -1,5 +1,5 @@
 /**
- * boiler.js v0.5.3
+ * boiler.js v0.6.0
  * https://github.com/Xaxis/boiler.js
  * http://www.boilerjs.com
  * (c) 2012-2013 Wil Neeley, Trestle Media, LLC.
@@ -25,7 +25,7 @@
   };
 
   // Library version
-  (l)._version = "0.5.3";
+  (l)._version = "0.6.0";
 
   /* ARRAY METHODS */
 
@@ -224,9 +224,9 @@
   };
 
   (l).contains = (l).inArray = function (col, value) {
-    return (l).find(col, function (v) {
+    return (l).isEqual((l).find(col, function (v) {
       return (l).isEqual(v, value) ? true : false;
-    }) ? true : false;
+    }), value);
   };
 
   (l).count = function (col, fn, scope, deep) {
@@ -369,7 +369,7 @@
 
   (l).has = (l).keyExists = function (col, key) {
     return (l).findKey(col, function (index) {
-      return !!(key === index);
+      return !!(key == index);
     }) ? true : false;
   };
 
@@ -421,10 +421,10 @@
       result = (l).countBy(col, fn || function (num) { return num; });
       comparator = (l).countBy(col, fn || function (num) { return num; }, this, true);
     }
-    leastValue = (most) ? [(l).max(result)] : [(l).min(result)];
+    leastValue = most ? (l).max(result) : (l).min(result);
     (l).each(result, function (index, value) {
-      if (leastValue[0] == value) {
-        ret = comparator[index].val[0];
+      if (leastValue == value) {
+        ret = index;
         return false;
       }
     });
@@ -437,11 +437,8 @@
       for (var o in col) {
         if ((l).isPlainObject(col[o]) || (l).isArray(col[o])) {
           var ret = (l).len(col[o], deep, count);
-          if ((l).type(col[o]) === "array") {
-            return ret - 1;
-          } else if ((l).type(col[o]) === "object") {
-            return ret;
-          }
+          if ((l).type(col[o]) === "array") return ret - 1;
+          else if ((l).type(col[o]) === "object") return ret;
         }
       }
     }
@@ -511,8 +508,9 @@
 
   (l).only = (l).whitelist = function (col, list) {
     var list = (l).isString(list) ? list.split(" ") : list;
-    return (l).filter(list, function (index, value) {
-      if ((l).keyExists(col, value)) return true;
+    return (l).filter(col, function (value, index) {
+      console.log(list, index, (l).inArray(list, index));
+      if ((l).keyExists(list, value)) return true;
     });
   };
 
