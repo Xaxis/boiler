@@ -781,9 +781,12 @@
 
   (l).range = function (start, stop, step) {
     var i = 0, ret = [];
+    step = step || 1;
+    stop = stop || start;
+    start = (arguments.length == 1) ? 0 : start;
     var len = Math.max(Math.ceil((stop - start) / step), 0);
     while (i < len) {
-      ret[ i++ ] = start;
+      ret[i++] = start;
       start += step;
     }
     return ret;
