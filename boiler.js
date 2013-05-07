@@ -1240,6 +1240,8 @@
   (l).each(['array', 'object', 'function', 'string', 'bool', 'number', 'null', 'undefined', 'date', 'regexp', 'element', 'nan'],
       function (index, type) {
         (l)[ type + 's' ] = function (obj, key, deep) {
+          deep = (l).isBool(key) ? key : deep;
+          key = (l).isBool(key) ? undefined : key;
           return (l).getByType(obj, type, key, deep);
         };
       });
