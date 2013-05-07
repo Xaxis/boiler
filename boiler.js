@@ -626,8 +626,8 @@
     return ret;
   };
 
-  (l).tap = function (col, fn) {
-    return fn.call(this, col);
+  (l).tap = function (col, fn, scope) {
+    return fn.call(scope || this, col);
   };
 
   (l).where = function (col, matches, find) {
@@ -1077,103 +1077,10 @@
     return typeof obj === "undefined";
   };
 
-  (l).module = (l).build = function ( opts ) {
-    if (!opts.ns) throw Error('_.build(): Argument `ns` is missing or not a string.');
-    var members, o, list = opts.ns ? opts.ns.split(".") : [];
-    var ns = list ? list.shift() : (opts.ns || "");
-    obj = opts.obj || {};
-
-    // Build namespace object attaching it to the previous object recursively
-    obj[ns] = obj[ns] || {};
-    if (list.length) (l).module(obj[ns], list.join('.'), opts.members, opts.deep);
-
-    // Merge `members` object and its constructs onto namespace object `obj`
-    if (opts.ns.split(opts.ns.length - 1)[0] === ns && (l).isPlainObject(opts.members)) {
-
-      // Merge newly created object with members object
-      obj[ns] = (l).extend(obj[ns], opts.members, opts.deep);
-
-      // When members contains the `_extends` property
-      if ('_extends' in obj[ns]) {
-        if ((l).isArray(obj[ns]['_extends'])) {
-          var extensions = obj[ns]['_extends'];
-          delete obj[ns]['_extends'];
-          extensions.push(opts.deep);
-
-          // Extend newly created object with objects in the extensions array
-          extensions.unshift(obj[ns]);
-          (l).extend.apply(this, extensions);
-        }
-      }
-
-      // When members contains the `_retract` property
-      if ('_exposed' in obj[ns]) {
-
-        // Get the keys of objects to be exposed upon
-        var exposures = obj[ns]['_exposed'];
-        delete obj[ns]['_exposed'];
-
-        // Get the objects to expose properties on
-        var exposedObjects = [];
-        for (var e in exposures) {
-          var eObj = (l).get(obj[ns], exposures[e]);
-          if ((l).isPlainObject(eObj)) exposedObjects.push(eObj);
-        }
-
-        // Get the properties to extend onto the exposures
-        var members = {};
-        var propsArray = (l).getByType(obj[ns], "*", opts.deep);
-        for (var o in propsArray) {
-          members[o] = propsArray[o];
-        }
-
-        // Extend the exposed objects with properties
-        for (var o in obj[ns]) {
-          if ((l).isPlainObject(obj[ns][o]) && (l).inArray(exposures, o)) {
-            for (var e in members) {
-              var prop = members[e];
-              if (!(o in prop)) (l).extend(obj[ns][o], prop);
-            }
-          }
-        }
-      }
-
-      // When members contains the `_exposed` property
-      if ('_retract' in obj[ns]) {
-        var retractions = obj[ns]['_retract'];
-        members = (l).objects(obj[ns], opts.deep);
-
-        // Retract all children members referenced in the array
-        if ((l).isArray(obj[ns]['_retract'])) {
-          delete obj[ns]['_retract'];
-
-          // Get the children object members
-          (l).each(members, function (index, elm) {
-            for (o in elm) {
-
-              // If we encounter a retraction, parent "inherits" from children
-              if ((l).inArray(retractions, o)) (l).extend(obj[ns], elm[o], opts.deep);
-            }
-          });
-
-          // Retract only the children members targeted in the retraction object
-        } else if ((l).isPlainObject(obj[ns]['_retract'])) {
-          delete obj[ns]['_retract'];
-
-          // Get members that exist at referenced targets
-          var targets = [];
-          (l).each(members, function (index, elm) {
-            for (o in retractions) {
-              if ((l).isArray(retractions[o])) targets.push((l).get(elm, o));
-            }
-          });
-
-          // Selectively inherit from children
-          targets.unshift(obj[ns], opts.deep);
-          (l).extend.apply(obj[ns], targets);
-        }
-      }
-    }
+  (l).module = (l).build = function (ns, obj) {
+    var list = ns ? ns.split(".") : [], ns = list ? list.shift() : (ns || ""), obj = obj || {};
+    obj[ns] = {};
+    if (list.length) (l).module(list.join('.'), obj[ns]);
     return obj;
   };
 
