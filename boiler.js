@@ -916,7 +916,8 @@
   (l).getByType = function (obj, type, key, deep) {
     var stack = [];
     deep = deep || (l).isBool(key) ? key : (l).isBool(type) ? type : false;
-    type = type || '*';
+    key = !(l).isString(key) ? undefined : (l).isString(key) ? key : undefined;
+    type = !(l).isString(type) ? '*' : (l).isString(type) ? type : undefined;
 
     // Start search starting at key when given
     if (key && key !== "*") {
@@ -1242,6 +1243,7 @@
         (l)[ type + 's' ] = function (obj, key, deep) {
           deep = (l).isBool(key) ? key : deep;
           key = (l).isBool(key) ? undefined : key;
+          console.log(obj, type, key, deep);
           return (l).getByType(obj, type, key, deep);
         };
       });
