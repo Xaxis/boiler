@@ -259,7 +259,7 @@
       if (((l).isPlainObject(col[o]) || ((l).isArray(col[o])) && !noArrays)) {
         depth = (l).isString(depth) ? '*' : depth - 1;
         args = (l).tail(args, 4);
-        if (depth >= 0 || depth === '*') (l).deep(col[o], fn, depth, args, noArrays);
+        if (depth > 0 || depth === '*') (l).deep(col[o], fn, depth, args, noArrays);
       }
       args = (l).tail(args, 4);
     }
@@ -894,23 +894,9 @@
   };
 
   (l).get = function (obj, key) {
-    var ns = ( (l).type(key) !== "string" ) ? false : key.split("."), ret;
-    if (!key) return obj;
-    if (ns.length > 1) {
-      obj = (l).get(obj, ns.shift());
-      key = ns.pop();
-    }
-    if ((l).isPlainObject(obj)) {
-      if (key in obj) {
-        return obj[key];
-      } else {
-        for (var o in obj) {
-          if ((l).isPlainObject(obj[o])) {
-            if (ret = (l).get(obj[o], key)) return ret;
-          }
-        }
-      }
-    }
+    var ret = undefined;
+    (l).deep(obj, function(d,i,v,r) { if (key == i) ret = v; });
+    return ret;
   };
 
   (l).getByType = function (obj, type, key, deep) {
@@ -918,7 +904,7 @@
     deep = (l).isBool(key) ? key : deep;
     key = !(l).isString(key) ? undefined : (l).isString(key) ? key : undefined;
     type = !(l).isString(type) ? '*' : (l).isString(type) ? type : undefined;
-
+    console.log(type, key, deep);
     // Start search at key when given
     if (key && key !== '*') {
       obj = (l).get(obj, key);
