@@ -252,14 +252,14 @@
   (l).deep = function (col, fn, depth, args, noArrays) {
     noArrays = noArrays ? noArrays : (l).isBool(depth) ? depth : (l).isBool(args) ? args : false;
     args = (l).isArray(args) ? args : (l).isArray(depth) ? depth : [];
-    depth = (l).isString(depth) || (l).isNumber(depth) ? depth : '*';
+    depth = ((l).isString(depth) || (l).isNumber(depth)) ? depth : '*';
     for (var o in col) {
       args.unshift(depth, o, col[o], col);
       if (fn.apply(this, args) === false) break;
-      if ((l).isPlainObject(col[o]) || ((l).isArray(col[o]) && !noArrays)) {
-        depth = depth === '*' ? '*' : depth - 1;
+      if (((l).isPlainObject(col[o]) || ((l).isArray(col[o])) && !noArrays)) {
+        depth = (l).isString(depth) ? '*' : depth - 1;
         args = (l).tail(args, 4);
-        if (depth) (l).deep(col[o], fn, depth, args, noArrays);
+        if (depth >= 0 || depth === '*') (l).deep(col[o], fn, depth, args, noArrays);
       }
       args = (l).tail(args, 4);
     }
@@ -915,20 +915,19 @@
 
   (l).getByType = function (obj, type, key, deep) {
     var stack = [];
-    deep = deep || (l).isBool(key) ? key : (l).isBool(type) ? type : false;
+    deep = (l).isBool(key) ? key : deep;
     key = !(l).isString(key) ? undefined : (l).isString(key) ? key : undefined;
     type = !(l).isString(type) ? '*' : (l).isString(type) ? type : undefined;
 
-    // Start search starting at key when given
-    if (key && key !== "*") {
-      if (!(l).isPlainObject(obj = (l).get(obj, key))) {
-        if (type === (l).type(obj) || type === "*") {
-          var objWrapper = {};
-          key = key.split(".");
-          objWrapper[key[key.length - 1]] = obj;
-          stack.push(objWrapper);
-          return stack;
-        }
+    // Start search at key when given
+    if (key && key !== '*') {
+      obj = (l).get(obj, key);
+      if (type === (l).type(obj) || type === "*") {
+        var objWrapper = {};
+        key = key.split(".");
+        objWrapper[key[key.length - 1]] = obj;
+        stack.push(objWrapper);
+        return stack;
       }
     }
 
@@ -939,7 +938,7 @@
         objWrapper[index] = elm;
         stack.push(objWrapper);
       }
-    }, (deep ? "*" : 1), true);
+    }, deep ? "*" : 0, true);
     return stack;
   };
 
@@ -1241,9 +1240,6 @@
   (l).each(['array', 'object', 'function', 'string', 'bool', 'number', 'null', 'undefined', 'date', 'regexp', 'element', 'nan'],
       function (index, type) {
         (l)[ type + 's' ] = function (obj, key, deep) {
-          deep = (l).isBool(key) ? key : deep;
-          key = (l).isBool(key) ? undefined : key;
-          console.log(obj, type, key, deep);
           return (l).getByType(obj, type, key, deep);
         };
       });
