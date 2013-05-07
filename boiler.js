@@ -824,7 +824,7 @@
     return (l).filter(fns, function (value, index) {
       var key = (l).keys(value)[0];
       if (only) {
-        if ((l).inArray(only, index)) {
+        if ((l).inArray(only, (l).keys(value)[0])) {
           value[key].apply(this, opts.args);
           return true;
         }
@@ -904,7 +904,7 @@
     deep = (l).isBool(key) ? key : deep;
     key = !(l).isString(key) ? undefined : (l).isString(key) ? key : undefined;
     type = !(l).isString(type) ? '*' : (l).isString(type) ? type : undefined;
-    console.log(type, key, deep);
+
     // Start search at key when given
     if (key && key !== '*') {
       obj = (l).get(obj, key);
