@@ -19,7 +19,7 @@
 
   // Library definition
   (l) = window[l] = function (obj) {
-    (l)._wrapped = obj;
+    (l)._bound = obj;
     if (obj instanceof (l)) return obj;
     if (!(this instanceof (l))) return new (l)(arguments);
   };
@@ -68,6 +68,7 @@
     for (; i < arr.length; i++) {
       if ((l).isEqual(arr[i], value)) return i;
     }
+    return -1;
   };
 
   (l).initial = function (arr, n) {
@@ -837,20 +838,20 @@
 
   (l).defaults = function (obj, defaults) {
     (l).each(defaults, function (index, value) {
-      if (!(index in obj)) { obj[ index ] = value;
-      } else if (index in obj) { if ((l).isNull(obj[index]) || (l).isUndefined(obj[index])) obj[ index ] = value; }
+      if (!(index in obj)) { obj[index] = value;
+      } else if (index in obj) { if ((l).isNull(obj[index]) || (l).isUndefined(obj[index])) obj[index] = value; }
     });
     return obj;
   };
 
   (l).extend = (l).merge = function () {
-    var keys = [], objs = [],
+    var keys = [], objs,
         target, obj, copy, key, i, deep;
 
     // Collect potential objects to merge
     objs = (l).filter((l).toArray(arguments), function (value) {
       if ((l).isBool(value)) deep = value;
-      if ((l).isPlainObject(value) && !(l).isEqual(target, value)) return value;
+      if ((l).isPlainObject(value)) return value;
     });
 
     // Shift target off of the `objs` array
@@ -929,12 +930,14 @@
   };
 
   (l).howDeep = function (obj, key) {
-    var paths = (l).paths(obj),
-        objs = (l).getByType(obj, true);
+    var paths = (l).paths(obj);
     if (key) {
       if (key in paths) return paths[key].split(".").length;
     } else {
-      for (var o in objs) { if ((l).isEqual(obj, objs[o])) return (l).howDeep(o); }
+      var objs = (l).getByType(obj, '*', true);
+      for (var o in objs) {
+        if ((l).isEqual(obj, objs[o])) return (l).howDeep(obj, (l).keys(objs[o])[0]);
+      }
     }
   };
 
@@ -961,7 +964,7 @@
 
   (l).isEqual = function (obj1, obj2) {
 
-    // Quick compare of objects that don't have nested objects or arrays
+    // Quick compare of objects that won't have nested objects
     if ((l).type(obj1) === (l).type(obj2) && !(l).isPlainObject(obj1) && !(l).isArray(obj1)) {
       switch ((l).type(obj1)) {
         case "function" :
@@ -974,7 +977,7 @@
           if (obj1 !== obj2) return false;
       }
 
-      // Compare objects that do have nested objects
+    // Compare objects that can have nested objects
     } else {
 
       // When target or comparison is falsy we compare them directly
@@ -1224,30 +1227,30 @@
 
   // Generate [type]s() methods
   (l).each(['array', 'object', 'function', 'string', 'bool', 'number', 'null', 'undefined', 'date', 'regexp', 'element', 'nan'],
-      function (index, type) {
-        (l)[ type + 's' ] = function (obj, key, deep) {
-          return (l).getByType(obj, type, key, deep);
-        };
-      });
+    function (index, type) {
+      (l)[ type + 's' ] = function (obj, key, deep) {
+        return (l).getByType(obj, type, key, deep);
+      };
+  });
 
   // Generate no[Type]s() methods
   (l).each(['array', 'object', 'function', 'string', 'bool', 'number', 'null', 'undefined', 'date', 'regexp', 'element', 'nan'],
-      function (index, name) {
-        (l)[ 'no' + name.charAt(0).toUpperCase() + name.slice(1) + 's' ] = function (obj, key, deep) {
-          return (l).filter((l).getByType(obj, "*", key, deep),
-              function (index, value) { if (!((l).type(value) === name)) return value; });
-        };
-      });
+    function (index, name) {
+      (l)[ 'no' + name.charAt(0).toUpperCase() + name.slice(1) + 's' ] = function (obj, key, deep) {
+        return (l).filter((l).getByType(obj, "*", key, deep),
+            function (value, index) { if (!((l).type(value[(l).keys(value)[0]]) === name)) return value; });
+      };
+  });
 
   // Generate [type]Names methods
   (l).each(['array', 'object', 'function', 'string', 'bool', 'number', 'null', 'undefined', 'date', 'regexp', 'element', 'nan'],
-      function (index, name) {
-        (l)[ name + 'Names' ] = function (obj, key, deep) {
-          var names = [];
-          (l).filter((l).getByType(obj, name, key, deep), function (value) { names.push((l).keys(value)[0]); });
-          return names;
-        };
-      });
+    function (index, name) {
+      (l)[ name + 'Names' ] = function (obj, key, deep) {
+        var names = [];
+        (l).filter((l).getByType(obj, name, key, deep), function (value) { names.push((l).keys(value)[0]); });
+        return names;
+      };
+  });
 
   // Add native sort method to library
   (l).each(['sort'], function (index, name) {
@@ -1260,7 +1263,7 @@
   }), function (index, name) {
     var fn = (l)[name];
     (l).prototype[name] = function () {
-      var args = [this._wrapped];
+      var args = [this._bound];
       Array.prototype.push.apply(args, arguments);
       return (l).result.call(this, fn.apply((l), args));
     };
@@ -1274,7 +1277,7 @@
     },
     end : function () {
       this._chain = false;
-      return (l)._wrapped[0];
+      return (l)._bound[0];
     }
   });
 
