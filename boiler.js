@@ -1105,7 +1105,7 @@
   };
 
   (l).paths = function (obj, pathObj, lastKey, nextKey) {
-    var o, key, subPath,
+    var o, key,
         pathObj = pathObj ? pathObj : {},
         lastKey = lastKey ? lastKey : "",
         nextKey = nextKey ? nextKey : "";
