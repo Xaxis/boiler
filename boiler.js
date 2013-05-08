@@ -1093,7 +1093,7 @@
 
   (l).parent = function (obj, key) {
     var target = key ? (l).get(obj, key) : obj,
-        objs = (l).getByType(obj, true);
+        objs = (l).objects(obj, true);
     for (var o in objs) {
       if ((l).isPlainObject(objs[o])) {
         for (var p in objs[o]) {
