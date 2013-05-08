@@ -662,7 +662,7 @@
     };
   };
 
-  (l).bind = function (obj, fn, scope, args) {
+  (l).bind = function (fn, scope, args) {
     args = args || (l).isArray(scope) ? scope : [];
     return function () {
       for (var i = 0; i < arguments.length; i++) { args.push(arguments[i]); }
