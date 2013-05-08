@@ -1,5 +1,5 @@
 /**
- * boiler.js v0.6.0
+ * boiler.js v0.7.0
  * https://github.com/Xaxis/boiler.js
  * http://www.boilerjs.com
  * (c) 2012-2013 Wil Neeley, Trestle Media, LLC.
@@ -19,13 +19,13 @@
 
   // Library definition
   (l) = window[l] = function (obj) {
-    (l)._bound = obj;
+    this._bound = arguments;
     if (obj instanceof (l)) return obj;
-    if (!(this instanceof (l))) return new (l)(arguments);
+    if (!(this instanceof (l))) return new (l)((l).toArray(arguments));
   };
 
   // Library version
-  (l)._version = "0.6.0";
+  (l)._version = "0.7.0";
 
   /* ARRAY METHODS */
 
@@ -696,7 +696,7 @@
       };
       var ready = edge && !timeout;
       clearTimeout(timeout);
-      timeout = setTimeout(next, args.n);
+      timeout = setTimeout(next, n);
       if (ready) res = fn.apply(scope, fargs);
       return res;
     };
@@ -708,14 +708,16 @@
 
   (l).delay = function (fn, ms) {
     return function () {
-      var fargs = arguments;
+      var args = arguments;
       setTimeout(function () {
-        return fn.apply(null, fargs);
+        return fn.apply(null, args);
       }, ms);
     }
   };
 
-  (l).fill = (l).partial = function (fn, args) {
+  (l).fill = (l).partial = function (fn) {
+    var args = [];
+    for (var i = 1; i < arguments.length; i++) { args.push(arguments[i]); }
     return function () {
       for (var i = 0; i < arguments.length; i++) { args.push(arguments[i]); }
       return fn.apply(this, args);
@@ -1205,7 +1207,7 @@
   /* UTILITY METHODS */
 
   (l).chain = function () {
-    return (l).apply(this, arguments).chain();
+    return (l).apply(this, (l).toArray(arguments)).chain();
   };
 
   (l).end = (l).result = function (obj) {
@@ -1238,7 +1240,7 @@
     function (index, name) {
       (l)[ 'no' + name.charAt(0).toUpperCase() + name.slice(1) + 's' ] = function (obj, key, deep) {
         return (l).filter((l).getByType(obj, "*", key, deep),
-            function (value, index) { if (!((l).type(value[(l).keys(value)[0]]) === name)) return value; });
+            function (value) { if (!((l).type(value[(l).keys(value)[0]]) === name)) return value; });
       };
   });
 
@@ -1259,25 +1261,23 @@
 
   // Attach library's methods to its prototype
   (l).each((l).filter((l).keys((l)), function (value) {
-    if (!(l).inArray(['_version'], value)) return true;
+    if (!(l).inArray(['_version', 'sort'], value)) return true;
   }), function (index, name) {
     var fn = (l)[name];
     (l).prototype[name] = function () {
-      var args = [this._bound];
-      Array.prototype.push.apply(args, arguments);
-      return (l).result.call(this, fn.apply((l), args));
+      return (l).end.call(this, fn.apply((l), this._bound[0].concat((l).toArray(arguments))));
     };
   });
 
-  // Add OOP methods to the library's prototype
+  // Add OOP methods to the library object prototype
   (l).extend((l).prototype, {
-    chain : function () {
+    chain: function () {
       this._chain = true;
       return this;
     },
-    end : function () {
+    end: function () {
       this._chain = false;
-      return (l)._bound[0];
+      return this._bound[0][0];
     }
   });
 
