@@ -48,9 +48,14 @@
   };
 
   (l).difference = function () {
-    var arrs = [], rest;
-    (l).each(arguments, function (index, value) { if ((l).isArray(value)) arrs.push(value); });
+    var arrs = [], rest, deep;
+    (l).each(arguments, function (index, value) {
+      if ((l).isArray(value)) arrs.push(value);
+      if (((l).isBool(value) && value) || (l).isNumber(value)) deep = value;
+    });
     rest = Array.prototype.concat.apply(Array.prototype, Array.prototype.slice.call(arrs, 1));
+    if ((l).isBool(deep)) arrs[0] = (l).flatten(arrs[0]);
+    if ((l).isNumber(deep)) arrs[0] = (l).flatten(arrs[0], deep);
     return (l).filter((l).uniq(arrs[0]), function (value) {
       return !(l).inArray(rest, value);
     });
@@ -255,10 +260,12 @@
         depth = col.depth || (depth || '*'),
         args = col.args || [],
         noArrays = col.noArrays || false,
-        noObjects = col.noObjects || false;
+        noObjects = col.noObjects || false,
+        ret = [];
     for (var o in obj) {
       args.unshift(depth, o, obj[o], obj);
-      if (fn.apply(this, args) === false) break;
+      var res = fn.apply(this, args);
+      if (res == true) ret.push(obj[o]);
       if (((l).isPlainObject(obj[o]) && !noObjects) || ((l).isArray(obj[o]) && !noArrays)) {
         depth = (l).isString(depth) ? '*' : depth - 1;
         args = (l).tail(args, 4);
@@ -268,7 +275,7 @@
       }
       args = (l).tail(args, 4);
     }
-    return col;
+    return ret;
   };
 
   (l).each = (l).forEach = function (col, fn, scope) {
