@@ -40,10 +40,10 @@
 
   (l).compact = function (arr, all, deep) {
     var res = [];
-    (l).deep(arr, function(d,key,value) {
+    (l).deep({obj:arr, fn:function(d,key,value) {
       if (all && !(l).isFalsy(value) && !(l).isEmpty(value)) res.push(value);
       else if (!all && !(l).isFalsy(value)) res.push(value);
-    }, (l).isBool(deep) && deep ? '*' : (l).isNumber(deep) ? deep : 0);
+    }, depth: (l).isBool(deep) && deep ? '*' : (l).isNumber(deep) ? deep : 1, noObjects:true});
     return res;
   };
 
@@ -249,17 +249,22 @@
     return (l).groupBy(col, map, scope || this, true);
   };
 
-  (l).deep = function (col, fn, depth, args, noArrays) {
-    noArrays = noArrays ? noArrays : (l).isBool(depth) ? depth : (l).isBool(args) ? args : false;
-    args = (l).isArray(args) ? args : (l).isArray(depth) ? depth : [];
-    depth = ((l).isString(depth) || (l).isNumber(depth)) ? depth : '*';
-    for (var o in col) {
-      args.unshift(depth, o, col[o], col);
+  (l).deep = function (col, fn, depth) {
+    var obj = col.obj || col,
+        fn = col.fn || fn,
+        depth = col.depth || (depth || '*'),
+        args = col.args || [],
+        noArrays = col.noArrays || false,
+        noObjects = col.noObjects || false;
+    for (var o in obj) {
+      args.unshift(depth, o, obj[o], obj);
       if (fn.apply(this, args) === false) break;
-      if (((l).isPlainObject(col[o]) || ((l).isArray(col[o])) && !noArrays)) {
+      if (((l).isPlainObject(obj[o]) && !noObjects) || ((l).isArray(obj[o]) && !noArrays)) {
         depth = (l).isString(depth) ? '*' : depth - 1;
         args = (l).tail(args, 4);
-        if (depth > 0 || depth === '*') (l).deep(col[o], fn, depth, args, noArrays);
+        if (depth > 0 || depth === '*') {
+          (l).deep({obj:obj[o], fn:fn, depth:depth, args:args, noArrays:noArrays, noObjects:noObjects});
+        }
       }
       args = (l).tail(args, 4);
     }
@@ -917,13 +922,13 @@
     }
 
     // Perform deep search for objects of type
-    (l).deep(obj, function (depth, index, elm) {
+    (l).deep({obj: obj, fn: function (depth, index, elm) {
       if (type === (l).type(elm) || type === "*") {
         var objWrapper = {};
         objWrapper[index] = elm;
         stack.push(objWrapper);
       }
-    }, deep ? "*" : 0, true);
+    }, depth: deep ? '*' : 1, noArrays: true});
     return stack;
   };
 
@@ -1126,7 +1131,7 @@
 
   (l).toQueryString = function (obj, prefix) {
     var ret = "";
-    (l).deep(obj, function (depth, index, value) {
+    (l).deep({obj: obj, fn: function (depth, index, value) {
       index = index.toString();
       if (!(l).isPlainObject(value)) {
         if ((l).isArray(value)) {
@@ -1138,7 +1143,7 @@
           ret += (prefix ? prefix + index : index) + "=" + value + "&";
         }
       }
-    }, "*", true);
+    }, depth: "*", noArrays: true});
     ret = encodeURIComponent(ret.replace(/&$/g, ''));
     return ret;
   };
