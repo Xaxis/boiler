@@ -32,23 +32,19 @@
   (l).at = function (arr, index, deep) {
     var res = [];
     (l).deep(arr, function(d,key,value) {
-      if ((l).isArray(index)) {
-        if ((l).inArray(index, parseInt(key))) res.push(value);
-      } else if (index == key) {
-        return res.push(value);
-      }
+      if ((l).isArray(index)) { if ((l).inArray(index, parseInt(key))) res.push(value);
+      } else if (index == key) { return res.push(value); }
     }, (l).isBool(deep) && deep ? '*' : (l).isNumber(deep) ? deep : 0);
     return res;
   };
 
-  (l).compact = function (arr, all) {
-    return (l).filter(arr, function (value) {
-      if (!all) {
-        if (!(l).isFalsy(value) || ( ( (l).isPlainObject(value) || (l).isArray(value) ) && (l).len(value) === 0 )) return value;
-      } else if (!(l).isFalsy(value) && !(l).isEmpty(value)) {
-        return value;
-      }
-    });
+  (l).compact = function (arr, all, deep) {
+    var res = [];
+    (l).deep(arr, function(d,key,value) {
+      if (all && !(l).isFalsy(value) && !(l).isEmpty(value)) res.push(value);
+      else if (!all && !(l).isFalsy(value)) res.push(value);
+    }, (l).isBool(deep) && deep ? '*' : (l).isNumber(deep) ? deep : 0);
+    return res;
   };
 
   (l).difference = function () {
