@@ -29,13 +29,16 @@
 
   /* ARRAY METHODS */
 
-  (l).at = function (arr, index) {
-    return (l).filter(arr, function (value, key) {
+  (l).at = function (arr, index, deep) {
+    var res = [];
+    (l).deep(arr, function(d,key,value) {
       if ((l).isArray(index)) {
-        for (var i = 0; i < index.length; i++) { if (index[i] === key) return true; }
-      } else if ((l).isNumber(index)) { if (key === index) return true; }
-      return false;
-    });
+        if ((l).inArray(index, parseInt(key))) res.push(value);
+      } else if (index == key) {
+        return res.push(value);
+      }
+    }, (l).isBool(deep) && deep ? '*' : (l).isNumber(deep) ? deep : 0);
+    return res;
   };
 
   (l).compact = function (arr, all) {
@@ -268,16 +271,13 @@
   };
 
   (l).each = (l).forEach = function (col, fn, scope) {
-    if (col === null) return;
     if ((l).isArray(col)) {
       for (var i = 0; i < col.length; i++) {
         if (fn.call(scope || col[i], i, col[i], col) === false) break;
       }
     } else {
       for (var key in col) {
-        if (col.hasOwnProperty(key)) {
-          if (fn.call(scope || col[key], key, col[key], col) === false) break;
-        }
+        if (fn.call(scope || col[key], key, col[key], col) === false) break;
       }
     }
     return col;
