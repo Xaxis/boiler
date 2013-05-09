@@ -70,16 +70,16 @@
 
   (l).indexOf = (l).firstIndexOf = function (arr, value, from) {
     var i = from || 0;
-    for (; i < arr.length; i++) {
-      if ((l).isEqual(arr[i], value)) return i;
-    }
+    for (; i < arr.length; i++) { if ((l).isEqual(arr[i], value)) return i; }
     return -1;
   };
 
-  (l).initial = function (arr, n) {
-    var n = n ? arr.length - n : arr.length - 1, i = 0, ret = [];
-    for (; i < n; i++) { ret.push(arr[i]); }
-    return ret;
+  (l).initial = function (arr, n, deep) {
+    var m = n ? arr.length - n : arr.length - 1;
+    return (l).deep({obj: arr, fn: function(d,i,v) {
+      if ((l).isArray(v)) m = v.length - n;
+      if (parseInt(i) < m) return true;
+    }, depth: deep ? '*' : 1, noObjects: true});
   };
 
   (l).intersection = function () {
