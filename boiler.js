@@ -525,6 +525,21 @@
     });
   };
 
+  (l).paths = function (col, keys, pathObj, lastKey, nextKey) {
+    var o, key,
+        keys = keys || false,
+        pathObj = pathObj ? pathObj : {},
+        lastKey = lastKey ? lastKey : "",
+        nextKey = nextKey ? nextKey : "";
+    for (o in col) {
+      if (keys) pathObj[o] = (nextKey + "." + lastKey + "." + o).replace(/^[.]+/g, "");
+      else pathObj[(nextKey + "." + lastKey + "." + o).replace(/^[.]+/g, "")] = col[o];
+      key = nextKey + "." + lastKey;
+      if ((l).isPlainObject(col[o]) || (l).isArray(col[o])) (l).paths(col[o], keys, pathObj, o, key);
+    }
+    return pathObj;
+  };
+
   (l).reduce = (l).foldl = function (col, fn, scope, right) {
     var copy = col, i = 0, base, keys, vals;
     if (right) {
@@ -1117,28 +1132,13 @@
     return obj;
   };
 
-  (l).paths = function (obj, keys, pathObj, lastKey, nextKey) {
-    var o, key,
-        keys = keys || false,
-        pathObj = pathObj ? pathObj : {},
-        lastKey = lastKey ? lastKey : "",
-        nextKey = nextKey ? nextKey : "";
-    for (o in obj) {
-      if (keys) pathObj[o] = (nextKey + "." + lastKey + "." + o).replace(/^[.]+/g, "");
-      else pathObj[(nextKey + "." + lastKey + "." + o).replace(/^[.]+/g, "")] = obj[o];
-      key = nextKey + "." + lastKey;
-      if ((l).isPlainObject(obj[o]) || (l).isArray(obj[o])) (l).paths(obj[o], keys, pathObj, o, key);
-    }
-    return pathObj;
-  };
-
   (l).pluck = (l).fetch = function (obj, key) {
     return (l).map(obj, function (value) { return value[key]; });
   };
 
   (l).resolve = function (obj, key) {
     if (!key) key = (l).keys(obj)[0];
-    return (l).paths(obj)[key];
+    return (l).paths(obj, true)[key];
   };
 
   (l).toQueryString = function (obj, prefix) {
