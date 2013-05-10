@@ -70,11 +70,10 @@
 
   (l).indexOf = (l).firstIndexOf = function (arr, value, from, deep) {
     var deep = deep || (l).isBool(from) ? from : false, from = from || 0, ret = -1;
-    console.log((l).paths(arr, true));
-    (l).deep({obj:arr, fn:function(d,i,v){
-      if ((l).isEqual(v, value)) { ret = parseInt(i); }
+    (l).deep({obj:(l).paths(arr), fn:function(d,i,v){
+      if ((l).isEqual(v, value)) { ret = i; }
     }, depth:deep ? '*' : 1, noObjects:true});
-    return ret;
+    return ret.length == 1 ? parseInt(ret) : ret;
   };
 
   (l).initial = function (arr, n, deep) {
