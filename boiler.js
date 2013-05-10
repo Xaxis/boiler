@@ -109,7 +109,7 @@
     }, depth: deep ? '*' : 1, noObjects: true});
   };
 
-  (l).lastIndexOf = function (arr, value, from) {
+  (l).lastIndexOf = function (arr, value, from, deep) {
     var i = from ? (arr.length - from) : arr.length;
     while (i--) { if ((l).isEqual(arr[i], value)) return i; }
     return -1;
@@ -278,12 +278,12 @@
       if (fn.apply(this, args)) ret.push(obj[o]);
       if (((l).isPlainObject(obj[o]) && !noObjects) || ((l).isArray(obj[o]) && !noArrays)) {
         depth = (l).isString(depth) ? '*' : depth - 1;
-        args = (l).tail(args, 4);
+        for (var i = 0; i < 4; i++) { args.shift(); }
         if (depth > 0 || depth === '*') {
           (l).deep({obj:obj[o], fn:fn, depth:depth, args:args, noArrays:noArrays, noObjects:noObjects, ret: ret});
         }
       }
-      args = (l).tail(args, 4);
+      for (var i = 0; i < 4; i++) { args.shift(); }
     }
     return ret;
   };
