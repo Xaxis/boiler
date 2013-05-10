@@ -943,9 +943,9 @@
   };
 
   (l).howDeep = function (obj, key) {
-    var paths = (l).paths(obj);
-    if (key) {
-      if (key in paths) return paths[key].split(".").length;
+    var paths = (l).paths(obj, true);
+    if (key && (key in paths)) {
+      return paths[key].split(".").length;
     } else {
       var objs = (l).getByType(obj, '*', true);
       for (var o in objs) {
@@ -1117,17 +1117,17 @@
     return obj;
   };
 
-  (l).paths = function (obj, pathObj, lastKey, nextKey) {
+  (l).paths = function (obj, keys, pathObj, lastKey, nextKey) {
     var o, key,
+        keys = keys || false,
         pathObj = pathObj ? pathObj : {},
         lastKey = lastKey ? lastKey : "",
         nextKey = nextKey ? nextKey : "";
     for (o in obj) {
-      pathObj[(nextKey + "." + lastKey + "." + o).replace(/^[.]+/g, "")] = obj[o];
+      if (keys) pathObj[o] = (nextKey + "." + lastKey + "." + o).replace(/^[.]+/g, "");
+      else pathObj[(nextKey + "." + lastKey + "." + o).replace(/^[.]+/g, "")] = obj[o];
       key = nextKey + "." + lastKey;
-      if ((l).isPlainObject(obj[o]) || (l).isArray(obj[o])) {
-        (l).paths(obj[o], pathObj, o, key);
-      }
+      if ((l).isPlainObject(obj[o]) || (l).isArray(obj[o])) (l).paths(obj[o], keys, pathObj, o, key);
     }
     return pathObj;
   };
