@@ -30,12 +30,10 @@
   /* ARRAY METHODS */
 
   (l).at = function (arr, index, deep) {
-    var res = [];
-    (l).deep(arr, function(d,key,value) {
-      if ((l).isArray(index)) { if ((l).inArray(index, parseInt(key))) res.push(value);
-      } else if (index == key) { return res.push(value); }
+    return (l).deep(arr, function(d,key,value) {
+      if ((l).isArray(index)) { if ((l).inArray(index, parseInt(key))) return true;
+      } else if (index == key) { return true; }
     }, (l).isBool(deep) && deep ? '*' : (l).isNumber(deep) ? deep : 0);
-    return res;
   };
 
   (l).compact = function (arr, all, deep) {
@@ -85,12 +83,15 @@
   };
 
   (l).intersection = function () {
-    var arrs, rest;
-    arrs = (l).filter((l).toArray(arguments), function (value) { if ((l).isArray(value)) return true; });
+    var arrs, rest, deep;
+    arrs = (l).filter((l).toArray(arguments), function (value) {
+      if ((l).isBool(value)) deep = value;
+      if ((l).isArray(value)) return true;
+    });
     rest = Array.prototype.slice.call(arrs, 1);
-    return (l).filter((l).uniq(arrs[0]), function (item) {
+    return (l).filter((l).uniq(arrs[0]), function (elm) {
       return (l).every(rest, function (other) {
-        return (l).indexOf(other, item) >= 0;
+        return (l).indexOf(other, elm) >= 0;
       });
     });
   };
