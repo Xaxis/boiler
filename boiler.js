@@ -65,10 +65,18 @@
   };
 
   (l).indexOf = (l).firstIndexOf = function (arr, value, from, deep) {
-    var deep = deep || (l).isBool(from) ? from : false, from = from || 0, ret = -1;
-    (l).deep({obj:(l).paths(arr), fn:function(d,i,v){
-      if ((l).isEqual(v, value)) { ret = i; }
-    }, depth:deep ? '*' : 1, noObjects:true});
+    var deep = deep || (l).isBool(from) ? from : false, from = (l).isNumber(from) ? from : 0,
+        ret = -1, n = 0;
+    (l).deep({obj: deep ? (l).paths(arr) : arr, fn: function(d,i,v) {
+      if ((l).isEqual(v, value)) {
+        if ((l).isNumber(from)) {
+          if (n >= from) ret = i;
+        } else {
+          ret = i;
+        }
+      }
+      n = (l).isArray(v) ? 0 : n+1;
+    }, depth: deep ? '*' : 1, noObjects: true});
     return ret.length == 1 ? parseInt(ret) : ret;
   };
 
@@ -88,7 +96,8 @@
     });
     rest = Array.prototype.slice.call(arrs, 1);
     return (l).filter((l).uniq(arrs[0]), function (elm) {
-      return (l).every(rest, function (other) {
+      return (l).all(rest, function (other) {
+        console.log(other, elm, (l).indexOf(other, elm));
         return (l).indexOf(other, elm) >= 0;
       });
     });
