@@ -70,10 +70,10 @@
 
   (l).indexOf = (l).firstIndexOf = function (arr, value, from, deep) {
     var deep = deep || (l).isBool(from) ? from : false, from = from || 0, ret = -1;
-    console.log((l).paths(arr));
-    (l).deep(arr, function(d,i,v){
-      if ((l).isEqual(v, value)) ret = parseInt(i);
-    }, deep ? '*' : 1);
+    console.log((l).paths(arr, true));
+    (l).deep({obj:arr, fn:function(d,i,v){
+      if ((l).isEqual(v, value)) { ret = parseInt(i); }
+    }, depth:deep ? '*' : 1, noObjects:true});
     return ret;
   };
 
@@ -1117,16 +1117,16 @@
     return obj;
   };
 
-  (l).paths = function (obj, arrs, pathObj, lastKey, nextKey) {
-    var o, key, arrs = arrs || false,
+  (l).paths = function (obj, pathObj, lastKey, nextKey) {
+    var o, key,
         pathObj = pathObj ? pathObj : {},
         lastKey = lastKey ? lastKey : "",
         nextKey = nextKey ? nextKey : "";
     for (o in obj) {
-      pathObj[o] = (nextKey + "." + lastKey + "." + o).replace(/^[.]+/g, "");
+      pathObj[(nextKey + "." + lastKey + "." + o).replace(/^[.]+/g, "")] = obj[o];
       key = nextKey + "." + lastKey;
-      if (((l).isPlainObject(obj[o]) && !arrs) || ((l).isArray(obj[o]) && arrs)) {
-        (l).paths(obj[o], arrs, pathObj, o, key);
+      if ((l).isPlainObject(obj[o]) || (l).isArray(obj[o])) {
+        (l).paths(obj[o], pathObj, o, key);
       }
     }
     return pathObj;
