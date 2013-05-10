@@ -149,16 +149,15 @@
     return (l).uniq((l).flatten((l).toArray(arguments)));
   };
 
-  (l).uniq = (l).unique = function (arr, fn, scope) {
-    var ret = [], seen = [], target;
-    target = fn ? (l).map(arr, fn, scope) : arr;
-    (l).each(target, function (index, value) {
-      if (!(l).contains(seen, value)) {
-        seen.push(value);
-        ret.push(value);
+  (l).uniq = (l).unique = function (arr, fn, scope, deep) {
+    var seen = [], deep = (l).filter(arguments, function(v) { if((l).isBool(v)) return true; }).length ? true : false;
+    arr = deep ? (l).flatten(arr) : arr;
+    return (l).deep({obj: (l).isFunction(fn) ? (l).map(arr, fn, scope) : arr, fn: function (d,i,v) {
+      if (!(l).contains(seen, v)) {
+        seen.push(v);
+        return true;
       }
-    });
-    return ret;
+    }, depth: 1, noObjects: true});
   };
 
   (l).without = (l).exclude = function (arr, values, deep) {
