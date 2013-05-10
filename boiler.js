@@ -37,12 +37,10 @@
   };
 
   (l).compact = function (arr, all, deep) {
-    var res = [];
-    (l).deep({obj:arr, fn:function(d,key,value) {
-      if (all && !(l).isFalsy(value) && !(l).isEmpty(value)) res.push(value);
-      else if (!all && !(l).isFalsy(value)) res.push(value);
+    return (l).deep({obj:arr, fn:function(d,key,value) {
+      if (all && !(l).isFalsy(value) && !(l).isEmpty(value)) return true;
+      else if (!all && !(l).isFalsy(value)) return true;
     }, depth: (l).isBool(deep) && deep ? '*' : (l).isNumber(deep) ? deep : 1, noObjects:true});
-    return res;
   };
 
   (l).difference = function () {
