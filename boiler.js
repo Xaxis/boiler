@@ -137,10 +137,12 @@
     return ret;
   };
 
-  (l).rest = (l).tail = function (arr, n) {
-    var n = n ? n : 1, i = arr.length, ret = [];
-    for (; n < i; n++) { ret.push(arr[n]); }
-    return ret;
+  (l).rest = (l).tail = function (arr, n, deep) {
+    var deep = deep || (l).isBool(n) ? n : false, n = (l).isNumber(n) ? n : 1;
+    return (l).deep({obj: arr, fn: function(d,i,v){
+      if (parseInt(i) >= n && !deep) return true;
+      else if (parseInt(i) >= n && !(l).isArray(v) && deep) return true;
+    }, depth: deep ? '*' : 1, noObjects: true});
   };
 
   (l).union = function () {
