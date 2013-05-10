@@ -161,11 +161,13 @@
     return ret;
   };
 
-  (l).without = (l).exclude = function (arr, values) {
-    return (l).filter(arr, function (value) {
-      for (var i = 0; i < values.length; i++) { if ((l).isEqual(values[i], value)) return false; }
+  (l).without = (l).exclude = function (arr, values, deep) {
+    if (deep) values = (l).flatten(values);
+    var res = (l).deep({obj: arr, fn: function(d,i,v){
+      for (var i = 0; i < values.length; i++) { if ((l).isEqual(values[i], v)) return false; }
       return true;
-    });
+    }, depth: deep ? '*' : 1, noObjects: true});
+    return deep ? (l).flatten(res) : res;
   };
 
   (l).zip = function () {
