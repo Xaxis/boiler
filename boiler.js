@@ -95,12 +95,11 @@
       if ((l).isArray(value)) return true;
     });
     rest = Array.prototype.slice.call(arrs, 1);
-    return (l).filter((l).uniq(arrs[0]), function (elm) {
+    return (l).deep({obj: (l).uniq(arrs[0]), fn: function (d,i,elm) {
       return (l).all(rest, function (other) {
-        console.log(other, elm, (l).indexOf(other, elm));
-        return (l).indexOf(other, elm) >= 0;
+        return (l).indexOf(other, elm, deep) != -1;
       });
-    });
+    }, depth: 1, noObjects: true});
   };
 
   (l).last = function (arr, n) {
