@@ -65,7 +65,8 @@
   };
 
   (l).indexOf = (l).firstIndexOf = function (arr, value, from, deep) {
-    var deep = deep || (l).isBool(from) ? from : false, from = (l).isNumber(from) ? from : 0, ret = -1, n = 0;
+    var deep = deep || (l).isBool(from) ? from : false, from = (l).isNumber(from) ? from : 0, ret = -1, n = 0,
+        last = (l).filter(arguments, function(v) { if (v == '___lastIndexOf___') return true; }).length ? true : false;
     (l).deep({obj: deep ? (l).paths(arr) : arr, fn: function(d,i,v) {
       if ((l).isEqual(v, value)) {
         if ((l).isNumber(from)) {
@@ -110,9 +111,7 @@
   };
 
   (l).lastIndexOf = function (arr, value, from, deep) {
-    var i = from ? (arr.length - from) : arr.length;
-    while (i--) { if ((l).isEqual(arr[i], value)) return i; }
-    return -1;
+    return (l).indexOf(arr, value, from, deep, '___lastIndexOf___');
   };
 
   (l).object = (l).toObject = function () {
@@ -171,7 +170,7 @@
 
   (l).zip = function () {
     var i = 0, ret = [], arrs;
-    arrs = (l).filter((l).toArray(arguments), function (value) { if ((l).isArray(value)) return true; });
+    arrs = (l).filter((l).toArray(arguments), function(value) { if ((l).isArray(value)) return true; });
     for (; i < arrs[0].length; i++) { ret[i] = (l).pluck(arrs, "" + i); }
     return ret;
   };
