@@ -436,10 +436,10 @@
     return true;
   };
 
-  (l).keys = function (col) {
+  (l).keys = function (col, deep) {
     var keys = [];
     for (var o in col) { keys.push(o); }
-    return keys;
+    return deep ? (l).keys((l).paths(col)) : keys;
   };
 
   (l).least = function (col, fn, most) {
