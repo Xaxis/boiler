@@ -332,14 +332,16 @@
     return ret;
   };
 
-  (l).find = (l).findValue = function (col, fn, scope, mode) {
-    for (var o in col) {
-      if (fn.call(scope ? scope : this, mode === "key" ? o : col[o])) return col[o];
-    }
+  (l).find = (l).findValue = function (col, fn, scope, deep, mode) {
+    deep = (l).isBool(scope) ? scope : deep;
+    var res = (l).deep({obj: col, fn: function(d,i,v) {
+      if (fn.call(scope ? scope : this, mode === "key" ? i : v)) return true;
+    }, depth: deep ? '*' : 1});
+    return res.length >= 1 ? res[0] : undefined;
   };
 
   (l).findKey = function (col, fn, scope) {
-    return (l).find(col, fn, scope || this, "key");
+    return (l).find(col, fn, scope || this, false, "key");
   };
 
   (l).flatten = function (col, n) {
@@ -426,7 +428,7 @@
     return (((l).isPlainObject(col) && (l).len(col) === 0) || ((l).isArray(col) && col.length === 0 ));
   };
 
-  (l).isUnique = function (col, key) {
+  (l).isUnique = function (col, key, deep) {
     var target;
     if (key in col) {
       target = col[key];
