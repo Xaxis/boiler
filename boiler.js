@@ -184,7 +184,7 @@
         if (!(key in col)) col[key] = value;
         start = false;
       }
-      if ((((l).isArray(v) && type) || ((l).isPlainObject(v) && !type))) {
+      if ((((l).isArray(v) && type) || ((l).isPlainObject(v) && !type)) && deep) {
         if (!(key in v)) v[key] = value;
       }
     }, depth: deep ? '*' : 1});
@@ -609,8 +609,17 @@
     return ret;
   };
 
-  (l).set = function (col, key, value) {
-    col[key] = value;
+  (l).set = function (col, key, value, deep) {
+    var start = true, type = (l).isArray(col) ? true : false;
+    (l).deep({obj: col, fn:function(d,i,v) {
+      if (start) {
+        col[key] = value;
+        start = false;
+      }
+      if ((((l).isArray(v) && type) || ((l).isPlainObject(v) && !type)) && deep) {
+        v[key] = value;
+      }
+    }, depth: deep ? '*' : 1});
     return col;
   };
 
