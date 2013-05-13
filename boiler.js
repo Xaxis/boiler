@@ -177,8 +177,17 @@
 
   /* COLLECTION METHODS */
 
-  (l).add = function (col, key, value) {
-    if (!(key in col)) col[key] = value;
+  (l).add = function (col, key, value, deep) {
+    var start = true, type = (l).isArray(col) ? true : false;
+    (l).deep({obj: col, fn:function(d,i,v) {
+      if (start) {
+        if (!(key in col)) col[key] = value;
+        start = false;
+      }
+      if ((((l).isArray(v) && type) || ((l).isPlainObject(v) && !type))) {
+        if (!(key in v)) v[key] = value;
+      }
+    }, depth: deep ? '*' : 1});
     return col;
   };
 
