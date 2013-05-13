@@ -314,9 +314,7 @@
   };
 
   (l).empty = function (col) {
-    if ((l).isPlainObject(col) || (l).isArray(col)) {
-      (l).each(col, function (index) { col[index] = undefined; });
-    }
+    (l).each(col, function (index) { col[index] = undefined; });
     return col;
   };
 
