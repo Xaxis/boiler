@@ -399,10 +399,10 @@
     return res;
   };
 
-  (l).has = (l).keyExists = function (col, key) {
+  (l).has = (l).keyExists = function (col, key, deep) {
     return (l).findKey(col, function (index) {
       return !!(key == index);
-    }) ? true : false;
+    }, deep) ? true : false;
   };
 
   (l).invert = function (col) {
