@@ -603,9 +603,9 @@
     return (l).each(col, function (index, value, ref) { ref[index] = fn.call(scope || this, value); });
   };
 
-  (l).sample = function (col, n) {
+  (l).sample = function (col, n, deep) {
     var ret = [], i;
-    for (i = n || 1; i > 0; i--) { ret.push((l).shuffle(col)[0]); }
+    for (i = n || 1; i > 0; i--) { ret.push((l).shuffle(deep ? (l).flatten(col) : col)[0]); }
     return ret;
   };
 
