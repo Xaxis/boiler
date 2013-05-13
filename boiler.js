@@ -250,10 +250,10 @@
     return ret;
   };
 
-  (l).contains = (l).inArray = function (col, value) {
+  (l).contains = (l).inArray = function (col, value, deep) {
     return (l).isEqual((l).find(col, function (v) {
       return (l).isEqual(v, value) ? true : false;
-    }), value);
+    }, deep), value);
   };
 
   (l).count = function (col, fn, scope, deep) {
