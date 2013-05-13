@@ -283,6 +283,7 @@
         args = col.args || [],
         noArrays = col.noArrays || false,
         noObjects = col.noObjects || false,
+        retType = col.retType || false,
         ret = col.ret || [];
     for (var o in obj) {
       args.unshift(depth, o, obj[o], obj);
@@ -296,7 +297,7 @@
       }
       for (var i = 0; i < 4; i++) { args.shift(); }
     }
-    return ret;
+    return retType ? obj : ret;
   };
 
   (l).each = (l).forEach = function (col, fn, scope) {
@@ -623,8 +624,10 @@
     return col;
   };
 
-  (l).setUndef = function (col, value) {
-    return (l).each(col, function (index, v, ref) { if ((l).isUndefined(v)) ref[index] = value; });
+  (l).setUndef = function (col, value, deep) {
+    return (l).deep({obj:col, fn:function (d, index, v, ref) {
+      if ((l).isUndefined(v)) ref[index] = value;
+    }, depth: deep ? '*' : 1, retType: true});
   };
 
   (l).shuffle  = function (col) {
