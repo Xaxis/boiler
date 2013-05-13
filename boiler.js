@@ -241,10 +241,10 @@
     return col;
   };
 
-  (l).clone = function (col) {
+  (l).clone = function (col, deep) {
     var ret = (l).isArray(col) ? [] : {};
     for (var i in col) {
-      if ((l).isPlainObject(col[i]) || (l).isArray(col[i])) ret[i] = (l).clone(col[i]);
+      if ((l).isPlainObject(col[i]) || (l).isArray(col[i]) && deep) ret[i] = (l).clone(col[i]);
       else ret[i] = col[i];
     }
     return ret;
