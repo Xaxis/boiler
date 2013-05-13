@@ -340,8 +340,9 @@
     return res.length >= 1 ? res[0] : undefined;
   };
 
-  (l).findKey = function (col, fn, scope) {
-    return (l).find(col, fn, scope || this, false, "key");
+  (l).findKey = function (col, fn, scope, deep) {
+    deep = (l).isBool(scope) ? scope : deep;
+    return (l).find(col, fn, scope || this, deep, "key");
   };
 
   (l).flatten = function (col, n) {
