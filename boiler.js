@@ -699,10 +699,10 @@
     return (l).where(col, matches, true);
   };
 
-  (l).values = function (col) {
-    var o, vals = [];
-    for (o in col) { vals.push(col[o]); }
-    return vals;
+  (l).values = function (col, deep) {
+    var vals = [];
+    for (var o in col) { vals.push(col[o]); }
+    return deep ? (l).values((l).paths(col)) : vals;
   };
 
   /* FUNCTION METHODS */
