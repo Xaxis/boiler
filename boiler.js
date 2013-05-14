@@ -481,7 +481,7 @@
   (l).min  = function (col, deep) {
     var minVals = [];
     (l).deep(col, function(depth, index, value) {
-      if ( (l).isNumber(value) ) minVals.push(value);
+      if ((l).isNumber(value) ) minVals.push(value);
     }, deep ? "*" : 1);
     return Math.min.apply(this, minVals);
   };
@@ -512,16 +512,11 @@
   };
 
   (l).paths = function (col, keys, pathObj, lastKey, nextKey) {
-    var o, key,
-        keys = keys || false,
-        pathObj = pathObj ? pathObj : {},
-        lastKey = lastKey ? lastKey : "",
-        nextKey = nextKey ? nextKey : "";
+    var o, keys = keys || false, pathObj = pathObj || {}, lastKey = lastKey || "", nextKey = nextKey || "";
     for (o in col) {
       if (keys) pathObj[o] = (nextKey + "." + lastKey + "." + o).replace(/^[.]+/g, "");
       else pathObj[(nextKey + "." + lastKey + "." + o).replace(/^[.]+/g, "")] = col[o];
-      key = nextKey + "." + lastKey;
-      if ((l).isPlainObject(col[o]) || (l).isArray(col[o])) (l).paths(col[o], keys, pathObj, o, key);
+      if ((l).isPlainObject(col[o]) || (l).isArray(col[o])) (l).paths(col[o], keys, pathObj, o, nextKey + "." + lastKey);
     }
     return pathObj;
   };
