@@ -247,17 +247,15 @@
 
   (l).count = function (col, fn, scope, deep) {
     var ret = 0, deep = (l).isBool(scope) ? scope : deep;
-    if (deep) {
-      (l).deep(col, function(depth, index, value) {
+    (l).deep(col, function(depth, index, value) {
+      if (deep) {
         if (!(l).isArray(value) && !(l).isPlainObject(value) ) {
           if (fn.call(!(l).isBool(scope) ? (scope || this) : this, value, index)) ret++;
         }
-      });
-    } else {
-      (l).each(col, function (index, value) {
+      } else {
         if (fn.call(!(l).isBool(scope) ? (scope || this) : this, value, index)) ret++;
-      });
-    }
+      }
+    }, deep ? '*' : 1);
     return ret;
   };
 
