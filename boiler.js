@@ -562,8 +562,16 @@
     return col;
   };
 
-  (l).replace = function (col, fn, scope) {
-    return (l).each(col, function (index, value, ref) { ref[index] = fn.call(scope || this, value); });
+  (l).replace = function (col, fn, scope, deep) {
+    var deep = (l).isBool(scope) ? scope : deep, ref = col, scope = !(l).isBool(scope) ? scope : this;
+    return (l).deep({obj:col, fn: function(d,i,v) {
+      if (deep) {
+        if ((l).isPlainObject(v) || (l).isArray(v)) ref = v;
+        else ref[i] = fn.call(scope, v);
+      } else {
+        ref[i] = fn.call(scope, v);
+      }
+    }, depth: deep ? '*' : 1, retType: true});
   };
 
   (l).sample = function (col, n, deep) {
