@@ -300,8 +300,17 @@
     return col;
   };
 
-  (l).empty = function (col) {
-    (l).each(col, function (index) { col[index] = undefined; });
+  (l).empty = function (col, deep) {
+    var ref = null;
+    (l).deep(col, function(d, index, value, r) {
+      if (deep) {
+        if (ref == null) ref = r;
+        if ((l).isPlainObject(value) || (l).isArray(value)) ref = value;
+        else ref[index] = undefined;
+      } else {
+        col[index] = undefined;
+      }
+    }, deep ? '*' : 1);
     return col;
   };
 
