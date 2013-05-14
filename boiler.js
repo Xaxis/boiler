@@ -1,5 +1,5 @@
 /**
- * boiler.js v0.8.0
+ * boiler.js v0.8.5
  * https://github.com/Xaxis/boiler.js
  * http://www.boilerjs.com
  * (c) 2012-2013 Wil Neeley, Trestle Media, LLC.
@@ -25,7 +25,7 @@
   };
 
   // Library version
-  (l)._version = "0.8.0";
+  (l)._version = "0.8.5";
 
   /* ARRAY METHODS */
 
@@ -345,24 +345,15 @@
   };
 
   (l).flatten = function (col, n) {
-    var ret = [], n = n || '*';
+    var ret = [], n = n || '*', nested;
     (l).deep(col, function (depth, index, elm) {
-      if ((l).isArray(col)) {
-          if (n === '*') {
-            if (!(l).isArray(elm)) ret.push(elm);
-          } else if (depth > 1) {
-            if (!(l).isArray(elm)) ret.push(elm);
-          } else {
-            ret.push(elm);
-          }
+      nested = !(l).isArray(elm) && !(l).isPlainObject(elm)
+      if (depth == '*') {
+        if (nested) ret.push(elm);
+      } else if (depth > 1) {
+        if (nested) ret.push(elm);
       } else {
-          if (n === '*') {
-            if (!(l).isPlainObject(elm)) ret[index] = elm;
-          } else if (depth > 1) {
-            if (!(l).isPlainObject(elm)) ret[index] = elm;
-          } else {
-            ret[index] = elm;
-          }
+        ret.push(elm);
       }
     }, n);
     return ret;
@@ -480,24 +471,10 @@
 
   (l).map = (l).collect = function (col, fn, scope, deep) {
     deep = deep || (l).isBool(scope) ? scope : false;
-    var list = (l).isArray(col) ? col : (l).toArray(col),
-        ret = [];
-    if ( col === null ) return ret;
-    if ( deep ) {
-      (l).deep(list, function(depth, index, value, ref) {
-        if ( !(l).isArray(value) && !(l).isPlainObject(value) ) {
-          if ((l).isArray(col)) {
-            ret.push(fn.call(scope || this, value, index, ref));
-          } else {
-            ret[index] = fn.call(scope || this, value, index, ref);
-          }
-        }
-      }, deep ? "*" : 1);
-    } else {
-      (l).each(list, function(index, value, ref) {
-        ret.push(fn.call(scope || this, value, index, ref));
-      });
-    }
+    var ret = [];
+    (l).each(deep ? (l).flatten(col) : col, function(index, value, ref) {
+      ret.push(fn.call(scope || this, value, index, ref));
+    });
     return ret;
   };
 
