@@ -30,7 +30,7 @@
   /* ARRAY METHODS */
 
   (l).at = function (arr, index, deep) {
-    return (l).deep(arr, function(d,key,value) {
+    return (l).deep(arr, function(d,key) {
       if ((l).isArray(index)) { if ((l).inArray(index, parseInt(key))) return true;
       } else if (index == key) { return true; }
     }, (l).isBool(deep) && deep ? '*' : (l).isNumber(deep) ? deep : 0);
@@ -414,12 +414,9 @@
     return (((l).isPlainObject(col) && (l).len(col) === 0) || ((l).isArray(col) && col.length === 0 ));
   };
 
-  (l).isUnique = function (col, key, deep) {
-    var target;
+  (l).isUnique = function (col, key) {
     if (key in col) {
-      target = col[key];
-      key = key.toString();
-      for (var o in col) { if ((l).isEqual(target, col[o]) && o !== key) return false; }
+      for (var o in col) { if ((l).isEqual(col[key], col[o]) && o !== key.toString()) return false; }
     }
     return true;
   };
@@ -496,11 +493,7 @@
   (l).none = function (col, fn, scope, deep) {
     deep = deep || (l).isBool(scope) ? scope : false;
     var ret = true;
-    if (deep) {
-      (l).deep(col, function(depth, index, value) { if (fn.call(scope ? scope : this, value, index)) ret = false; });
-    } else {
-      (l).each(col, function (index, value) { if (fn.call(scope ? scope : this, value, index)) ret = false; });
-    }
+    (l).deep(col, function(d,i,v) { if (fn.call(scope ? scope : this, v, i)) ret = false; }, deep ? '*' : 1);
     return ret;
   };
 
