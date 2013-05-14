@@ -193,17 +193,15 @@
 
   (l).all = (l).every = function (col, fn, scope, deep) {
     var ret = true, deep = (l).isBool(scope) ? scope : deep;
-    if (deep) {
-      (l).deep(col, function(depth, index, value) {
-        if ( !(l).isArray(value) && !(l).isPlainObject(value) ) {
+    (l).deep(col, function(depth, index, value) {
+      if (deep) {
+        if (!(l).isArray(value) && !(l).isPlainObject(value)) {
           if (!fn.call(!(l).isBool(scope) ? (scope || this) : this, value, index)) ret = false;
         }
-      });
-    } else {
-      (l).each(col, function(index, value) {
+      } else {
         if (!fn.call(!(l).isBool(scope) ? (scope || this) : this, value, index)) ret = false;
-      });
-    }
+      }
+    }, deep ? '*' : 1);
     return ret;
   };
 
@@ -318,8 +316,7 @@
     return col;
   };
 
-  (l).filter = function (col, fn, scope, deep, reject) {
-    deep = (l).isBool(scope) ? scope : deep;
+  (l).filter = function (col, fn, scope, reject) {
     var ret = [];
     (l).each(col, function (index, value) {
       if (reject) {
@@ -562,7 +559,7 @@
   };
 
   (l).reject = function (col, fn, scope) {
-    return (l).filter(col, fn, scope || this, false, true);
+    return (l).filter(col, fn, scope || this, true);
   };
 
   (l).remove = function (col, key) {
