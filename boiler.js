@@ -318,7 +318,8 @@
     return col;
   };
 
-  (l).filter = function (col, fn, scope, reject) {
+  (l).filter = function (col, fn, scope, deep, reject) {
+    deep = (l).isBool(scope) ? scope : deep;
     var ret = [];
     (l).each(col, function (index, value) {
       if (reject) {
@@ -584,7 +585,7 @@
   };
 
   (l).reject = function (col, fn, scope) {
-    return (l).filter(col, fn, scope || this, true);
+    return (l).filter(col, fn, scope || this, false, true);
   };
 
   (l).remove = function (col, key) {
@@ -1167,9 +1168,9 @@
     return (l).map(obj, function (value) { return value[key]; });
   };
 
-  (l).resolve = function (obj, key) {
+  (l).resolve = function (obj, key, paths) {
     if (!key) key = (l).keys(obj)[0];
-    return (l).paths(obj, true)[key];
+    return (l).paths(obj, paths)[key];
   };
 
   (l).toQueryString = function (obj, prefix) {
