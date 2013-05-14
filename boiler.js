@@ -207,21 +207,12 @@
 
   (l).any = (l).some = function (col, fn, scope, deep) {
     var ret = false, deep = (l).isBool(scope) ? scope : deep;
-    if (deep) {
-      (l).deep(col, function(depth, index, value) {
-        if (fn.call(!(l).isBool(scope) ? (scope || this) : this, value, index) ) {
-          ret = true;
-          return false;
-        }
-      });
-    } else {
-      (l).each(col, function(index, value) {
-        if (fn.call(!(l).isBool(scope) ? (scope || this) : this, value, index) ) {
-          ret = true;
-          return false;
-        }
-      });
-    }
+    (l).deep(col, function(depth, index, value) {
+      if (fn.call(!(l).isBool(scope) ? (scope || this) : this, value, index) ) {
+        if (!ret) ret = true;
+        ret = true;
+      }
+    }, deep ? '*' : 1);
     return ret;
   };
 
