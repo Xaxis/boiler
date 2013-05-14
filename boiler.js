@@ -1169,7 +1169,7 @@
   };
 
   (l).resolve = function (obj, key, paths) {
-    if (!key) key = (l).keys(obj)[0];
+    if ((key in obj) && !paths) return obj[key];
     return (l).paths(obj, paths)[key];
   };
 
