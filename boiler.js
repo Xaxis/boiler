@@ -224,9 +224,9 @@
     return sumTotal / (l).len(col, deep);
   };
 
-  (l).clear = function (col) {
-    if ((l).isPlainObject(col)) (l).each(col, function (index) { delete col[index]; });
-    else col.length = 0;
+  (l).clear = function (col, deep) {
+    if ((l).isArray(col)) col.length = 0;
+    else (l).each(col, function (index) { delete col[index]; });
     return col;
   };
 
@@ -334,7 +334,7 @@
     return res.length >= 1 ? res[0] : undefined;
   };
 
-  (l).findKey = function (col, fn, scope, deep) {
+  (l).findKey = (l).findIndex = function (col, fn, scope, deep) {
     deep = (l).isBool(scope) ? scope : deep;
     return (l).find(col, fn, scope || this, deep, "key");
   };
@@ -923,9 +923,7 @@
   };
 
   (l).get = function (obj, key) {
-    var ret = undefined;
-    (l).deep(obj, function(d,i,v) { if (key == i) ret = v; });
-    return ret;
+    return (l).deep(obj, function(d,i) { if (key == i) return true; })[0];
   };
 
   (l).getByType = function (obj, type, key, deep) {
@@ -1122,6 +1120,7 @@
   (l).parent = function (obj, key) {
     var target = key ? (l).get(obj, key) : obj,
         objs = (l).objects(obj, true);
+    console.log(target);
     for (var o in objs) {
       if ((l).isPlainObject(objs[o])) {
         for (var p in objs[o]) {
