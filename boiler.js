@@ -1136,9 +1136,9 @@
     return (l).map(obj, function (value) { return (l).resolve(value, key); });
   };
 
-  (l).resolve = function (obj, key, paths) {
-    if ((key in obj) && !paths) return obj[key];
-    return (l).paths(obj, paths)[key];
+  (l).resolve = function (obj, path, keys) {
+    if ((path in obj) && !keys) return obj[path];
+    return (l).paths(obj, keys)[path];
   };
 
   (l).toQueryString = function (obj, prefix) {
