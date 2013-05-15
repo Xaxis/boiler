@@ -924,7 +924,7 @@
 
   (l).get = function (obj, key) {
     var ret = undefined;
-    (l).deep(obj, function(d,i,v,r) { if (key == i) ret = v; });
+    (l).deep(obj, function(d,i,v) { if (key == i) ret = v; });
     return ret;
   };
 
@@ -1133,7 +1133,7 @@
   };
 
   (l).pluck = (l).fetch = function (obj, key) {
-    return (l).map(obj, function (value) { return value[key]; });
+    return (l).map(obj, function (value) { return (l).resolve(value, key); });
   };
 
   (l).resolve = function (obj, key, paths) {
