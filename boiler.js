@@ -230,11 +230,14 @@
     return col;
   };
 
-  (l).clone = function (col, deep) {
-    var ret = (l).isArray(col) ? [] : {};
+  (l).clone = function (col, fn, deep) {
+    var deep = (l).isBool(fn) ? fn : deep, ret = (l).isArray(col) ? [] : {};
     for (var i in col) {
-      if ((l).isPlainObject(col[i]) || (l).isArray(col[i]) && deep) ret[i] = (l).clone(col[i]);
-      else ret[i] = col[i];
+      if ((l).isPlainObject(col[i]) || (l).isArray(col[i]) && deep) {
+        ret[i] = (l).clone(col[i], fn, deep);
+      } else {
+        ret[i] = (l).isFunction(fn) ? fn.call(this, col[i]) : col[i];
+      }
     }
     return ret;
   };
@@ -1120,7 +1123,6 @@
   (l).parent = function (obj, key) {
     var target = key ? (l).get(obj, key) : obj,
         objs = (l).objects(obj, true);
-    console.log(target);
     for (var o in objs) {
       if ((l).isPlainObject(objs[o])) {
         for (var p in objs[o]) {
@@ -1147,7 +1149,6 @@
       if (!(l).isPlainObject(value)) {
         if ((l).isArray(value)) {
           (l).deep(value, function (arrDepth, arrIndex, arrValue) {
-            arrIndex = arrIndex.toString();
             ret += (prefix ? prefix + index + "[]" : index + "[]") + "=" + arrValue + "&";
           }, "*");
         } else {
