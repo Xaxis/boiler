@@ -1,7 +1,7 @@
 boiler
 ======
-For More Info, API, Bench Tests, and Downloads visit: http://www.boilerjs.com
+For More Info, API, Unit Tests, and Downloads visit: http://www.boilerjs.com
 
-Boiler is a utility library that makes every day tasks in JavaScript easier by providing over 150 methods that play well
-with other libraries. Boiler IS NOT a DOM manipulation library and doesn't require a browser to be useful. It's the
-perfect solution for those requiring a slightly more robust Underscore.js-esque JavaScript utility library.
+Boiler is a utility library that makes every day tasks in JavaScript easier by providing over 150 methods that work on arrays,
+collections, functions, numbers, objects, and strings. It's the perfect solution for those looking for the JavaScript equivalent
+of a Swiss Army Knife.
