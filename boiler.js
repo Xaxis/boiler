@@ -291,7 +291,7 @@
   };
 
   _.each = _.forEach = function (col, fn, scope) {
-    if (_.isArray(col)) {
+    if (col instanceof Array) {
       for (var i = 0; i < col.length; i++) {
         if (fn.call(scope || col[i], i, col[i], col) === false) break;
       }
@@ -397,9 +397,7 @@
 
   _.invert = function (col) {
     var inverted = {}, i = -1, keys = Object.keys(col);
-    while (++i < keys.length) {
-      inverted[col[keys[i]]] = keys[i];
-    }
+    while (++i < keys.length) { inverted[col[keys[i]]] = keys[i]; }
     return inverted;
   };
 
@@ -987,8 +985,7 @@
   };
 
   _.isElement = function (obj) {
-    return typeof obj === "object" ? obj instanceof HTMLElement :
-        obj && typeof obj === "object" && obj.nodeType === 1 && typeof obj.nodeName === "string";
+    return obj ? obj.nodeType === 1 : false;
   };
 
   _.isEqual = function (obj1, obj2) {
