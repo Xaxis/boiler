@@ -224,7 +224,7 @@
     return sumTotal / _.len(col, deep);
   };
 
-  _.clear = function (col, deep) {
+  _.clear = function (col) {
     if (_.isArray(col)) col.length = 0;
     else _.each(col, function (index) { delete col[index]; });
     return col;
@@ -390,8 +390,9 @@
   };
 
   _.has = _.keyExists = function (col, key, deep) {
-    return _.findKey(col, function (index) {
-      return !!(key == index);
+    return !deep && Object.hasOwnProperty ? hasOwnProperty.call(col, key)
+        : _.findKey(col, function (index) {
+          return !!(key == index);
     }, deep) ? true : false;
   };
 
