@@ -5,124 +5,124 @@
  * (c) 2012-2013 Wil Neeley, Trestle Media, LLC.
  * boiler.js may be freely distributed under the MIT license.
  **/
-(function () {
+(function (exports) {
   var
-
-  // Library reference
-  l = "_",
 
   // Global root object (window or global)
   root = this,
 
   // Save conflict reference
-  previousLib = root[l];
+  previousLib = root._,
 
   // Library definition
-  (l) = window[l] = function (obj) {
+  _ = function (obj) {
     this._bound = arguments;
-    if (obj instanceof (l)) return obj;
-    if (!(this instanceof (l))) return new (l)((l).toArray(arguments));
+    if (obj instanceof _) return obj;
+    if (!(this instanceof _)) return new _(_.toArray(arguments));
   };
 
   // Library version
-  (l)._version = "0.8.6";
+  _._version = "0.8.6";
+
+  // Export library
+  exports._ = _;
 
   /* ARRAY METHODS */
 
-  (l).at = function (arr, index, deep) {
-    return (l).deep(arr, function(d,key) {
-      if ((l).isArray(index)) { if ((l).inArray(index, parseInt(key))) return true;
+  _.at = function (arr, index, deep) {
+    return _.deep(arr, function(d,key) {
+      if (_.isArray(index)) { if (_.inArray(index, parseInt(key))) return true;
       } else if (index == key) { return true; }
-    }, (l).isBool(deep) && deep ? '*' : (l).isNumber(deep) ? deep : 0);
+    }, _.isBool(deep) && deep ? '*' : _.isNumber(deep) ? deep : 0);
   };
 
-  (l).compact = function (arr, all, deep) {
-    return (l).deep({obj:arr, fn:function(d,key,value) {
-      if (all && !(l).isFalsy(value) && !(l).isEmpty(value)) return true;
-      else if (!all && !(l).isFalsy(value)) return true;
-    }, depth: (l).isBool(deep) && deep ? '*' : (l).isNumber(deep) ? deep : 1, noObjects:true});
+  _.compact = function (arr, all, deep) {
+    return _.deep({obj:arr, fn:function(d,key,value) {
+      if (all && !_.isFalsy(value) && !_.isEmpty(value)) return true;
+      else if (!all && !_.isFalsy(value)) return true;
+    }, depth: _.isBool(deep) && deep ? '*' : _.isNumber(deep) ? deep : 1, noObjects:true});
   };
 
-  (l).difference = function () {
+  _.difference = function () {
     var arrs = [], deep = false, rest;
-    (l).each(arguments, function (index, value) {
-      if ((l).isArray(value)) arrs.push(value);
-      if (((l).isBool(value) && value) || (l).isNumber(value)) deep = value;
+    _.each(arguments, function (index, value) {
+      if (_.isArray(value)) arrs.push(value);
+      if ((_.isBool(value) && value) || _.isNumber(value)) deep = value;
     });
     rest = Array.prototype.concat.apply(Array.prototype, Array.prototype.slice.call(arrs, 1));
-    if ((l).isBool(deep)) arrs[0] = (l).flatten(arrs[0]);
-    if ((l).isNumber(deep)) arrs[0] = (l).flatten(arrs[0], deep);
-    return (l).filter((l).uniq(arrs[0]), function (value) {
-      return !(l).inArray(rest, value);
+    if (_.isBool(deep)) arrs[0] = _.flatten(arrs[0]);
+    if (_.isNumber(deep)) arrs[0] = _.flatten(arrs[0], deep);
+    return _.filter(_.uniq(arrs[0]), function (value) {
+      return !_.inArray(rest, value);
     });
   };
 
-  (l).first = function (arr, n, deep) {
+  _.first = function (arr, n, deep) {
     n = n ? n : 1;
-    return (l).deep({obj: arr, fn: function(d,i,v) {
+    return _.deep({obj: arr, fn: function(d,i,v) {
       if (parseInt(i) < n) return true;
     }, depth: deep ? '*' : 1, noObjects: true});
   };
 
-  (l).indexOf = (l).firstIndexOf = function (arr, value, from, deep) {
-    var deep = deep || (l).isBool(from) ? from : false, from = (l).isNumber(from) ? from : 0, ret = -1, n = 0,
-        last = (l).filter(arguments, function(v) { if (v == '___lastIndexOf___') return true; }).length ? true : false;
-    (l).deep({obj: deep ? (l).paths(arr) : arr, fn: function(d,i,v) {
-      if ((l).isEqual(v, value)) {
-        if ((l).isNumber(from)) {
+  _.indexOf = _.firstIndexOf = function (arr, value, from, deep) {
+    var deep = deep || _.isBool(from) ? from : false, from = _.isNumber(from) ? from : 0, ret = -1, n = 0,
+        last = _.filter(arguments, function(v) { if (v == '___lastIndexOf___') return true; }).length ? true : false;
+    _.deep({obj: deep ? _.paths(arr) : arr, fn: function(d,i,v) {
+      if (_.isEqual(v, value)) {
+        if (_.isNumber(from)) {
           if (n >= from) ret = i;
         } else {
           ret = i;
         }
       }
-      n = (l).isArray(v) ? 0 : n+1;
+      n = _.isArray(v) ? 0 : n+1;
     }, depth: deep ? '*' : 1, noObjects: true});
     return ret.length == 1 ? parseInt(ret) : ret;
   };
 
-  (l).initial = function (arr, n, deep) {
+  _.initial = function (arr, n, deep) {
     var m = n ? arr.length - n : arr.length - 1;
-    return (l).deep({obj: arr, fn: function(d,i,v) {
-      if ((l).isArray(v)) m = v.length - n;
+    return _.deep({obj: arr, fn: function(d,i,v) {
+      if (_.isArray(v)) m = v.length - n;
       if (parseInt(i) < m) return true;
     }, depth: deep ? '*' : 1, noObjects: true});
   };
 
-  (l).intersection = function () {
+  _.intersection = function () {
     var arrs, rest, deep;
-    arrs = (l).filter((l).toArray(arguments), function (value) {
-      if ((l).isBool(value)) deep = value;
-      if ((l).isArray(value)) return true;
+    arrs = _.filter(_.toArray(arguments), function (value) {
+      if (_.isBool(value)) deep = value;
+      if (_.isArray(value)) return true;
     });
     rest = Array.prototype.slice.call(arrs, 1);
-    return (l).deep({obj: (l).uniq(arrs[0]), fn: function (d,i,elm) {
-      return (l).all(rest, function (other) {
-        return (l).indexOf(other, elm, deep) != -1;
+    return _.deep({obj: _.uniq(arrs[0]), fn: function (d,i,elm) {
+      return _.all(rest, function (other) {
+        return _.indexOf(other, elm, deep) != -1;
       });
     }, depth: 1, noObjects: true});
   };
 
-  (l).last = function (arr, n, deep) {
-    var deep = deep || (l).isBool(n) ? n : false, n = (l).isNumber(n) ? arr.length - n : arr.length - 1;
-    return (l).deep({obj: arr, fn:function(d,i,v) {
+  _.last = function (arr, n, deep) {
+    var deep = deep || _.isBool(n) ? n : false, n = _.isNumber(n) ? arr.length - n : arr.length - 1;
+    return _.deep({obj: arr, fn:function(d,i,v) {
       if (n <= parseInt(i) && !deep) return true;
-      else if (n-1 <= parseInt(i) && !(l).isArray(v) && deep) return true;
+      else if (n-1 <= parseInt(i) && !_.isArray(v) && deep) return true;
     }, depth: deep ? '*' : 1, noObjects: true});
   };
 
-  (l).lastIndexOf = function (arr, value, from, deep) {
-    return (l).indexOf(arr, value, from, deep, '___lastIndexOf___');
+  _.lastIndexOf = function (arr, value, from, deep) {
+    return _.indexOf(arr, value, from, deep, '___lastIndexOf___');
   };
 
-  (l).object = (l).toObject = function () {
+  _.object = _.toObject = function () {
     var arrs = [], keys = [], ret = {}, allArrays = true, i;
-    (l).each(arguments, function (index, value) {
-      if ((l).isArray(value)) arrs.push(value);
+    _.each(arguments, function (index, value) {
+      if (_.isArray(value)) arrs.push(value);
       else allArrays = false;
     });
     if (arrs.length === 2) {
       keys = arrs[1];
-      (l).each(arrs[0], function (index, value) { ret[ value ] = keys[index]; });
+      _.each(arrs[0], function (index, value) { ret[ value ] = keys[index]; });
     } else if ( allArrays && arrs.length > 1 ) {
       for (i = 0; i < arrs.length; i ++) {
         var key = arrs[i][0];
@@ -136,79 +136,79 @@
     return ret;
   };
 
-  (l).rest = (l).tail = function (arr, n, deep) {
-    var deep = deep || (l).isBool(n) ? n : false, n = (l).isNumber(n) ? n : 1;
-    return (l).deep({obj: arr, fn: function(d,i,v){
+  _.rest = _.tail = function (arr, n, deep) {
+    var deep = deep || _.isBool(n) ? n : false, n = _.isNumber(n) ? n : 1;
+    return _.deep({obj: arr, fn: function(d,i,v){
       if (parseInt(i) >= n && !deep) return true;
-      else if (parseInt(i) >= n && !(l).isArray(v) && deep) return true;
+      else if (parseInt(i) >= n && !_.isArray(v) && deep) return true;
     }, depth: deep ? '*' : 1, noObjects: true});
   };
 
-  (l).union = function () {
-    return (l).uniq((l).flatten((l).toArray(arguments)));
+  _.union = function () {
+    return _.uniq(_.flatten(_.toArray(arguments)));
   };
 
-  (l).uniq = (l).unique = function (arr, fn, scope, deep) {
-    var seen = [], deep = (l).filter(arguments, function(v) { if((l).isBool(v)) return true; }).length ? true : false;
-    arr = deep ? (l).flatten(arr) : arr;
-    return (l).deep({obj: (l).isFunction(fn) ? (l).map(arr, fn, scope) : arr, fn: function (d,i,v) {
-      if (!(l).contains(seen, v)) {
+  _.uniq = _.unique = function (arr, fn, scope, deep) {
+    var seen = [], deep = _.filter(arguments, function(v) { if(_.isBool(v)) return true; }).length ? true : false;
+    arr = deep ? _.flatten(arr) : arr;
+    return _.deep({obj: _.isFunction(fn) ? _.map(arr, fn, scope) : arr, fn: function (d,i,v) {
+      if (!_.contains(seen, v)) {
         seen.push(v);
         return true;
       }
     }, depth: 1, noObjects: true});
   };
 
-  (l).without = (l).exclude = function (arr, values, deep) {
-    if (deep) values = (l).flatten(values);
-    var res = (l).deep({obj: arr, fn: function(d,i,v){
-      for (var i = 0; i < values.length; i++) { if ((l).isEqual(values[i], v)) return false; }
+  _.without = _.exclude = function (arr, values, deep) {
+    if (deep) values = _.flatten(values);
+    var res = _.deep({obj: arr, fn: function(d,i,v){
+      for (var i = 0; i < values.length; i++) { if (_.isEqual(values[i], v)) return false; }
       return true;
     }, depth: deep ? '*' : 1, noObjects: true});
-    return deep ? (l).flatten(res) : res;
+    return deep ? _.flatten(res) : res;
   };
 
-  (l).zip = function () {
+  _.zip = function () {
     var i = 0, ret = [], arrs;
-    arrs = (l).filter((l).toArray(arguments), function(value) { if ((l).isArray(value)) return true; });
-    for (; i < arrs[0].length; i++) { ret[i] = (l).pluck(arrs, "" + i); }
+    arrs = _.filter(_.toArray(arguments), function(value) { if (_.isArray(value)) return true; });
+    for (; i < arrs[0].length; i++) { ret[i] = _.pluck(arrs, "" + i); }
     return ret;
   };
 
   /* COLLECTION METHODS */
 
-  (l).add = function (col, key, value, deep) {
-    var start = true, type = (l).isArray(col) ? true : false;
-    (l).deep({obj: col, fn:function(d,i,v) {
+  _.add = function (col, key, value, deep) {
+    var start = true, type = _.isArray(col) ? true : false;
+    _.deep({obj: col, fn:function(d,i,v) {
       if (start) {
         if (!(key in col)) col[key] = value;
         start = false;
       }
-      if ((((l).isArray(v) && type) || ((l).isPlainObject(v) && !type)) && deep) {
+      if (((_.isArray(v) && type) || (_.isPlainObject(v) && !type)) && deep) {
         if (!(key in v)) v[key] = value;
       }
     }, depth: deep ? '*' : 1});
     return col;
   };
 
-  (l).all = (l).every = function (col, fn, scope, deep) {
-    var ret = true, deep = (l).isBool(scope) ? scope : deep;
-    (l).deep(col, function(depth, index, value) {
+  _.all = _.every = function (col, fn, scope, deep) {
+    var ret = true, deep = _.isBool(scope) ? scope : deep;
+    _.deep(col, function(depth, index, value) {
       if (deep) {
-        if (!(l).isArray(value) && !(l).isPlainObject(value)) {
-          if (!fn.call(!(l).isBool(scope) ? (scope || this) : this, value, index)) ret = false;
+        if (!_.isArray(value) && !_.isPlainObject(value)) {
+          if (!fn.call(!_.isBool(scope) ? (scope || this) : this, value, index)) ret = false;
         }
       } else {
-        if (!fn.call(!(l).isBool(scope) ? (scope || this) : this, value, index)) ret = false;
+        if (!fn.call(!_.isBool(scope) ? (scope || this) : this, value, index)) ret = false;
       }
     }, deep ? '*' : 1);
     return ret;
   };
 
-  (l).any = (l).some = function (col, fn, scope, deep) {
-    var ret = false, deep = (l).isBool(scope) ? scope : deep;
-    (l).deep(col, function(depth, index, value) {
-      if (fn.call(!(l).isBool(scope) ? (scope || this) : this, value, index) ) {
+  _.any = _.some = function (col, fn, scope, deep) {
+    var ret = false, deep = _.isBool(scope) ? scope : deep;
+    _.deep(col, function(depth, index, value) {
+      if (fn.call(!_.isBool(scope) ? (scope || this) : this, value, index) ) {
         if (!ret) ret = true;
         ret = true;
       }
@@ -216,57 +216,57 @@
     return ret;
   };
 
-  (l).average = function (col, deep) {
+  _.average = function (col, deep) {
     var sumTotal = 0;
-    (l).deep(col, function (depth, index, value) {
-      if ((l).isNumber(value)) sumTotal += value;
+    _.deep(col, function (depth, index, value) {
+      if (_.isNumber(value)) sumTotal += value;
     }, deep ? "*" : 1);
-    return sumTotal / (l).len(col, deep);
+    return sumTotal / _.len(col, deep);
   };
 
-  (l).clear = function (col, deep) {
-    if ((l).isArray(col)) col.length = 0;
-    else (l).each(col, function (index) { delete col[index]; });
+  _.clear = function (col, deep) {
+    if (_.isArray(col)) col.length = 0;
+    else _.each(col, function (index) { delete col[index]; });
     return col;
   };
 
-  (l).clone = function (col, fn, deep) {
-    var deep = (l).isBool(fn) ? fn : deep, ret = (l).isArray(col) ? [] : {};
+  _.clone = function (col, fn, deep) {
+    var deep = _.isBool(fn) ? fn : deep, ret = _.isArray(col) ? [] : {};
     for (var i in col) {
-      if ((l).isPlainObject(col[i]) || (l).isArray(col[i]) && deep) {
-        ret[i] = (l).clone(col[i], fn, deep);
+      if (_.isPlainObject(col[i]) || _.isArray(col[i]) && deep) {
+        ret[i] = _.clone(col[i], fn, deep);
       } else {
-        ret[i] = (l).isFunction(fn) ? fn.call(this, col[i]) : col[i];
+        ret[i] = _.isFunction(fn) ? fn.call(this, col[i]) : col[i];
       }
     }
     return ret;
   };
 
-  (l).contains = (l).inArray = function (col, value, deep) {
-    return (l).isEqual((l).find(col, function (v) {
-      return (l).isEqual(v, value) ? true : false;
+  _.contains = _.inArray = function (col, value, deep) {
+    return _.isEqual(_.find(col, function (v) {
+      return _.isEqual(v, value) ? true : false;
     }, deep), value);
   };
 
-  (l).count = function (col, fn, scope, deep) {
-    var ret = 0, deep = (l).isBool(scope) ? scope : deep;
-    (l).deep(col, function(depth, index, value) {
+  _.count = function (col, fn, scope, deep) {
+    var ret = 0, deep = _.isBool(scope) ? scope : deep;
+    _.deep(col, function(depth, index, value) {
       if (deep) {
-        if (!(l).isArray(value) && !(l).isPlainObject(value) ) {
-          if (fn.call(!(l).isBool(scope) ? (scope || this) : this, value, index)) ret++;
+        if (!_.isArray(value) && !_.isPlainObject(value) ) {
+          if (fn.call(!_.isBool(scope) ? (scope || this) : this, value, index)) ret++;
         }
       } else {
-        if (fn.call(!(l).isBool(scope) ? (scope || this) : this, value, index)) ret++;
+        if (fn.call(!_.isBool(scope) ? (scope || this) : this, value, index)) ret++;
       }
     }, deep ? '*' : 1);
     return ret;
   };
 
-  (l).countBy = function (col, map, scope) {
-    return (l).groupBy(col, map, scope || this, true);
+  _.countBy = function (col, map, scope) {
+    return _.groupBy(col, map, scope || this, true);
   };
 
-  (l).deep = function (col, fn, depth) {
+  _.deep = function (col, fn, depth) {
     var obj = col.obj || col,
         fn = col.fn || fn,
         depth = col.depth || (depth || '*'),
@@ -278,11 +278,11 @@
     for (var o in obj) {
       args.unshift(depth, o, obj[o], obj);
       if (fn.apply(this, args)) ret.push(obj[o]);
-      if (((l).isPlainObject(obj[o]) && !noObjects) || ((l).isArray(obj[o]) && !noArrays)) {
-        depth = (l).isString(depth) ? '*' : depth - 1;
+      if ((_.isPlainObject(obj[o]) && !noObjects) || (_.isArray(obj[o]) && !noArrays)) {
+        depth = _.isString(depth) ? '*' : depth - 1;
         for (var i = 0; i < 4; i++) { args.shift(); }
         if (depth > 0 || depth === '*') {
-          (l).deep({obj:obj[o], fn:fn, depth:depth, args:args, noArrays:noArrays, noObjects:noObjects, ret: ret});
+          _.deep({obj:obj[o], fn:fn, depth:depth, args:args, noArrays:noArrays, noObjects:noObjects, ret: ret});
         }
       }
       for (var i = 0; i < 4; i++) { args.shift(); }
@@ -290,8 +290,8 @@
     return retType ? obj : ret;
   };
 
-  (l).each = (l).forEach = function (col, fn, scope) {
-    if ((l).isArray(col)) {
+  _.each = _.forEach = function (col, fn, scope) {
+    if (_.isArray(col)) {
       for (var i = 0; i < col.length; i++) {
         if (fn.call(scope || col[i], i, col[i], col) === false) break;
       }
@@ -303,12 +303,12 @@
     return col;
   };
 
-  (l).empty = function (col, deep) {
+  _.empty = function (col, deep) {
     var ref = null;
-    (l).deep(col, function(d, index, value, r) {
+    _.deep(col, function(d, index, value, r) {
       if (deep) {
         if (ref == null) ref = r;
-        if ((l).isPlainObject(value) || (l).isArray(value)) ref = value;
+        if (_.isPlainObject(value) || _.isArray(value)) ref = value;
         else ref[index] = undefined;
       } else {
         col[index] = undefined;
@@ -317,9 +317,9 @@
     return col;
   };
 
-  (l).filter = function (col, fn, scope, reject) {
+  _.filter = function (col, fn, scope, reject) {
     var ret = [];
-    (l).each(col, function (index, value) {
+    _.each(col, function (index, value) {
       if (reject) {
         if (!fn.call(scope ? scope : this, value, index)) ret.push(value);
       } else {
@@ -329,23 +329,23 @@
     return ret;
   };
 
-  (l).find = (l).findValue = function (col, fn, scope, deep, mode) {
-    deep = (l).isBool(scope) ? scope : deep;
-    var res = (l).deep({obj: col, fn: function(d,i,v) {
+  _.find = _.findValue = function (col, fn, scope, deep, mode) {
+    deep = _.isBool(scope) ? scope : deep;
+    var res = _.deep({obj: col, fn: function(d,i,v) {
       if (fn.call(scope ? scope : this, mode === "key" ? i : v)) return true;
     }, depth: deep ? '*' : 1});
     return res.length >= 1 ? res[0] : undefined;
   };
 
-  (l).findKey = (l).findIndex = function (col, fn, scope, deep) {
-    deep = (l).isBool(scope) ? scope : deep;
-    return (l).find(col, fn, scope || this, deep, "key");
+  _.findKey = _.findIndex = function (col, fn, scope, deep) {
+    deep = _.isBool(scope) ? scope : deep;
+    return _.find(col, fn, scope || this, deep, "key");
   };
 
-  (l).flatten = function (col, n) {
+  _.flatten = function (col, n) {
     var ret = [], n = n || '*', nested;
-    (l).deep(col, function (depth, index, elm) {
-      nested = !(l).isArray(elm) && !(l).isPlainObject(elm)
+    _.deep(col, function (depth, index, elm) {
+      nested = !_.isArray(elm) && !_.isPlainObject(elm)
       if (depth == '*') {
         if (nested) ret.push(elm);
       } else if (depth > 1) {
@@ -357,91 +357,91 @@
     return ret;
   };
 
-  (l).groupBy = function (col, map, scope, count) {
-    count = count || (l).isBool(scope) ? scope : false;
+  _.groupBy = function (col, map, scope, count) {
+    count = count || _.isBool(scope) ? scope : false;
     var res = {};
-    (l).each(col, function (index, value) {
-      var key = (l).isString(map) ? value[map] : map.call(scope || this, value, index, col);
-      if ((l).has(res, key)) res[key].push(value);
+    _.each(col, function (index, value) {
+      var key = _.isString(map) ? value[map] : map.call(scope || this, value, index, col);
+      if (_.has(res, key)) res[key].push(value);
       else res[key] = [value];
     });
-    if (count) { (l).each(res, function (index, value) { res[index] = value.length; }); }
+    if (count) { _.each(res, function (index, value) { res[index] = value.length; }); }
     return res;
   };
 
-  (l).groupsOf = function (col, n, pad) {
+  _.groupsOf = function (col, n, pad) {
     var res = [], i = 1, key;
-    (l).each(col, function (index, value) {
+    _.each(col, function (index, value) {
       if ( (key in res) && i < n ) {
         res[key].push(value);
         i += 1;
       } else {
-        key = (l).len(res);
+        key = _.len(res);
         res[key] = [value];
         i = 1;
       }
     });
     if (pad) {
-      (l).each(res, function (index, value) {
+      _.each(res, function (index, value) {
         if (value.length < n) for (i = value.length; i < n; i++) { res[index].push(pad); }
       });
     }
     return res;
   };
 
-  (l).has = (l).keyExists = function (col, key, deep) {
-    return (l).findKey(col, function (index) {
+  _.has = _.keyExists = function (col, key, deep) {
+    return _.findKey(col, function (index) {
       return !!(key == index);
     }, deep) ? true : false;
   };
 
-  (l).invert = function (col) {
+  _.invert = function (col) {
     var invertedObj = {};
-    (l).each(col, function (index, value) {
+    _.each(col, function (index, value) {
       invertedObj[value] = index;
     });
     return invertedObj;
   };
 
-  (l).invoke = function (col, fn, args) {
+  _.invoke = function (col, fn, args) {
     var args = args || [], ret;
-    return (l).map(col, function (value) {
+    return _.map(col, function (value) {
       args.unshift(value);
-      ret = ((l).isFunction(fn) ? fn : value[fn]).apply(value, args);
+      ret = (_.isFunction(fn) ? fn : value[fn]).apply(value, args);
       args.shift();
       return ret;
     });
   };
 
-  (l).isEmpty = function (col) {
-    return (((l).isPlainObject(col) && (l).len(col) === 0) || ((l).isArray(col) && col.length === 0 ));
+  _.isEmpty = function (col) {
+    return ((_.isPlainObject(col) && _.len(col) === 0) || (_.isArray(col) && col.length === 0 ));
   };
 
-  (l).isUnique = function (col, key) {
+  _.isUnique = function (col, key) {
     if (key in col) {
-      for (var o in col) { if ((l).isEqual(col[key], col[o]) && o !== key.toString()) return false; }
+      for (var o in col) { if (_.isEqual(col[key], col[o]) && o !== key.toString()) return false; }
     }
     return true;
   };
 
-  (l).keys = function (col, deep) {
+  _.keys = function (col, deep) {
     var keys = [];
     for (var o in col) { keys.push(o); }
-    return deep ? (l).keys((l).paths(col)) : keys;
+    return deep ? _.keys(_.paths(col)) : keys;
   };
 
-  (l).least = function (col, fn, most) {
+  _.least = function (col, fn, most) {
     var comparator, result, ret, leastValue;
-    if ((l).isString(fn)) {
-      result = (l).countBy(col, function (p) { return p[fn]; });
-      comparator = (l).countBy(col, function (p) { return p[fn]; }, this, true);
+    if (_.isString(fn)) {
+      result = _.countBy(col, function (p) { return p[fn]; });
+      comparator = _.countBy(col, function (p) { return p[fn]; }, this, true);
     }
     else {
-      result = (l).countBy(col, fn || function (num) { return num; });
-      comparator = (l).countBy(col, fn || function (num) { return num; }, this, true);
+      result = _.countBy(col, fn || function (num) { return num; });
+      comparator = _.countBy(col, fn || function (num) { return num; }, this, true);
     }
-    leastValue = most ? (l).max(result) : (l).min(result);
-    (l).each(result, function (index, value) {
+    leastValue = most ? _.max(result) : _.min(result);
+    _.each(result, function (index, value) {
       if (leastValue == value) {
         ret = index;
         return false;
@@ -450,113 +450,113 @@
     return ret;
   };
 
-  (l).len = function (col, deep, count) {
-    var count = count ? (count += (l).keys(col).length) : (l).keys(col).length;
+  _.len = function (col, deep, count) {
+    var count = count ? (count += _.keys(col).length) : _.keys(col).length;
     if (deep) {
       for (var o in col) {
-        if ((l).isPlainObject(col[o]) || (l).isArray(col[o])) {
-          var ret = (l).len(col[o], deep, count);
-          if ((l).type(col[o]) === "array") return ret - 1;
-          else if ((l).type(col[o]) === "object") return ret;
+        if (_.isPlainObject(col[o]) || _.isArray(col[o])) {
+          var ret = _.len(col[o], deep, count);
+          if (_.type(col[o]) === "array") return ret - 1;
+          else if (_.type(col[o]) === "object") return ret;
         }
       }
     }
     return count;
   };
 
-  (l).map = (l).collect = function (col, fn, scope, deep) {
-    deep = deep || (l).isBool(scope) ? scope : false;
+  _.map = _.collect = function (col, fn, scope, deep) {
+    deep = deep || _.isBool(scope) ? scope : false;
     var ret = [];
-    (l).each(deep ? (l).flatten(col) : col, function(index, value, ref) {
+    _.each(deep ? _.flatten(col) : col, function(index, value, ref) {
       ret.push(fn.call(scope || this, value, index, ref));
     });
     return ret;
   };
 
-  (l).max  = function (col, deep) {
+  _.max  = function (col, deep) {
     var maxVals = [];
-    (l).deep(col, function (depth, index, value) {
-      if ((l).isNumber(value)) maxVals.push(value);
+    _.deep(col, function (depth, index, value) {
+      if (_.isNumber(value)) maxVals.push(value);
     }, deep ? "*" : 1);
     return Math.max.apply(this, maxVals);
   };
 
-  (l).min  = function (col, deep) {
+  _.min  = function (col, deep) {
     var minVals = [];
-    (l).deep(col, function(depth, index, value) {
-      if ((l).isNumber(value) ) minVals.push(value);
+    _.deep(col, function(depth, index, value) {
+      if (_.isNumber(value) ) minVals.push(value);
     }, deep ? "*" : 1);
     return Math.min.apply(this, minVals);
   };
 
-  (l).most = function (obj, fn) {
-    return (l).least(obj, fn, true);
+  _.most = function (obj, fn) {
+    return _.least(obj, fn, true);
   };
 
-  (l).none = function (col, fn, scope, deep) {
-    deep = deep || (l).isBool(scope) ? scope : false;
+  _.none = function (col, fn, scope, deep) {
+    deep = deep || _.isBool(scope) ? scope : false;
     var ret = true;
-    (l).deep(col, function(d,i,v) { if (fn.call(scope ? scope : this, v, i)) ret = false; }, deep ? '*' : 1);
+    _.deep(col, function(d,i,v) { if (fn.call(scope ? scope : this, v, i)) ret = false; }, deep ? '*' : 1);
     return ret;
   };
 
-  (l).omit = (l).blacklist = function (col, list) {
-    var props = (l).isArray(list) ? list : [list];
-    return (l).filter(col, function(value, index) {
-      if (!(index in props) && !((l).inArray(props, index))) return value;
+  _.omit = _.blacklist = function (col, list) {
+    var props = _.isArray(list) ? list : [list];
+    return _.filter(col, function(value, index) {
+      if (!(index in props) && !(_.inArray(props, index))) return value;
     });
   };
 
-  (l).only = (l).whitelist = function (col, list) {
-    var list = (l).isString(list) ? list.split(" ") : list;
-    return (l).filter(col, function (value, index) {
-      if ((l).inArray(list, index)) return true;
+  _.only = _.whitelist = function (col, list) {
+    var list = _.isString(list) ? list.split(" ") : list;
+    return _.filter(col, function (value, index) {
+      if (_.inArray(list, index)) return true;
     });
   };
 
-  (l).paths = function (col, keys, pathObj, lastKey, nextKey) {
+  _.paths = function (col, keys, pathObj, lastKey, nextKey) {
     var o, keys = keys || false, pathObj = pathObj || {}, lastKey = lastKey || "", nextKey = nextKey || "";
     for (o in col) {
       if (keys) pathObj[o] = (nextKey + "." + lastKey + "." + o).replace(/^[.]+/g, "");
       else pathObj[(nextKey + "." + lastKey + "." + o).replace(/^[.]+/g, "")] = col[o];
-      if ((l).isPlainObject(col[o]) || (l).isArray(col[o])) (l).paths(col[o], keys, pathObj, o, nextKey + "." + lastKey);
+      if (_.isPlainObject(col[o]) || _.isArray(col[o])) _.paths(col[o], keys, pathObj, o, nextKey + "." + lastKey);
     }
     return pathObj;
   };
 
-  (l).reduce = (l).foldl = function (col, fn, scope, right) {
+  _.reduce = _.foldl = function (col, fn, scope, right) {
     var copy = col, i = 0, base, keys, vals;
     if (right) {
-      if ((l).isPlainObject(copy)) {
-        keys = (l).keys(copy).reverse();
-        vals = (l).values(copy).reverse();
-        copy = (l).object(keys, vals);
-      } else if ((l).isArray(copy)) {
+      if (_.isPlainObject(copy)) {
+        keys = _.keys(copy).reverse();
+        vals = _.values(copy).reverse();
+        copy = _.object(keys, vals);
+      } else if (_.isArray(copy)) {
         copy = copy.reverse();
       }
     }
-    base = (l).find(copy, function (value) { return value; });
-    (l).each(copy, function (index, value) {
+    base = _.find(copy, function (value) { return value; });
+    _.each(copy, function (index, value) {
       if (i !== 0) base = fn.call(scope || this, base, value, index);
       i++;
     });
-    return (l).isArray(base) ? base[0] : base;
+    return _.isArray(base) ? base[0] : base;
   };
 
-  (l).reduceRight = (l).foldr = function (col, fn, scope) {
-    return (l).reduce((l).values(col), fn, scope || this, true);
+  _.reduceRight = _.foldr = function (col, fn, scope) {
+    return _.reduce(_.values(col), fn, scope || this, true);
   };
 
-  (l).reject = function (col, fn, scope) {
-    return (l).filter(col, fn, scope || this, true);
+  _.reject = function (col, fn, scope) {
+    return _.filter(col, fn, scope || this, true);
   };
 
-  (l).remove = function (col, key) {
+  _.remove = function (col, key) {
     var rest, from;
-    if ((l).isPlainObject(col)) {
-      if ((l).isArray(key)) { for (var i = 0; i < key.length; i++) { if (key[i] in col) delete col[key[i]]; }
+    if (_.isPlainObject(col)) {
+      if (_.isArray(key)) { for (var i = 0; i < key.length; i++) { if (key[i] in col) delete col[key[i]]; }
       } else { if (key in col) delete col[key]; }
-    } else if ((l).isArray(col)) {
+    } else if (_.isArray(col)) {
       from = parseInt(key);
       rest = col.slice((from) + 1);
       col.length = (from < 0) ? col.length + from : from;
@@ -565,11 +565,11 @@
     return col;
   };
 
-  (l).replace = function (col, fn, scope, deep) {
-    var deep = (l).isBool(scope) ? scope : deep, ref = col, scope = !(l).isBool(scope) ? scope : this;
-    return (l).deep({obj:col, fn: function(d,i,v) {
+  _.replace = function (col, fn, scope, deep) {
+    var deep = _.isBool(scope) ? scope : deep, ref = col, scope = !_.isBool(scope) ? scope : this;
+    return _.deep({obj:col, fn: function(d,i,v) {
       if (deep) {
-        if ((l).isPlainObject(v) || (l).isArray(v)) ref = v;
+        if (_.isPlainObject(v) || _.isArray(v)) ref = v;
         else ref[i] = fn.call(scope, v);
       } else {
         ref[i] = fn.call(scope, v);
@@ -577,35 +577,35 @@
     }, depth: deep ? '*' : 1, retType: true});
   };
 
-  (l).sample = function (col, n, deep) {
+  _.sample = function (col, n, deep) {
     var ret = [], i;
-    for (i = n || 1; i > 0; i--) { ret.push((l).shuffle(deep ? (l).flatten(col) : col)[0]); }
+    for (i = n || 1; i > 0; i--) { ret.push(_.shuffle(deep ? _.flatten(col) : col)[0]); }
     return ret;
   };
 
-  (l).set = function (col, key, value, deep) {
-    var start = true, type = (l).isArray(col) ? true : false;
-    (l).deep({obj: col, fn:function(d,i,v) {
+  _.set = function (col, key, value, deep) {
+    var start = true, type = _.isArray(col) ? true : false;
+    _.deep({obj: col, fn:function(d,i,v) {
       if (start) {
         col[key] = value;
         start = false;
       }
-      if ((((l).isArray(v) && type) || ((l).isPlainObject(v) && !type)) && deep) {
+      if (((_.isArray(v) && type) || (_.isPlainObject(v) && !type)) && deep) {
         v[key] = value;
       }
     }, depth: deep ? '*' : 1});
     return col;
   };
 
-  (l).setUndef = function (col, value, deep) {
-    return (l).deep({obj:col, fn:function (d, index, v, ref) {
-      if ((l).isUndefined(v)) ref[index] = value;
+  _.setUndef = function (col, value, deep) {
+    return _.deep({obj:col, fn:function (d, index, v, ref) {
+      if (_.isUndefined(v)) ref[index] = value;
     }, depth: deep ? '*' : 1, retType: true});
   };
 
-  (l).shuffle  = function (col) {
+  _.shuffle  = function (col) {
     var ret, i, n, copy;
-    ret = (l).isPlainObject(col) ? (l).toArray(col) : col;
+    ret = _.isPlainObject(col) ? _.toArray(col) : col;
     for (i = ret.length - 1; i > 0; i--) {
       n = Math.floor(Math.random() * (i + 1));
       copy = ret[i];
@@ -615,23 +615,23 @@
     return ret;
   };
 
-  (l).size = function (col, deep, count) {
+  _.size = function (col, deep, count) {
     count = count ? count : 0;
-    (l).each((l).values(col), function (index, value) { if (!(l).isFalsy(value)) count += 1; });
+    _.each(_.values(col), function (index, value) { if (!_.isFalsy(value)) count += 1; });
     if (deep) {
       for (var o in col) {
-        if ((l).isPlainObject(col[o]) || (l).isArray(col[o])) {
-          var ret = (l).size(col[o], deep, count);
-          if ((l).type(col[o]) === "array") return ret - 1;
-          else if ((l).type(col[o]) === "object") return ret;
+        if (_.isPlainObject(col[o]) || _.isArray(col[o])) {
+          var ret = _.size(col[o], deep, count);
+          if (_.type(col[o]) === "array") return ret - 1;
+          else if (_.type(col[o]) === "object") return ret;
         }
       }
     }
     return count;
   };
 
-  (l).sortBy = function (col, fn, scope) {
-    return (l).pluck((l).map(col, function (value, index, list) {
+  _.sortBy = function (col, fn, scope) {
+    return _.pluck(_.map(col, function (value, index, list) {
       return {
         value : value,
         index : index,
@@ -648,38 +648,38 @@
     }), 'value');
   };
 
-  (l).sum = function (col, deep) {
+  _.sum = function (col, deep) {
     var ret = 0;
-    (l).deep(col, function (depth, index, value) {
-      if ((l).isNumber(value)) ret += value;
+    _.deep(col, function (depth, index, value) {
+      if (_.isNumber(value)) ret += value;
     }, deep ? "*" : 1);
     return ret;
   };
 
-  (l).tap = function (col, fn, scope) {
+  _.tap = function (col, fn, scope) {
     return fn.call(scope || this, col);
   };
 
-  (l).where = function (col, matches, find) {
-    return (l)[find ? 'find' : 'filter'](col, function (value) {
+  _.where = function (col, matches, find) {
+    return _[find ? 'find' : 'filter'](col, function (value) {
       for (var key in matches) { if (matches[key] !== value[key]) return false; }
       return true;
     });
   };
 
-  (l).whereFirst = function (col, matches) {
-    return (l).where(col, matches, true);
+  _.whereFirst = function (col, matches) {
+    return _.where(col, matches, true);
   };
 
-  (l).values = function (col, deep) {
+  _.values = function (col, deep) {
     var vals = [];
     for (var o in col) { vals.push(col[o]); }
-    return deep ? (l).values((l).paths(col)) : vals;
+    return deep ? _.values(_.paths(col)) : vals;
   };
 
   /* FUNCTION METHODS */
 
-  (l).after = function (fn, n) {
+  _.after = function (fn, n) {
     fn.n = fn.after = n;
     return function () {
       if (fn.n > 1) {
@@ -691,23 +691,23 @@
     };
   };
 
-  (l).bind = function (fn, scope, args) {
-    args = args || (l).isArray(scope) ? scope : [];
+  _.bind = function (fn, scope, args) {
+    args = args || _.isArray(scope) ? scope : [];
     return function () {
       for (var i = 0; i < arguments.length; i++) { args.push(arguments[i]); }
       return fn.apply(scope, args);
     };
   };
 
-  (l).bindAll = function (obj, methods) {
+  _.bindAll = function (obj, methods) {
     if (arguments.length === 1 && obj) {
-      (l).each(obj, function (f) { if ((l).isFunction(obj[f])) obj[f] = (l).bind(obj[f], obj); });
-    } else if (arguments.length === 2) { (l).each(args.methods, function (f) { obj[f] = (l).bind(obj[f], obj); }); }
+      _.each(obj, function (f) { if (_.isFunction(obj[f])) obj[f] = _.bind(obj[f], obj); });
+    } else if (arguments.length === 2) { _.each(args.methods, function (f) { obj[f] = _.bind(obj[f], obj); }); }
     return obj;
   };
 
-  (l).compose = function () {
-    var fns = (l).filter((l).toArray(arguments), function(value) { if ((l).isFunction(value)) return true; });
+  _.compose = function () {
+    var fns = _.filter(_.toArray(arguments), function(value) { if (_.isFunction(value)) return true; });
     return function () {
       var args = arguments;
       for (var i = fns.length - 1; i >= 0; i--) { args = [fns[i].apply(this, args)]; }
@@ -715,7 +715,7 @@
     };
   };
 
-  (l).debounce = function (fn, n, edge) {
+  _.debounce = function (fn, n, edge) {
     var res, timeout;
     return function () {
       var scope = this, fargs = arguments;
@@ -731,11 +731,11 @@
     };
   };
 
-  (l).defer = function (fn) {
-    return (l).delay.call(this, fn, 0);
+  _.defer = function (fn) {
+    return _.delay.call(this, fn, 0);
   };
 
-  (l).delay = function (fn, ms) {
+  _.delay = function (fn, ms) {
     return function () {
       var args = arguments;
       setTimeout(function () {
@@ -744,7 +744,7 @@
     }
   };
 
-  (l).fill = (l).partial = function (fn) {
+  _.fill = _.partial = function (fn) {
     var args = [];
     for (var i = 1; i < arguments.length; i++) { args.push(arguments[i]); }
     return function () {
@@ -753,16 +753,16 @@
     };
   };
 
-  (l).memoize = function (fn, hash) {
+  _.memoize = function (fn, hash) {
     var memo = {};
-    hash = hash || (l).identity;
+    hash = hash || _.identity;
     return function () {
       var key = hash.apply(this, arguments);
-      return (l).has(memo, key) ? memo[key] : (memo[key] = fn.apply(this, arguments));
+      return _.has(memo, key) ? memo[key] : (memo[key] = fn.apply(this, arguments));
     };
   };
 
-  (l).once = function (fn) {
+  _.once = function (fn) {
     fn.n = fn.once = 1;
     return function () {
       if (fn.n) {
@@ -772,7 +772,7 @@
     };
   };
 
-  (l).throttle = function (fn, ms) {
+  _.throttle = function (fn, ms) {
     var scope, last, timeout, fargs, ret, res, later;
     later = function () {
       last = new Date;
@@ -796,12 +796,12 @@
     }
   };
 
-  (l).times = function (fn, n) {
+  _.times = function (fn, n) {
     fn.n = n;
     return function () { for (var i = 0; i < fn.n; i++) { fn.apply(this, arguments); } };
   };
 
-  (l).wrap = function (fn, wrapper) {
+  _.wrap = function (fn, wrapper) {
     return function () {
       var args = [fn];
       args.push.apply(args, arguments);
@@ -811,7 +811,7 @@
 
   /* NUMBER METHODS */
 
-  (l).range = function (start, stop, step) {
+  _.range = function (start, stop, step) {
     var i = 0, ret = [];
     step = step || 1;
     stop = stop || start;
@@ -824,39 +824,39 @@
     return ret;
   };
 
-  (l).uniqueId = function(prefix) {
-    var prefix = prefix || "", self = (l).uniqueId;
+  _.uniqueId = function(prefix) {
+    var prefix = prefix || "", self = _.uniqueId;
     if (!('uuids' in self)) self.uuids = [];
     var newId = prefix + Math.floor((1 + Math.random()) * 0x10000).toString(10).substring(1);
-    if (!(l).inArray(self.uuids, newId)) {
+    if (!_.inArray(self.uuids, newId)) {
       self.uuids.push(newId);
       return newId;
     } else {
-      (l).uniqueId();
+      _.uniqueId();
     }
   };
 
   /* OBJECT METHODS */
 
-  (l).array = (l).toArray = function () {
+  _.array = _.toArray = function () {
     var ret = [];
     if (arguments.length > 1) {
       for (var i = 0; i < arguments.length; i++) {
-        (l).each(arguments[i], function (index, value) { ret.push(value); });
+        _.each(arguments[i], function (index, value) { ret.push(value); });
       }
     } else {
-      (l).each(arguments[0], function (index, value) { ret.push(value); });
+      _.each(arguments[0], function (index, value) { ret.push(value); });
     }
     return ret;
   };
 
-  (l).call = function (opts) {
-    var only = (l).isString(opts.only) ? opts.only.split(" ") : opts.only,
-        fns = (l).functions(opts.obj, opts.key, opts.deep);
-    return (l).filter(fns, function (value, index) {
-      var key = (l).keys(value)[0];
+  _.call = function (opts) {
+    var only = _.isString(opts.only) ? opts.only.split(" ") : opts.only,
+        fns = _.functions(opts.obj, opts.key, opts.deep);
+    return _.filter(fns, function (value, index) {
+      var key = _.keys(value)[0];
       if (only) {
-        if ((l).inArray(only, (l).keys(value)[0])) {
+        if (_.inArray(only, _.keys(value)[0])) {
           value[key].apply(this, opts.args);
           return true;
         }
@@ -867,22 +867,22 @@
     });
   };
 
-  (l).defaults = function (obj, defaults) {
-    (l).each(defaults, function (index, value) {
+  _.defaults = function (obj, defaults) {
+    _.each(defaults, function (index, value) {
       if (!(index in obj)) { obj[index] = value;
-      } else if (index in obj) { if ((l).isNull(obj[index]) || (l).isUndefined(obj[index])) obj[index] = value; }
+      } else if (index in obj) { if (_.isNull(obj[index]) || _.isUndefined(obj[index])) obj[index] = value; }
     });
     return obj;
   };
 
-  (l).extend = (l).merge = function () {
+  _.extend = _.merge = function () {
     var keys = [], objs,
         target, obj, copy, key, i, deep;
 
     // Collect potential objects to merge
-    objs = (l).filter((l).toArray(arguments), function (value) {
-      if ((l).isBool(value)) deep = value;
-      if ((l).isPlainObject(value)) return value;
+    objs = _.filter(_.toArray(arguments), function (value) {
+      if (_.isBool(value)) deep = value;
+      if (_.isPlainObject(value)) return value;
     });
 
     // Shift target off of the `objs` array
@@ -892,17 +892,17 @@
     if (deep) {
 
       // Build property reference used to prevent never ending loops
-      (l).each(objs, function (index, value) {
-        keys.push((l).keys(value));
-        keys = (l).flatten(keys);
+      _.each(objs, function (index, value) {
+        keys.push(_.keys(value));
+        keys = _.flatten(keys);
       });
 
       // Add properties to all nested objects
-      (l).deep(target, function (depth, index, obj) {
-        if ((l).indexOf(keys, index) === -1) {
+      _.deep(target, function (depth, index, obj) {
+        if (_.indexOf(keys, index) === -1) {
           for (i = 0; i < objs.length; i++) {
             for (key in objs[i]) {
-              if ((l).isPlainObject(obj)) {
+              if (_.isPlainObject(obj)) {
                 copy = objs[i][key];
                 obj[key] = copy;
               }
@@ -925,20 +925,20 @@
     return target;
   };
 
-  (l).get = function (obj, key) {
-    return (l).deep(obj, function(d,i) { if (key == i) return true; })[0];
+  _.get = function (obj, key) {
+    return _.deep(obj, function(d,i) { if (key == i) return true; })[0];
   };
 
-  (l).getByType = function (obj, type, key, deep) {
+  _.getByType = function (obj, type, key, deep) {
     var stack = [];
-    deep = (l).isBool(key) ? key : deep;
-    key = !(l).isString(key) ? undefined : (l).isString(key) ? key : undefined;
-    type = !(l).isString(type) ? '*' : (l).isString(type) ? type : undefined;
+    deep = _.isBool(key) ? key : deep;
+    key = !_.isString(key) ? undefined : _.isString(key) ? key : undefined;
+    type = !_.isString(type) ? '*' : _.isString(type) ? type : undefined;
 
     // Start search at key when given
     if (key && key !== '*') {
-      obj = (l).get(obj, key);
-      if (type === (l).type(obj) || type === "*") {
+      obj = _.get(obj, key);
+      if (type === _.type(obj) || type === "*") {
         var objWrapper = {};
         key = key.split(".");
         objWrapper[key[key.length - 1]] = obj;
@@ -948,8 +948,8 @@
     }
 
     // Perform deep search for objects of type
-    (l).deep({obj: obj, fn: function (depth, index, elm) {
-      if (type === (l).type(elm) || type === "*") {
+    _.deep({obj: obj, fn: function (depth, index, elm) {
+      if (type === _.type(elm) || type === "*") {
         var objWrapper = {};
         objWrapper[index] = elm;
         stack.push(objWrapper);
@@ -958,44 +958,44 @@
     return stack;
   };
 
-  (l).howDeep = function (obj, key) {
-    var paths = (l).paths(obj, true);
+  _.howDeep = function (obj, key) {
+    var paths = _.paths(obj, true);
     if (key && (key in paths)) {
       return paths[key].split(".").length;
     } else {
-      var objs = (l).getByType(obj, '*', true);
+      var objs = _.getByType(obj, '*', true);
       for (var o in objs) {
-        if ((l).isEqual(obj, objs[o])) return (l).howDeep(obj, (l).keys(objs[o])[0]);
+        if (_.isEqual(obj, objs[o])) return _.howDeep(obj, _.keys(objs[o])[0]);
       }
     }
   };
 
-  (l).isArguments = function (obj) {
+  _.isArguments = function (obj) {
     return {}.toString.call(obj) === "[object Arguments]";
   };
 
-  (l).isArray = function (obj) {
+  _.isArray = function (obj) {
     return {}.toString.call(obj) === "[object Array]";
   };
 
-  (l).isBool = function (obj) {
+  _.isBool = function (obj) {
     return {}.toString.call(obj) === "[object Boolean]";
   };
 
-  (l).isDate = function (obj) {
+  _.isDate = function (obj) {
     return {}.toString.call(obj) === "[object Date]" || obj instanceof Date;
   };
 
-  (l).isElement = function (obj) {
+  _.isElement = function (obj) {
     return typeof obj === "object" ? obj instanceof HTMLElement :
         obj && typeof obj === "object" && obj.nodeType === 1 && typeof obj.nodeName === "string";
   };
 
-  (l).isEqual = function (obj1, obj2) {
+  _.isEqual = function (obj1, obj2) {
 
     // Quick compare of objects that won't have nested objects
-    if ((l).type(obj1) === (l).type(obj2) && !(l).isPlainObject(obj1) && !(l).isArray(obj1)) {
-      switch ((l).type(obj1)) {
+    if (_.type(obj1) === _.type(obj2) && !_.isPlainObject(obj1) && !_.isArray(obj1)) {
+      switch (_.type(obj1)) {
         case "function" :
           if (obj1.toString() !== obj2.toString()) return false;
           break;
@@ -1010,24 +1010,24 @@
     } else {
 
       // When target or comparison is falsy we compare them directly
-      if ((l).isFalsy(obj1) || (l).isFalsy(obj2)) {
+      if (_.isFalsy(obj1) || _.isFalsy(obj2)) {
         if (obj1 !== obj2) return false;
       }
       for (var o in obj1) {
         switch (true) {
 
           // Catch comparison of element first to prevent infinite loop when caught as objects
-          case ( (l).isElement(obj1[o]) ) :
+          case ( _.isElement(obj1[o]) ) :
             if (obj1[o] !== obj2[o]) return false;
             break;
-          case ( (l).isNaN(obj1[o]) ) :
-            if (!(l).isNaN(obj2[o])) return false;
+          case ( _.isNaN(obj1[o]) ) :
+            if (!_.isNaN(obj2[o])) return false;
             break;
           case ( typeof obj1[o] === "object" ) :
-            if (!(l).isEqual(obj1[o], obj2[o])) return false;
+            if (!_.isEqual(obj1[o], obj2[o])) return false;
             break;
           case ( typeof obj1[o] === "function" ) :
-            if (!(l).isFunction(obj2[o])) return false;
+            if (!_.isFunction(obj2[o])) return false;
             if (obj1[o].toString() !== obj2[o].toString()) return false;
             break;
           default :
@@ -1039,9 +1039,9 @@
       for (var o in obj2) {
         if (typeof obj1 === "undefined") return false;
         if (obj1 === null || obj1 === undefined) return false;
-        if ((l).isFalsy(obj1[o])) {
-          if ((l).isNaN(obj1[o])) {
-            if (!(l).isNaN(obj2[o])) return false;
+        if (_.isFalsy(obj1[o])) {
+          if (_.isNaN(obj1[o])) {
+            if (!_.isNaN(obj2[o])) return false;
           } else if (obj1[o] !== obj2[o]) return false;
         }
       }
@@ -1049,106 +1049,106 @@
     return true;
   };
 
-  (l).isFalsy = function (obj) {
-    return ((l).isUndefined(obj) ||
-            (l).isNull(obj) ||
-            (l).isNaN(obj) ||
+  _.isFalsy = function (obj) {
+    return (_.isUndefined(obj) ||
+            _.isNull(obj) ||
+            _.isNaN(obj) ||
             obj === "" ||
             obj === 0 ||
-            ((l).isBool(obj) && Boolean(obj) === false));
+            (_.isBool(obj) && Boolean(obj) === false));
   };
 
-  (l).isFinite = function (obj) {
+  _.isFinite = function (obj) {
     return obj === Infinity || obj === -Infinity;
   };
 
-  (l).isFunction = function (obj) {
+  _.isFunction = function (obj) {
     return {}.toString.call(obj) === "[object Function]";
   };
 
-  (l).isNaN = function (obj) {
+  _.isNaN = function (obj) {
     return typeof obj === "number" && obj !== obj;
   };
 
-  (l).isNull = function (obj) {
+  _.isNull = function (obj) {
     return {}.toString.call(obj) === "[object Null]";
   };
 
-  (l).isNumber = function (obj) {
+  _.isNumber = function (obj) {
     return {}.toString.call(obj) === "[object Number]";
   };
 
-  (l).isObject = function (obj) {
+  _.isObject = function (obj) {
     return typeof obj === "object";
   };
 
-  (l).isPlainObject = function (obj) {
+  _.isPlainObject = function (obj) {
     return typeof obj === "object" && {}.toString.call(obj) === "[object Object]";
   };
 
-  (l).isRegExp = function (obj) {
+  _.isRegExp = function (obj) {
     return {}.toString.call(obj) === "[object RegExp]" || obj instanceof RegExp;
   };
 
-  (l).isString = function (obj) {
+  _.isString = function (obj) {
     return typeof obj === "string" && {}.toString.call(obj) === "[object String]";
   };
 
-  (l).isUndefined = function (obj) {
+  _.isUndefined = function (obj) {
     return typeof obj === "undefined";
   };
 
-  (l).module = (l).build = function (ns, obj) {
+  _.module = _.build = function (ns, obj) {
     var list = ns ? ns.split(".") : [], ns = list ? list.shift() : (ns || ""), obj = obj || {};
     obj[ns] = {};
-    if (list.length) (l).module(list.join('.'), obj[ns]);
+    if (list.length) _.module(list.join('.'), obj[ns]);
     return obj;
   };
 
-  (l).nest = function (obj, prefix) {
+  _.nest = function (obj, prefix) {
     prefix = prefix || "";
-    return (l).each(obj, function (index, value) {
+    return _.each(obj, function (index, value) {
       var newObj = {};
       newObj[prefix + index] = value;
       obj[index] = newObj;
     });
   };
 
-  (l).pairs = function (obj) {
+  _.pairs = function (obj) {
     var pairs = [];
-    if ((l).isPlainObject(obj)) { (l).each(obj, function (index, value) { pairs.push([index, value]); }); }
+    if (_.isPlainObject(obj)) { _.each(obj, function (index, value) { pairs.push([index, value]); }); }
     return pairs;
   };
 
-  (l).parent = function (obj, key) {
-    var target = key ? (l).get(obj, key) : obj,
-        objs = (l).objects(obj, true);
+  _.parent = function (obj, key) {
+    var target = key ? _.get(obj, key) : obj,
+        objs = _.objects(obj, true);
     for (var o in objs) {
-      if ((l).isPlainObject(objs[o])) {
+      if (_.isPlainObject(objs[o])) {
         for (var p in objs[o]) {
-          if ((l).isEqual(objs[o][p], target)) return objs[o];
+          if (_.isEqual(objs[o][p], target)) return objs[o];
         }
       }
     }
     return obj;
   };
 
-  (l).pluck = (l).fetch = function (obj, key) {
-    return (l).map(obj, function (value) { return (l).resolve(value, key); });
+  _.pluck = _.fetch = function (obj, key) {
+    return _.map(obj, function (value) { return _.resolve(value, key); });
   };
 
-  (l).resolve = function (obj, path, keys) {
+  _.resolve = function (obj, path, keys) {
     if ((path in obj) && !keys) return obj[path];
-    return (l).paths(obj, keys)[path];
+    return _.paths(obj, keys)[path];
   };
 
-  (l).toQueryString = function (obj, prefix) {
+  _.toQueryString = function (obj, prefix) {
     var ret = "";
-    (l).deep({obj: obj, fn: function (depth, index, value) {
+    _.deep({obj: obj, fn: function (depth, index, value) {
       index = index.toString();
-      if (!(l).isPlainObject(value)) {
-        if ((l).isArray(value)) {
-          (l).deep(value, function (arrDepth, arrIndex, arrValue) {
+      if (!_.isPlainObject(value)) {
+        if (_.isArray(value)) {
+          _.deep(value, function (arrDepth, arrIndex, arrValue) {
             ret += (prefix ? prefix + index + "[]" : index + "[]") + "=" + arrValue + "&";
           }, "*");
         } else {
@@ -1160,10 +1160,10 @@
     return ret;
   };
 
-  (l).type = function (obj) {
+  _.type = function (obj) {
     var types = "Date RegExp Element Arguments PlainObject Array Function String Bool NaN Finite Number Null Undefined Object".split(" "), i;
     for (i = 0; i < types.length; i++) {
-      if ((l)["is" + types[i]].call(this, obj)) {
+      if (_["is" + types[i]].call(this, obj)) {
         return types[i]
             .toLowerCase()
             .replace(/plainobject/g, "object")
@@ -1175,9 +1175,9 @@
 
   /* STRING METHODS */
 
-  (l).fromQueryString = function (str, deep) {
+  _.fromQueryString = function (str, deep) {
     var ret = {}, parts;
-    (l).each(decodeURIComponent(str).split("&"), function (index, value) {
+    _.each(decodeURIComponent(str).split("&"), function (index, value) {
       parts = value.split("=");
       if (parts[0].match(/\[\]/g) && deep) {
         parts[0] = parts[0].replace(/\[\]/g, '');
@@ -1193,7 +1193,7 @@
     return ret;
   };
 
-  (l).htmlEncode = function (str) {
+  _.htmlEncode = function (str) {
     var entities = {
       '\u0026':['amp'], '\u0022':['quot'], '\u0027':['apos'], '\u003C':['lt'],
       '\u003E':['gt'], '\u00A0':['nbsp'], '/':['#x2F']
@@ -1205,7 +1205,7 @@
     return str;
   };
 
-  (l).htmlDecode = function (str) {
+  _.htmlDecode = function (str) {
     var entities = {
       '&quot;':['\"'], '&amp;':['&'], '&apos;':["'"], '&lt;':['<'],
       '&gt;':['>'], '&nbsp;':[' '], '&#x2F;':['/']
@@ -1219,71 +1219,71 @@
 
   /* UTILITY METHODS */
 
-  (l).chain = function () {
-    return (l).apply(this, (l).toArray(arguments)).chain();
+  _.chain = function () {
+    return _.apply(this, _.toArray(arguments)).chain();
   };
 
-  (l).end = (l).result = function (obj) {
-    return this._chain ? (l)(obj).chain() : obj;
+  _.end = _.result = function (obj) {
+    return this._chain ? _(obj).chain() : obj;
   };
 
-  (l).identity = function (value) {
+  _.identity = function (value) {
     return value;
   };
 
-  (l).noConflict = function () {
-    root['_'] = previousLib;
-    return (l);
+  _.noConflict = function () {
+    root._ = previousLib;
+    return _;
   };
 
-  (l).value = function (value) {
-    return (l).isFunction(value) ? value() : value;
+  _.value = function (value) {
+    return _.isFunction(value) ? value() : value;
   };
 
   // Generate [type]s() methods
-  (l).each(['array', 'object', 'function', 'string', 'bool', 'number', 'null', 'undefined', 'date', 'regexp', 'element', 'nan'],
+  _.each(['array', 'object', 'function', 'string', 'bool', 'number', 'null', 'undefined', 'date', 'regexp', 'element', 'nan'],
     function (index, type) {
-      (l)[ type + 's' ] = function (obj, key, deep) {
-        return (l).getByType(obj, type, key, deep);
+      _[ type + 's' ] = function (obj, key, deep) {
+        return _.getByType(obj, type, key, deep);
       };
   });
 
   // Generate no[Type]s() methods
-  (l).each(['array', 'object', 'function', 'string', 'bool', 'number', 'null', 'undefined', 'date', 'regexp', 'element', 'nan'],
+  _.each(['array', 'object', 'function', 'string', 'bool', 'number', 'null', 'undefined', 'date', 'regexp', 'element', 'nan'],
     function (index, name) {
-      (l)[ 'no' + name.charAt(0).toUpperCase() + name.slice(1) + 's' ] = function (obj, key, deep) {
-        return (l).filter((l).getByType(obj, "*", key, deep),
-            function (value) { if (!((l).type(value[(l).keys(value)[0]]) === name)) return value; });
+      _[ 'no' + name.charAt(0).toUpperCase() + name.slice(1) + 's' ] = function (obj, key, deep) {
+        return _.filter(_.getByType(obj, "*", key, deep),
+            function (value) { if (!(_.type(value[_.keys(value)[0]]) === name)) return value; });
       };
   });
 
   // Generate [type]Names methods
-  (l).each(['array', 'object', 'function', 'string', 'bool', 'number', 'null', 'undefined', 'date', 'regexp', 'element', 'nan'],
+  _.each(['array', 'object', 'function', 'string', 'bool', 'number', 'null', 'undefined', 'date', 'regexp', 'element', 'nan'],
     function (index, name) {
-      (l)[ name + 'Names' ] = function (obj, key, deep) {
+      _[ name + 'Names' ] = function (obj, key, deep) {
         var names = [];
-        (l).filter((l).getByType(obj, name, key, deep), function (value) { names.push((l).keys(value)[0]); });
+        _.filter(_.getByType(obj, name, key, deep), function (value) { names.push(_.keys(value)[0]); });
         return names;
       };
   });
 
   // Add native sort method to library
-  (l).each(['sort'], function (index, name) {
-    if (Array.prototype[name]) { (l)[name] = !(l)[name] ? Array.prototype[name] : (l)[name]; }
+  _.each(['sort'], function (index, name) {
+    if (Array.prototype[name]) { _[name] = !_[name] ? Array.prototype[name] : _[name]; }
   });
 
   // Attach library's methods to its prototype
-  (l).each((l).filter((l).keys((l)), function (value) {
-    if (!(l).inArray(['_version', 'sort'], value)) return true;
+  _.each(_.filter(_.keys(_), function (value) {
+    if (!_.inArray(['_version', 'sort'], value)) return true;
   }), function (index, name) {
-    var fn = (l)[name];
-    (l).prototype[name] = function () {
-      return (l).end.call(this, fn.apply((l), this._bound[0].concat((l).toArray(arguments))));
+    var fn = _[name];
+    _.prototype[name] = function () {
+      return _.end.call(this, fn.apply(_, this._bound[0].concat(_.toArray(arguments))));
     };
   });
 
   // Add OOP methods to the library object prototype
-  (l).extend((l).prototype, {
+  _.extend(_.prototype, {
     chain: function () {
       this._chain = true;
       return this;
@@ -1294,4 +1294,4 @@
     }
   });
 
-})();
+})(typeof exports !== 'undefined' ? exports : window);
