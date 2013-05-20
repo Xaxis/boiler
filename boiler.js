@@ -390,18 +390,17 @@
   };
 
   _.has = _.keyExists = function (col, key, deep) {
-    return !deep && Object.hasOwnProperty ? hasOwnProperty.call(col, key)
-        : _.findKey(col, function (index) {
-          return !!(key == index);
+    return !deep && Object.hasOwnProperty ? hasOwnProperty.call(col, key) : _.findKey(col, function (index) {
+      return !!(key == index);
     }, deep) ? true : false;
   };
 
   _.invert = function (col) {
-    var invertedObj = {};
-    _.each(col, function (index, value) {
-      invertedObj[value] = index;
-    });
-    return invertedObj;
+    var inverted = {}, i = -1, keys = Object.keys(col);
+    while (++i < keys.length) {
+      inverted[col[keys[i]]] = keys[i];
+    }
+    return inverted;
   };
 
   _.invoke = function (col, fn, args) {
