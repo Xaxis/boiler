@@ -1055,7 +1055,7 @@
             (_.isBool(obj) && Boolean(obj) === false));
   };
 
-  _.isFinite = function (obj) {
+  _.isInfinite = function (obj) {
     return obj === Infinity || obj === -Infinity;
   };
 
