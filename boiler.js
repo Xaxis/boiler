@@ -507,12 +507,14 @@
     });
   };
 
-  _.paths = function (col, keys, pathObj, lastKey, nextKey) {
-    var o, keys = keys || false, pathObj = pathObj || {}, lastKey = lastKey || "", nextKey = nextKey || "";
-    for (o in col) {
-      if (keys) pathObj[o] = (nextKey + "." + lastKey + "." + o).replace(/^[.]+/g, "");
-      else pathObj[(nextKey + "." + lastKey + "." + o).replace(/^[.]+/g, "")] = col[o];
-      if (_.isPlainObject(col[o]) || _.isArray(col[o])) _.paths(col[o], keys, pathObj, o, nextKey + "." + lastKey);
+  _.paths = function (col, keys, noEnum, pathObj, lastKey, nextKey) {
+    var o, keys = keys || false,
+        pathObj = pathObj || {}, lastKey = lastKey || "", nextKey = nextKey || "",
+        props = noEnum ? Object.getOwnPropertyNames(col) : _.keys(col);
+    for (o = 0; o < props.length; o++) {
+      if (keys) pathObj[props[o]] = (nextKey + "." + lastKey + "." + props[o]).replace(/^[.]+/g, "");
+      else pathObj[(nextKey + "." + lastKey + "." + props[o]).replace(/^[.]+/g, "")] = col[props[o]];
+      if (_.isPlainObject(col[props[o]]) || _.isArray(col[props[o]])) _.paths(col[props[o]], keys, noEnum, pathObj, props[o], nextKey + "." + lastKey);
     }
     return pathObj;
   };
