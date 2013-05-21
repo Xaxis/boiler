@@ -753,12 +753,12 @@
 
   _.memoize = function (fn, hash) {
     var cache = {};
-    hash = hash || _.identity;
+    hash = hash || (hash = _.identity);
     return function () {
       var key = hash.apply(this, arguments);
-      return _.has(cache, key) ? cache[key] : (cache[key] = fn.apply(this, arguments));
+      return (key in cache) ? cache[key] : (cache[key] = fn.apply(this, arguments));
     };
-  }; 
+  };
 
   _.once = function (fn) {
     fn.n = fn.once = 1;
