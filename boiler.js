@@ -267,25 +267,20 @@
   };
 
   _.deep = function (col, fn, depth) {
-    var obj = col.obj || col,
-        fn = col.fn || fn,
-        depth = col.depth || (depth || '*'),
-        args = col.args || [],
-        noArrays = col.noArrays || false,
-        noObjects = col.noObjects || false,
-        retType = col.retType || false,
-        ret = col.ret || [];
-    for (var o in obj) {
+    var obj = col.obj || col, fn = col.fn || fn, depth = col.depth || (depth || '*'), args = col.args || [],
+        noArrays = col.noArrays || false, noObjects = col.noObjects || false, retType = col.retType || false,
+        ret = col.ret || [], o;
+    for (o in obj) {
       args.unshift(depth, o, obj[o], obj);
       if (fn.apply(this, args)) ret.push(obj[o]);
       if ((_.isPlainObject(obj[o]) && !noObjects) || (_.isArray(obj[o]) && !noArrays)) {
-        depth = _.isString(depth) ? '*' : depth - 1;
-        for (var i = 0; i < 4; i++) { args.shift(); }
+        depth = depth == '*' ? '*' : depth - 1;
+        args.splice(0, 4);
         if (depth > 0 || depth === '*') {
           _.deep({obj:obj[o], fn:fn, depth:depth, args:args, noArrays:noArrays, noObjects:noObjects, ret: ret});
         }
       }
-      for (var i = 0; i < 4; i++) { args.shift(); }
+      args.splice(0, 4);
     }
     return retType ? obj : ret;
   };
