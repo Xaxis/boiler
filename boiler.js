@@ -756,10 +756,9 @@
     hash = hash || _.identity;
     return function () {
       var key = hash.apply(this, arguments);
-      console.log(key, _.has(cache, key), cache);
       return _.has(cache, key) ? cache[key] : (cache[key] = fn.apply(this, arguments));
     };
-  };
+  }; 
 
   _.once = function (fn) {
     fn.n = fn.once = 1;
