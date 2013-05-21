@@ -33,7 +33,7 @@
     return _.deep(arr, function(d,key) {
       if (_.isArray(index)) { if (_.inArray(index, parseInt(key))) return true;
       } else if (index == key) { return true; }
-    }, _.isBool(deep) && deep ? '*' : _.isNumber(deep) ? deep : 0);
+    }, _.isBool(deep) && deep ? '*' : _.isNumber(deep) ? deep : 1);
   };
 
   _.compact = function (arr, all, deep) {
@@ -624,11 +624,12 @@
   };
 
   _.sortBy = function (col, fn, scope) {
+    var iterator = _.isFunction(fn) ? fn : function(col) { return col[fn]; };
     return _.pluck(_.map(col, function (value, index, list) {
       return {
         value : value,
         index : index,
-        criteria : fn.call(scope || this, value, index, list)
+        criteria : iterator.call(scope || this, value, index, list)
       };
     }).sort(function (left, right) {
       var a = left.criteria;
@@ -1259,10 +1260,12 @@
       };
   });
 
+  /*
   // Add native sort method to library
-  _.each(['sort'], function (name) {
+  _.each(['concat', 'sort'], function (name) {
     if (Array.prototype[name]) { _[name] = !_[name] ? Array.prototype[name] : _[name]; }
   });
+  */
 
   // Attach library's methods to its prototype
   _.each(_.filter(_.keys(_), function (value) {
