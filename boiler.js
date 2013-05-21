@@ -752,11 +752,11 @@
   };
 
   _.memoize = function (fn, hash) {
-    var memo = {};
-    hash = hash || _.identity;
+    var cache = {};
+    hash = hash || (hash = _.identity);
     return function () {
       var key = hash.apply(this, arguments);
-      return _.has(memo, key) ? memo[key] : (memo[key] = fn.apply(this, arguments));
+      return _.has(cache, key) ? cache[key] : (cache[key] = fn.apply(this, arguments));
     };
   };
 
@@ -1158,13 +1158,13 @@
   };
 
   _.type = function (obj) {
-    var types = "Date RegExp Element Arguments PlainObject Array Function String Bool NaN Finite Number Null Undefined Object".split(" "), i;
+    var types = "Date RegExp Element Arguments PlainObject Array Function String Bool NaN Infinite Number Null Undefined Object".split(" "), i;
     for (i = 0; i < types.length; i++) {
       if (_["is" + types[i]].call(this, obj)) {
         return types[i]
             .toLowerCase()
             .replace(/plainobject/g, "object")
-            .replace(/finite/g, "infinity");
+            .replace(/infinite/g, "infinity");
       }
     }
     return false;
