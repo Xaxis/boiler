@@ -352,21 +352,27 @@ test("deep", function() {
 });
 
 test("each", function() {
-  _.each([1, 2, 3], function(i,v) {
-    equal(v, i + 1, 'each iteration provided index and value from array');
+  _.each([1, 2, 3], function(v,i) {
+    equal(v, parseInt(i) + 1, 'each iteration provided index and value from array');
   });
 
   var answers = [];
-  _.each([1, 2, 3], function(i,v){ answers.push(v * this.multiplier);}, {multiplier : 5});
+  _.each([1, 2, 3], function(v,i){ answers.push(v * this.multiplier);}, {multiplier : 5});
   equal(answers.join(', '), '5, 10, 15', 'scope object property accessed');
 
   answers = false;
-  _.each([1, 2, 3], function(i,v,arr) { if (_.contains(arr, v)) answers = true; });
+  _.each([1, 2, 3], function(v,i,arr) { if (_.contains(arr, v)) answers = true; });
   equal(true, answers, 'original collection can be referenced from within the iterator');
 
   answers = [];
-  _.forEach([1, 2, 3], function(i,v){ answers.push(v); });
+  _.forEach([1, 2, 3], function(v,i){ answers.push(v); });
   equal(answers.join(', '), '1, 2, 3', 'can be aliased with _.forEach"');
+
+  answers = ['#F00', '#0F0', '#00F'];
+  _.each({red: '#F00', green: '#0F0', blue: '#00F'}, function(v,i){
+    equal(_.inArray(answers, v), true, 'each iteration provided index and value from object-literal');
+  });
+
 });
 
 test("empty", function() {
@@ -466,7 +472,7 @@ test("invert", function() {
   var obj = {'one':1,'two':2};
   deepEqual(_.invert(obj), {1:'one', 2:'two'}, 'successfully inverted object-literal key/value pairs');
 
-  deepEqual(_.invert([1,2]), {1:0,2:1}, 'successfully inverted array to object-literal with inverted key/value pairs');
+  deepEqual(_.invert([1,2]), {1:'0', 2:'1'}, 'successfully inverted array to object-literal with inverted key/value pairs');
 });
 
 test("invoke", function() {
@@ -573,11 +579,11 @@ test("omit", function() {
 });
 
 test("only", function() {
-  deepEqual(_.only([1,2,3], [0,1]), [1,2], 'matched all indices from array in list');
+  deepEqual(_.only([1,2,3], ['0', '1']), [1, 2], 'matched all indices from array in list');
 
   deepEqual(_.only({'one':1, 'two':2, 'three':3}, ['one','two']), [1,2], 'matched all indices from object-literal in list');
 
-  deepEqual(_.whitelist([1,2,3], [0,1]), [1,2], 'successfully aliased with _.whitelist');
+  deepEqual(_.whitelist([1,2,3], ['0', '1']), [1,2], 'successfully aliased with _.whitelist');
 });
 
 test("reduce", function() {
@@ -1092,13 +1098,13 @@ test("isFalsy", function() {
   equal(isTrue, false, 'returns false on all other non-"falsy" types');
 });
 
-test("isFinite", function() {
-  equal(_.isFinite(types.finite[0]), true, 'returns true when passed an infinite value');
+test("isInfinite", function() {
+  equal(_.isInfinite(types.finite[0]), true, 'returns true when passed an infinite value');
 
   var isTrue = false;
   for (var t in types) {
     for (var a in types[t]) {
-      if (_.isFinite(types[t][a]) && t !== 'finite') isTrue = true;
+      if (_.isInfinite(types[t][a]) && t !== 'finite') isTrue = true;
     }
   }
   equal(isTrue, false, 'returns false on all other types');
