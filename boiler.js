@@ -508,8 +508,7 @@
   };
 
   _.paths = function (col, keys, noEnum, pathObj, lastKey, nextKey) {
-    var o, keys = keys || false,
-        pathObj = pathObj || {}, lastKey = lastKey || "", nextKey = nextKey || "",
+    var o, keys = keys || false, pathObj = pathObj || {}, lastKey = lastKey || "", nextKey = nextKey || "",
         props = noEnum ? Object.getOwnPropertyNames(col) : _.keys(col);
     for (o = 0; o < props.length; o++) {
       if (keys) pathObj[props[o]] = (nextKey + "." + lastKey + "." + props[o]).replace(/^[.]+/g, "");
@@ -1262,16 +1261,9 @@
       };
   });
 
-  /*
-  // Add native sort method to library
-  _.each(['concat', 'sort'], function (name) {
-    if (Array.prototype[name]) { _[name] = !_[name] ? Array.prototype[name] : _[name]; }
-  });
-  */
-
   // Attach library's methods to its prototype
   _.each(_.filter(_.keys(_), function (value) {
-    if (!_.inArray(['_version', 'sort'], value)) return true;
+    if (!_.inArray(['_version'], value)) return true;
   }), function (name) {
     var fn = _[name];
     _.prototype[name] = function () {
