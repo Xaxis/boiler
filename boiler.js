@@ -423,9 +423,13 @@
   };
 
   _.keys = function (col, deep) {
-    var keys = [];
-    for (var o in col) { keys.push(o); }
-    return deep ? _.keys(_.paths(col)) : keys;
+    if (!deep && Object.keys) {
+      return Object.keys(col)
+    } else {
+      var keys = [];
+      for (var o in col) { keys.push(o); }
+      return deep ? _.keys(_.paths(col)) : keys;
+    }
   };
 
   _.least = function (col, fn, most) {
