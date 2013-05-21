@@ -89,7 +89,7 @@
   };
 
   _.intersection = function () {
-    var arrs, rest, deep;
+    var rest, deep,
     arrs = _.filter(_.toArray(arguments), function (value) {
       if (_.isBool(value)) deep = value;
       if (_.isArray(value)) return true;
@@ -291,14 +291,10 @@
   };
 
   _.each = _.forEach = function (col, fn, scope) {
-    if (col instanceof Array) {
-      for (var i = 0; i < col.length; i++) {
-        if (fn.call(scope || col[i], i, col[i], col) === false) break;
-      }
-    } else {
-      for (var key in col) {
-        if (fn.call(scope || col[key], key, col[key], col) === false) break;
-      }
+    var keys = _.keys(col), i = 0;
+    if (col == null) return;
+    for (; i < keys.len; i++) {
+      if (fn.call(scope || col[keys[i]], keys[i], col[keys[i]], col) === false) break;
     }
     return col;
   };
