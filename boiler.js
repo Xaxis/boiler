@@ -753,9 +753,10 @@
 
   _.memoize = function (fn, hash) {
     var cache = {};
-    hash = hash || (hash = _.identity);
+    hash = hash || _.identity;
     return function () {
       var key = hash.apply(this, arguments);
+      console.log(key, _.has(cache, key), cache);
       return _.has(cache, key) ? cache[key] : (cache[key] = fn.apply(this, arguments));
     };
   };
