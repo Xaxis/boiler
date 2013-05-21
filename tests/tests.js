@@ -686,6 +686,8 @@ test("sortBy", function() {
   deepEqual(_.sortBy([1,  2,  3,  4,  5,  6], function (num){ return Math.cos(num); }), [3, 4, 2, 5, 1, 6], 'successfully sorted array by condition within iterator');
 
   deepEqual(_.sortBy([1,  2,  3,  4,  5,  6], function (num){ return Math.cos(num) * this.x; }, {x:2}), [3, 4, 2, 5, 1, 6], 'successfully sorted array by condition within iterator while bound to scope');
+
+  deepEqual(_.sortBy(['Jupitor', 'Earth', 'Venus', 'Mars'], 'length'), ['Mars', 'Earth', 'Venus', 'Jupitor'], 'successfully sorted an array by property name');
 });
 
 test("sum", function() {
@@ -1472,6 +1474,8 @@ test("paths", function() {
   deepEqual(_.paths({color: {rgb: '#0F0'}}), {color: {rgb:'#0F0'}, 'color.rgb': '#0F0'}, 'successfully retrieved values from object-literal keyed by namespace property names');
 
   deepEqual(_.paths(['red',['green']]), {0: 'red', 1: ['green'], '1.0': 'green'}, 'successfully retrieved values from array keyed by namespace property names');
+
+  deepEqual(_.paths(['red'], false, true), {0: 'red', length: 1}, 'successfully retrieved values from array keyed by namespace property names');
 });
 
 test("pluck", function() {
