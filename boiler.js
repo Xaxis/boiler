@@ -45,7 +45,7 @@
 
   _.difference = function () {
     var arrs = [], deep = false, rest;
-    _.each(arguments, function (index, value) {
+    _.each(arguments, function (value) {
       if (_.isArray(value)) arrs.push(value);
       if ((_.isBool(value) && value) || _.isNumber(value)) deep = value;
     });
@@ -89,7 +89,7 @@
   };
 
   _.intersection = function () {
-    var rest, deep,
+    var arrs, rest, deep;
     arrs = _.filter(_.toArray(arguments), function (value) {
       if (_.isBool(value)) deep = value;
       if (_.isArray(value)) return true;
@@ -116,13 +116,13 @@
 
   _.object = _.toObject = function () {
     var arrs = [], keys = [], ret = {}, allArrays = true, i;
-    _.each(arguments, function (index, value) {
+    _.each(arguments, function (value, index) {
       if (_.isArray(value)) arrs.push(value);
       else allArrays = false;
     });
     if (arrs.length === 2) {
       keys = arrs[1];
-      _.each(arrs[0], function (index, value) { ret[ value ] = keys[index]; });
+      _.each(arrs[0], function (value, index) { ret[ value ] = keys[index]; });
     } else if ( allArrays && arrs.length > 1 ) {
       for (i = 0; i < arrs.length; i ++) {
         var key = arrs[i][0];
@@ -226,7 +226,7 @@
 
   _.clear = function (col) {
     if (_.isArray(col)) col.length = 0;
-    else _.each(col, function (index) { delete col[index]; });
+    else _.each(col, function (value, index) { delete col[index]; });
     return col;
   };
 
@@ -291,10 +291,10 @@
   };
 
   _.each = _.forEach = function (col, fn, scope) {
-    var keys = _.keys(col), i = 0;
+    var keys = _.keys(col), i = 0, l = keys.length;
     if (col == null) return;
-    for (; i < keys.len; i++) {
-      if (fn.call(scope || col[keys[i]], keys[i], col[keys[i]], col) === false) break;
+    for (; i < l; i++) {
+      if (fn.call(scope || col[keys[i]], col[keys[i]], keys[i], col) === false) break;
     }
     return col;
   };
@@ -315,7 +315,7 @@
 
   _.filter = function (col, fn, scope, reject) {
     var ret = [];
-    _.each(col, function (index, value) {
+    _.each(col, function (value, index) {
       if (reject) {
         if (!fn.call(scope ? scope : this, value, index)) ret.push(value);
       } else {
@@ -356,12 +356,12 @@
   _.groupBy = function (col, map, scope, count) {
     count = count || _.isBool(scope) ? scope : false;
     var res = {};
-    _.each(col, function (index, value) {
+    _.each(col, function (value, index) {
       var key = _.isString(map) ? value[map] : map.call(scope || this, value, index, col);
       if (_.has(res, key)) res[key].push(value);
       else res[key] = [value];
     });
-    if (count) { _.each(res, function (index, value) { res[index] = value.length; }); }
+    if (count) { _.each(res, function (value, index) { res[index] = value.length; }); }
     return res;
   };
 
@@ -378,7 +378,7 @@
       }
     });
     if (pad) {
-      _.each(res, function (index, value) {
+      _.each(res, function (value, index) {
         if (value.length < n) for (i = value.length; i < n; i++) { res[index].push(pad); }
       });
     }
@@ -439,7 +439,7 @@
       comparator = _.countBy(col, fn || function (num) { return num; }, this, true);
     }
     leastValue = most ? _.max(result) : _.min(result);
-    _.each(result, function (index, value) {
+    _.each(result, function (value, index) {
       if (leastValue == value) {
         ret = index;
         return false;
@@ -465,7 +465,7 @@
   _.map = _.collect = function (col, fn, scope, deep) {
     deep = deep || _.isBool(scope) ? scope : false;
     var ret = [];
-    _.each(deep ? _.flatten(col) : col, function(index, value, ref) {
+    _.each(deep ? _.flatten(col) : col, function(value, index, ref) {
       ret.push(fn.call(scope || this, value, index, ref));
     });
     return ret;
@@ -534,7 +534,7 @@
       }
     }
     base = _.find(copy, function (value) { return value; });
-    _.each(copy, function (index, value) {
+    _.each(copy, function (value, index) {
       if (i !== 0) base = fn.call(scope || this, base, value, index);
       i++;
     });
@@ -615,7 +615,7 @@
 
   _.size = function (col, deep, count) {
     count = count ? count : 0;
-    _.each(_.values(col), function (index, value) { if (!_.isFalsy(value)) count += 1; });
+    _.each(_.values(col), function (value) { if (!_.isFalsy(value)) count += 1; });
     if (deep) {
       for (var o in col) {
         if (_.isPlainObject(col[o]) || _.isArray(col[o])) {
@@ -699,8 +699,8 @@
 
   _.bindAll = function (obj, methods) {
     if (arguments.length === 1 && obj) {
-      _.each(obj, function (f) { if (_.isFunction(obj[f])) obj[f] = _.bind(obj[f], obj); });
-    } else if (arguments.length === 2) { _.each(args.methods, function (f) { obj[f] = _.bind(obj[f], obj); }); }
+      _.each(obj, function (v, f) { if (_.isFunction(obj[f])) obj[f] = _.bind(obj[f], obj); });
+    } else if (arguments.length === 2) { _.each(args.methods, function (v, f) { obj[f] = _.bind(obj[f], obj); }); }
     return obj;
   };
 
@@ -840,10 +840,10 @@
     var ret = [];
     if (arguments.length > 1) {
       for (var i = 0; i < arguments.length; i++) {
-        _.each(arguments[i], function (index, value) { ret.push(value); });
+        _.each(arguments[i], function (value) { ret.push(value); });
       }
     } else {
-      _.each(arguments[0], function (index, value) { ret.push(value); });
+      _.each(arguments[0], function (value) { ret.push(value); });
     }
     return ret;
   };
@@ -866,7 +866,7 @@
   };
 
   _.defaults = function (obj, defaults) {
-    _.each(defaults, function (index, value) {
+    _.each(defaults, function (value, index) {
       if (!(index in obj)) { obj[index] = value;
       } else if (index in obj) { if (_.isNull(obj[index]) || _.isUndefined(obj[index])) obj[index] = value; }
     });
@@ -890,7 +890,7 @@
     if (deep) {
 
       // Build property reference used to prevent never ending loops
-      _.each(objs, function (index, value) {
+      _.each(objs, function (value) {
         keys.push(_.keys(value));
         keys = _.flatten(keys);
       });
@@ -1104,7 +1104,7 @@
 
   _.nest = function (obj, prefix) {
     prefix = prefix || "";
-    return _.each(obj, function (index, value) {
+    return _.each(obj, function (value, index) {
       var newObj = {};
       newObj[prefix + index] = value;
       obj[index] = newObj;
@@ -1113,7 +1113,7 @@
 
   _.pairs = function (obj) {
     var pairs = [];
-    if (_.isPlainObject(obj)) { _.each(obj, function (index, value) { pairs.push([index, value]); }); }
+    if (_.isPlainObject(obj)) { _.each(obj, function (value, index) { pairs.push([index, value]); }); }
     return pairs;
   };
 
@@ -1174,7 +1174,7 @@
 
   _.fromQueryString = function (str, deep) {
     var ret = {}, parts;
-    _.each(decodeURIComponent(str).split("&"), function (index, value) {
+    _.each(decodeURIComponent(str).split("&"), function (value) {
       parts = value.split("=");
       if (parts[0].match(/\[\]/g) && deep) {
         parts[0] = parts[0].replace(/\[\]/g, '');
@@ -1239,7 +1239,7 @@
 
   // Generate [type]s() methods
   _.each(['array', 'object', 'function', 'string', 'bool', 'number', 'null', 'undefined', 'date', 'regexp', 'element', 'nan'],
-    function (index, type) {
+    function (type) {
       _[ type + 's' ] = function (obj, key, deep) {
         return _.getByType(obj, type, key, deep);
       };
@@ -1247,7 +1247,7 @@
 
   // Generate no[Type]s() methods
   _.each(['array', 'object', 'function', 'string', 'bool', 'number', 'null', 'undefined', 'date', 'regexp', 'element', 'nan'],
-    function (index, name) {
+    function (name) {
       _[ 'no' + name.charAt(0).toUpperCase() + name.slice(1) + 's' ] = function (obj, key, deep) {
         return _.filter(_.getByType(obj, "*", key, deep),
             function (value) { if (!(_.type(value[_.keys(value)[0]]) === name)) return value; });
@@ -1256,7 +1256,7 @@
 
   // Generate [type]Names methods
   _.each(['array', 'object', 'function', 'string', 'bool', 'number', 'null', 'undefined', 'date', 'regexp', 'element', 'nan'],
-    function (index, name) {
+    function (name) {
       _[ name + 'Names' ] = function (obj, key, deep) {
         var names = [];
         _.filter(_.getByType(obj, name, key, deep), function (value) { names.push(_.keys(value)[0]); });
@@ -1265,14 +1265,14 @@
   });
 
   // Add native sort method to library
-  _.each(['sort'], function (index, name) {
+  _.each(['sort'], function (name) {
     if (Array.prototype[name]) { _[name] = !_[name] ? Array.prototype[name] : _[name]; }
   });
 
   // Attach library's methods to its prototype
   _.each(_.filter(_.keys(_), function (value) {
     if (!_.inArray(['_version', 'sort'], value)) return true;
-  }), function (index, name) {
+  }), function (name) {
     var fn = _[name];
     _.prototype[name] = function () {
       return _.end.call(this, fn.apply(_, this._bound[0].concat(_.toArray(arguments))));
