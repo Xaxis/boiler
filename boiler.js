@@ -1131,9 +1131,9 @@
     return _.map(obj, function (value) { return _.resolve(value, key); });
   };
 
-  _.resolve = function (obj, path, keys) {
+  _.resolve = function (obj, path, keys, own) {
     if ((path in obj) && !keys) return obj[path];
-    return _.paths(obj, keys)[path];
+    return _.paths(obj, keys, own)[path];
   };
 
   _.toQueryString = function (obj, prefix) {
