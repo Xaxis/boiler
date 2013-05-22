@@ -625,7 +625,11 @@
   };
 
   _.sortBy = function (col, fn, scope) {
-    var iterator = _.isFunction(fn) ? fn : function(col) { return col[fn]; };
+    var iterator = _.isFunction(fn) ? fn : function(v, i, r) {
+      var type = typeof r[i];
+      if (type == 'array' || type == 'object') return _.resolve(r[i], fn);
+      else return v[fn];
+    };
     return _.pluck(_.map(col, function (value, index, list) {
       return {
         value : value,
@@ -633,11 +637,11 @@
         criteria : iterator.call(scope || this, value, index, list)
       };
     }).sort(function (left, right) {
-      var a = left.criteria;
-      var b = right.criteria;
-      if (a !== b) {
-        if (a > b || a === void 0) return 1;
-        if (a < b || b === void 0) return -1;
+      var x = left.criteria;
+      var y = right.criteria;
+      if (x !== y) {
+        if (x > y || x === void 0) return 1;
+        if (x < y || y === void 0) return -1;
       }
       return left.index < right.index ? -1 : 1;
     }), 'value');
