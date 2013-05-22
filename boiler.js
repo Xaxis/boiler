@@ -231,12 +231,14 @@
   };
 
   _.clone = function (col, fn, deep) {
-    var deep = _.isBool(fn) ? fn : deep, ret = _.isArray(col) ? [] : {};
+    var deep = _.isBool(fn) ? fn : deep,
+        ret = _.isArray(col) ? [] : {},
+        iterator = _.isFunction(fn);
     for (var i in col) {
       if (_.isPlainObject(col[i]) || _.isArray(col[i]) && deep) {
         ret[i] = _.clone(col[i], fn, deep);
       } else {
-        ret[i] = _.isFunction(fn) ? fn.call(this, col[i]) : col[i];
+        ret[i] = iterator ? fn.call(this, col[i]) : col[i];
       }
     }
     return ret;
