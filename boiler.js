@@ -231,15 +231,10 @@
   };
 
   _.clone = function (col, fn, deep) {
-    var deep = _.isBool(fn) ? fn : deep,
-        ret = _.isArray(col) ? [] : {},
-        iterator = _.isFunction(fn);
-    for (var i in col) {
-      if (_.isPlainObject(col[i]) || _.isArray(col[i]) && deep) {
-        ret[i] = _.clone(col[i], fn, deep);
-      } else {
-        ret[i] = iterator ? fn.call(this, col[i]) : col[i];
-      }
+    var deep = _.isBool(fn) ? fn : deep, ret = _.isArray(col) ? [] : {}, iterator = _.isFunction(fn), i;
+    for (i in col) {
+      if (typeof col[i] == 'object' && deep) ret[i] = _.clone(col[i], fn, deep);
+      else ret[i] = iterator ? fn.call(this, col[i]) : col[i];
     }
     return ret;
   };
