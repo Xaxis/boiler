@@ -466,10 +466,10 @@
     return ret;
   };
 
-  _.max  = function (col, deep) {
-    var maxVals = [];
-    _.deep(col, function (depth, index, value) {
-      if (_.isNumber(value)) maxVals.push(value);
+  _.max  = function (col, fn, deep) {
+    var maxVals = [], deep = deep || _.isBool(fn) ? fn : false, iterator = _.isFunction(fn);
+    _.deep(col, function (depth, index, value, ref) {
+      if (_.isNumber(value)) maxVals.push(iterator ? fn.call(this, value, index, ref) : value);
     }, deep ? "*" : 1);
     return Math.max.apply(this, maxVals);
   };
