@@ -216,10 +216,10 @@
     return ret;
   };
 
-  _.average = function (col, deep) {
-    var sumTotal = 0;
-    _.deep(col, function (depth, index, value) {
-      if (_.isNumber(value)) sumTotal += value;
+  _.average = function (col, fn, deep) {
+    var sumTotal = 0, deep = deep || _.isBool(fn) ? fn : false, iterator = _.isFunction(fn);
+    _.deep(col, function (depth, index, value, ref) {
+      if (_.isNumber(value)) sumTotal += iterator ? fn.call(this, value, index, ref) : value;
     }, deep ? "*" : 1);
     return sumTotal / _.len(col, deep);
   };
