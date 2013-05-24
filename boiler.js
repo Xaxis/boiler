@@ -139,9 +139,7 @@
   _.remove = function (col, value) {
     if (col instanceof Array) {
       var key, i = col.length;
-      while (--i) {
-        if ((key = _.indexOf(col, value)) !== -1) col.splice(key, 1);
-      }
+      while (i--) { if ((key = _.indexOf(col, value)) !== -1) col.splice(key, 1); }
     }
     return col;
   };
@@ -171,12 +169,13 @@
   };
 
   _.without = _.exclude = function (arr, values, deep) {
+    var ret = [];
     if (deep) values = _.flatten(values);
-    var res = _.deep({obj: arr, fn: function(d,i,v){
+    _.deep({obj: arr, fn: function(d,i,v){
       for (var i = 0; i < values.length; i++) { if (_.isEqual(values[i], v)) return false; }
-      return true;
+      ret.push(v);
     }, depth: deep ? '*' : 1, noObjects: true});
-    return deep ? _.flatten(res) : res;
+    return deep ? _.flatten(ret) : ret;
   };
 
   _.zip = function () {
