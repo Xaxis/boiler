@@ -285,8 +285,14 @@
   _.each = _.forEach = function (col, fn, scope) {
     var keys = _.keys(col), i = 0, l = keys.length;
     if (col == null) return;
-    for (; i < l; i++) {
-      if (fn.call(scope || col[keys[i]], col[keys[i]], keys[i], col) === false) break;
+    if (col.forEach) {
+      col.forEach(fn, scope);
+    } else {
+      for (; i < l; i++) {
+        if (_.has(col, keys[i])) {
+          if (fn.call(scope || col[keys[i]], col[keys[i]], keys[i], col) === false) break;
+        }
+      }
     }
     return col;
   };
