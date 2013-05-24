@@ -283,14 +283,17 @@
   };
 
   _.each = _.forEach = function (col, fn, scope) {
-    var keys = _.keys(col), i = 0, l = keys.length;
     if (col == null) return;
     if (col.forEach) {
       col.forEach(fn, scope);
+    } else if (col instanceof Array) {
+      for (var i = 0; i < col.length; i++) {
+        if (fn.call(scope || col[i], col[i], i, col) === false) return;
+      }
     } else {
-      for (; i < l; i++) {
-        if (_.has(col, keys[i])) {
-          if (fn.call(scope || col[keys[i]], col[keys[i]], keys[i], col) === false) break;
+      for (var key in col) {
+        if (_.has(col, key)) {
+          if (fn.call(scope || col[key], col[key], key, col) === false) return;
         }
       }
     }
