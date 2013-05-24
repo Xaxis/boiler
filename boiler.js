@@ -136,6 +136,16 @@
     return ret;
   };
 
+  _.remove = function (col, value) {
+    if (col instanceof Array) {
+      var key, i = col.length;
+      while (--i) {
+        if ((key = _.indexOf(col, value)) !== -1) col.splice(key, 1);
+      }
+    }
+    return col;
+  };
+
   _.rest = _.tail = function (arr, n, deep) {
     var deep = deep || _.isBool(n) ? n : false, n = _.isNumber(n) ? n : 1;
     return _.deep({obj: arr, fn: function(d,i,v){
@@ -149,7 +159,8 @@
   };
 
   _.uniq = _.unique = function (arr, fn, scope, deep) {
-    var seen = [], deep = _.filter(arguments, function(v) { if(_.isBool(v)) return true; }).length ? true : false;
+    var seen = [],
+        deep = _.filter(arguments, function(v) { if(_.isBool(v)) return true; }).length ? true : false;
     arr = deep ? _.flatten(arr) : arr;
     return _.deep({obj: _.isFunction(fn) ? _.map(arr, fn, scope) : arr, fn: function (d,i,v) {
       if (!_.contains(seen, v)) {
@@ -297,7 +308,6 @@
         }
       }
     }
-    return col;
   };
 
   _.empty = function (col, deep) {
@@ -549,20 +559,6 @@
 
   _.reject = function (col, fn, scope) {
     return _.filter(col, fn, scope || this, true);
-  };
-
-  _.remove = function (col, key) {
-    var rest, from;
-    if (_.isPlainObject(col)) {
-      if (_.isArray(key)) { for (var i = 0; i < key.length; i++) { if (key[i] in col) delete col[key[i]]; }
-      } else { if (key in col) delete col[key]; }
-    } else if (_.isArray(col)) {
-      from = parseInt(key);
-      rest = col.slice((from) + 1);
-      col.length = (from < 0) ? col.length + from : from;
-      col.push.apply(col, rest);
-    }
-    return col;
   };
 
   _.replace = function (col, fn, scope, deep) {
@@ -1111,11 +1107,12 @@
 
   _.nest = function (obj, prefix) {
     prefix = prefix || "";
-    return _.each(obj, function (value, index) {
+    _.each(obj, function (value, index) {
       var newObj = {};
       newObj[prefix + index] = value;
       obj[index] = newObj;
     });
+    return obj;
   };
 
   _.pairs = function (obj) {
