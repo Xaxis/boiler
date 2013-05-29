@@ -143,7 +143,7 @@ test("lastIndexOf", function() {
 });
 
 test("object", function() {
-  deepEqual(_.object(['one',1,'two',2,'three',3]),{one:1,two:2,three:3}, 'successfully created object-literal from one array, where odd elements represent keys and even represent values');
+  deepEqual(_.object(0, 'red', 1, 'blue'), {0: "red", 1: "blue"}, 'successfully created object-literal from even number of passed arguments');
 
   deepEqual(_.object(['one','two','three'], [1,2,3]),{one:1,two:2,three:3}, 'successfully created object-literal from two arrays, the first containing keys and the second containing values');
 
