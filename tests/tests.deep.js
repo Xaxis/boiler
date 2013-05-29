@@ -82,24 +82,44 @@ test("at", function() {
   deepEqual(_.at([1,2,3], 1), [2], 'returns array with value at single index when `index` is passed as number');
 
   deepEqual(_.at([1,2,3], [0,1]), [1,2], 'returns array with values at indices when `index` is passed as as an array of indices');
+
+  deepEqual(_.at([1,2,3,[4,5,6]], [0,1], true), [1,2,4,5], 'deeply returns array with values at indices when `index` is passed as as an array of indices');
+
+  deepEqual(_.at([1,2,[3]], 0, true), [1,3], 'deeply returns array with values at single index when `index` is passed as number');
+
+  deepEqual(_.at([1,2,[3,[4,5,[6,7]]]], 0, 2), [1,3], 'deeply returns array with values at single index when `index` is passed as number');
 });
 
 test("compact", function() {
   deepEqual(_.compact([0,  null,  undefined,  '',  NaN,  false, {},  [],  'Red']), [{},[],'Red'], 'returns array with all "falsy" values removed');
 
   deepEqual(_.compact([0,  null,  undefined,  '',  NaN,  false, {},  [],  'Red'], true), ['Red'], 'returns array with all "falsy" values and empty arrays and object literals removed');
+
+  deepEqual(_.compact([0,1,false,[2,[],3,{}]], true, true), [1, [2, [], 3, {}], 2, 3], 'deeply returns array with all "falsy" values and empty arrays and object literals removed');
+
+  deepEqual(_.compact([0,1,false,[2,[],3,{}]], false, true), [1, [2, [], 3, {}], 2, [], 3, {}], 'deeply returns array with all "falsy" values removed');
+
+  deepEqual(_.compact([0,1,false,[2,[],3,{}]], true, 1), [1, [2, [], 3, {}]], 'deeply returns array with all "falsy" values removed to specified depth');
 });
 
 test("difference", function() {
   deepEqual(_.difference(['Red',  'Green',  'Blue'], ['Red',  'Green']), ['Blue'], 'returns array containing the difference of values between target array and comparison array(s)');
 
   deepEqual(_.difference([1,2,3], [2,3,4], [3,4,5]), [1], 'returns array containing the difference of values between target array and comparison array(s)');
+
+  deepEqual(_.difference([1,2,3,[6]], [2,3,4], [3,4,5], true), [1, 6], 'returns array containing the difference of values between target array (with nested values) and comparison array(s)');
+
+  deepEqual(_.difference([1,2,3,[6,[7]]], [2,3,4], [3,4,5], 1), [1, [6, [7]]], 'returns array containing the difference of values between target array (with nested values to specified depth) and comparison array(s)');
 });
 
 test("first", function() {
-  deepEqual(_.first([1,2,3]), 1, 'returns array containing first value from target array');
+  deepEqual(_.first([1,2,3]), [1], 'returns array containing first value from target array');
 
   deepEqual(_.first([1,2,3], 2), [1,2], 'returns array containing first `n` values from target array');
+
+  deepEqual(_.first([1,2,3], 2), [1,2], 'returns array containing first `n` values from target array and nested arrays');
+
+  deepEqual(_.first([1,2,3,[4,5,6,[7,8,9]]], 1, true), [1,4,7], 'returns array containing first `n` values from target array and nested arrays to specified depth');
 });
 
 test("indexOf", function() {
@@ -107,37 +127,39 @@ test("indexOf", function() {
 
   deepEqual(_.indexOf([1,2,3,1,2,3], 2, 3), 4, 'returns the index of the first value encountered that matches `value` starting after `from`');
 
-  deepEqual(_.indexOf([1, 2, [3], 1, 2, [3]], [3], true), 2, 'returns the index of the first value encountered that matches the `value` (using deep comparison)');
-
-  deepEqual(_.indexOf([1, 2, [3], 1, 2, [3]], [3], 3, true), 5, 'returns the index of the first value encountered that matches the `value` (using deep comparison) starting after `from`');
+  deepEqual(_.indexOf([1,2,[3]], 3, true), '2.0', 'returns the namespace path of the first nested value encountered that matches `value`');
 });
 
 test("initial", function() {
   deepEqual(_.initial([1,2,3]), [1,2], 'returns all but the last value in array');
 
   deepEqual(_.initial([1,2,3], 2), [1], 'returns all but the last `n` values in array');
+
+  deepEqual(_.initial([1,2,3,[4,5,6]], 2, true), [1,2,4], 'deeply returns all but the last `n` values in array');
 });
 
 test("intersection", function() {
   deepEqual(_.intersection([1,2,3,4], [1,2,101,102]), [1,2], 'returns an array containing intersected values');
 
   deepEqual(_.intersection([7,8,9], [9,10,11]), [9], 'returns an array containing intersected values');
+
+  deepEqual(_.intersection([7,8,9], [[9],10,11], true), [9], 'returns an array containing intersected values inclusive of nested arrays');
 });
 
 test("last", function() {
-  deepEqual(_.last([1,2,3]), 3, 'returns an array containing the last value in target array');
+  deepEqual(_.last([1,2,3]), [3], 'returns an array containing the last value in target array');
 
   deepEqual(_.last([1,2,3], 2), [2,3], 'returns an array containing the last `n` values in target array');
+
+  deepEqual(_.last([1,2,3,[4,5,6]], 2, true), [2,3,5,6], 'returns an array containing the last `n` values in target array');
 });
 
 test("lastIndexOf", function() {
-  deepEqual(_.lastIndexOf([1,2,3], 2), 1, 'returns the index of the first value encountered that matches `value`');
+  deepEqual(_.lastIndexOf([1,2,3,1,2,3], 3), 5, 'returns the last index in array where target value exists');
 
-  deepEqual(_.lastIndexOf([1, 2, 3, 1, 2, 3], 2, 4), 4, 'returns the index of the first value encountered that matches `value` starting after `from`');
+  deepEqual(_.lastIndexOf(['GM', 'Ford', 'GM', 'Suburu', 'Honda'], 'GM', 2), 2, 'returns the last index in array where target value exists starting from `n` element from end of array');
 
-  deepEqual(_.lastIndexOf([1, 2, [3], 1, 2, [3]], [3], true), 5, 'returns the index of the first value encountered that matches the `value` (using deep comparison)');
-
-  deepEqual(_.lastIndexOf([1, 2, [3], 1, 2, [3]], [3], 3, true), 2, 'returns the index of the first value encountered that matches the `value` (using deep comparison) starting after `from`');
+  deepEqual(_.lastIndexOf(['GM', 'Ford', ['GM', 'Suburu', 'Honda']], 'GM', 2, true), "2.0", 'returns the last index in array where target value exists starting from `n` element from end of array');
 });
 
 test("object", function() {
@@ -150,12 +172,6 @@ test("object", function() {
   deepEqual(_.toObject(['one',1,'two',2,'three',3]),{one:1,two:2,three:3}, 'successfully aliased with _.toObject');
 });
 
-test("remove", function() {
-  deepEqual(_.remove([1, 2, 2, 4], 2), [1, 4], 'successfully removed all occurrences of value from array');
-
-  deepEqual(_.remove([1, [2], [2], 4], [2]), [1, 4], 'successfully removed all occurrences of value from array using deep equality');
-});
-
 test("rest", function() {
   deepEqual(_.rest([1,2,3]), [2,3], 'return array containing all elements after the first element of target array');
 
@@ -164,6 +180,8 @@ test("rest", function() {
   deepEqual(_.rest([1,2,3], 2), [3], 'return array containing all elements after the nth element of target array');
 
   deepEqual(_.tail([1,2,3], 2), [3], 'successfully aliased with _.tail');
+
+  deepEqual(_.rest([1,2, [3,4,5]], 1, true), [2, 4, 5], 'deeply return array containing all elements after the nth element of target array');
 });
 
 test("union", function() {
@@ -178,6 +196,8 @@ test("uniq", function() {
   deepEqual(_.uniq([1,2,3,3], function (n) {return n * 2;}), [2,4,6], 'returns non-duplicate complex values computed from an iterator function');
 
   deepEqual(_.uniq([1,2,3,3], function (n) {return n * this.x;}, {x: 3}), [3,6,9], 'returns non-duplicate complex values computed from an iterator function bound to an object scope');
+
+  deepEqual(_.uniq([1,1,2,2,[3,3,4,4]], true), [1,2,3,4], 'deeply returns non-duplicate simple values from target array');
 });
 
 test("without", function() {
@@ -185,7 +205,9 @@ test("without", function() {
 
   deepEqual(_.without([[1],[2],[3],[4]], [[3],[4]]), [[1],[2]], 'returns array containing all complex values but those in the `values` array');
 
-  deepEqual(_.without([1,2,3,4], [3,4]), [1,2], 'successfully aliased with _.exclude');
+  deepEqual(_.without([1,2,3,4], [3,[4]], true), [1,2], 'deeply returns array containing all values but those in the `values` array');
+
+  deepEqual(_.without([1,2,3,4], [3,[4]], true), [1,2], 'successfully aliased with _.exclude');
 });
 
 test("zip", function() {
@@ -596,6 +618,12 @@ test("reject", function() {
   deepEqual(_.reject({0:1,1:2}, function(n) {return n >=2;}), [1], 'successfully rejected an object-literal with condition');
 
   deepEqual(_.reject([1,2], function(n) {return n == this.x;}, {x:2}), [1], 'successfully rejected an array while applying an object scope');
+});
+
+test("remove", function() {
+  deepEqual(_.remove([1, 2, 2, 4], 2), [1, 4], 'successfully removed all occurances of value from array');
+
+  deepEqual(_.remove([1, [2], [2], 4], [2]), [1, 4], 'successfully removed all occurances of value from array using deep equality');
 });
 
 test("replace", function() {
