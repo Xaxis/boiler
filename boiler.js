@@ -91,7 +91,7 @@
       if (_.isArray(value)) arrs.push(value);
       else allArrays = false;
     });
-    if (arrs.length === 2) {
+    if (allArrays && arrs.length === 2) {
       var keys = arrs[1];
       for (; i < arrs[0].length; i++) {
         ret[arrs[0][i]] = keys[i];
@@ -101,9 +101,13 @@
         var key = arrs[i][0];
         ret[key] = arrs[i][1];
       }
-    } else {
+    } else if (allArrays) {
       for (; i < arrs[0].length; i += 2) {
         ret[arrs[0][i]] = arrs[0][i + 1];
+      }
+    } else {
+      for (; i < arguments.length; i+=2) {
+        ret[arguments[i]] = arguments[i+1];
       }
     }
     return ret;
@@ -128,7 +132,7 @@
 
   _.uniq = _.unique = function (arr, fn, scope) {
     var seen = [];
-    return _.filter(_.isFunction(fn) ? _.map(arr, fn, scope) : arr, function (v, i) {
+    return _.filter(_.isFunction(fn) ? _.map(arr, fn, scope) : arr, function (v) {
       if (_.indexOf(seen, v, true) === -1) {
         seen[seen.length] = v;
         return true;
@@ -411,7 +415,7 @@
 
   _.keys = function (col, deep) {
     if (!deep && Object.keys) {
-      return Object.keys(col)
+      return Object.keys(col);
     } else {
       var keys = [];
       for (var o in col) { keys.push(o); }
@@ -979,7 +983,7 @@
 
   _.isEqual = function (obj1, obj2) {
 
-    // Quick compare of objects that won't have nested objects
+    // Quick compare objects that don't have nested objects
     if (_.type(obj1) === _.type(obj2) && !_.isPlainObject(obj1) && !_.isArray(obj1)) {
       switch (_.type(obj1)) {
         case "function" :
@@ -991,8 +995,6 @@
         default:
           if (obj1 !== obj2) return false;
       }
-
-    // Compare objects that can have nested objects
     } else {
 
       // When target or comparison is falsy we compare them directly
