@@ -1,5 +1,5 @@
 /**
- * boiler.js v0.8.8
+ * boiler.js v0.8.9
  * https://github.com/Xaxis/boiler.js
  * http://www.boilerjs.com
  * (c) 2012-2013 Wil Neeley, Trestle Media, LLC.
@@ -22,100 +22,78 @@
   };
 
   // Library version
-  _._version = "0.8.8";
+  _._version = "0.8.9";
 
   // Export library
   exports._ = _;
 
   /* ARRAY METHODS */
 
-  _.at = function (arr, index, deep) {
-    return _.deep(arr, function(d,key) {
-      if (_.isArray(index)) { if (_.inArray(index, parseInt(key))) return true;
-      } else if (index == key) { return true; }
-    }, _.isBool(deep) && deep ? '*' : _.isNumber(deep) ? deep : 1);
-  };
-
-  _.compact = function (arr, all, deep) {
-    return _.deep({obj:arr, fn:function(d,key,value) {
-      if (all && !_.isFalsy(value) && !_.isEmpty(value)) return true;
-      else if (!all && !_.isFalsy(value)) return true;
-    }, depth: _.isBool(deep) && deep ? '*' : _.isNumber(deep) ? deep : 1, noObjects:true});
-  };
-
-  _.difference = function () {
-    var arrs = [], deep = false, rest;
-    _.each(arguments, function (value) {
-      if (_.isArray(value)) arrs.push(value);
-      if ((_.isBool(value) && value) || _.isNumber(value)) deep = value;
-    });
-    rest = Array.prototype.concat.apply(Array.prototype, Array.prototype.slice.call(arrs, 1));
-    if (_.isBool(deep)) arrs[0] = _.flatten(arrs[0]);
-    if (_.isNumber(deep)) arrs[0] = _.flatten(arrs[0], deep);
-    return _.filter(_.uniq(arrs[0]), function (value) {
-      return !_.inArray(rest, value);
+  _.at = function (arr, index) {
+    index = _.isArray(index) ? _.keys(index) : index;
+    return _.filter(arr, function(v, i) {
+      if (i == index || _.contains(index, i.toString())) return true;
     });
   };
 
-  _.first = function (arr, n, deep) {
-    n = n ? n : 1;
-    return _.deep({obj: arr, fn: function(d,i,v) {
-      if (parseInt(i) < n) return true;
-    }, depth: deep ? '*' : 1, noObjects: true});
+  _.compact = function (arr, all) {
+    return _.filter(arr, function(v) {
+      if (all && !_.isFalsy(v) && !_.isEmpty(v)) return true;
+      else if (!all && !_.isFalsy(v)) return true;
+    });
+  };
+
+  _.difference = function (arr) {
+    var rest = Array.prototype.concat.apply(Array.prototype, Array.prototype.slice.call(arguments, 1));
+    return _.filter(_.uniq(arr), function (v) { return !_.inArray(rest, v); });
+  };
+
+  _.first = _.take = function (arr, n) {
+    return n ? Array.prototype.slice.call(arr, 0, n) : arr[0];
   };
 
   _.indexOf = _.firstIndexOf = function (arr, value, from, deep) {
-    var deep = deep || _.isBool(from) ? from : false, from = _.isNumber(from) ? from : 0, ret = -1, n = 0,
-        last = _.filter(arguments, function(v) { if (v == '___lastIndexOf___') return true; }).length ? true : false;
-    _.deep({obj: deep ? _.paths(arr) : arr, fn: function(d,i,v) {
-      if (_.isEqual(v, value)) {
-        if (_.isNumber(from)) {
-          if (n >= from) ret = i;
-        } else {
-          ret = i;
-        }
-      }
-      n = _.isArray(v) ? 0 : n+1;
-    }, depth: deep ? '*' : 1, noObjects: true});
-    return ret.length == 1 ? parseInt(ret) : ret;
+    if (arr == null) return -1;
+    var deep = deep || _.isBool(from) ? from : false, from = _.isNumber(from) ? from : 0, i = 0;
+    if (arr.indexOf && !deep) return arr.indexOf(value, from);
+    for (; i < arr.length; i++) {
+      if (deep && _.isEqual(arr[i], value) && i >= from) return i;
+      else if (arr[i] === value && i >= from) return i;
+    }
+    return -1;
   };
 
-  _.initial = function (arr, n, deep) {
+  _.initial = function (arr, n) {
     var m = n ? arr.length - n : arr.length - 1;
-    return _.deep({obj: arr, fn: function(d,i,v) {
-      if (_.isArray(v)) m = v.length - n;
-      if (parseInt(i) < m) return true;
-    }, depth: deep ? '*' : 1, noObjects: true});
+    return _.filter(arr, function(v, i) { if (i < m) return true; });
   };
 
-  _.intersection = function () {
-    var arrs, rest, deep;
-    arrs = _.filter(_.toArray(arguments), function (value) {
-      if (_.isBool(value)) deep = value;
-      if (_.isArray(value)) return true;
-    });
-    rest = Array.prototype.slice.call(arrs, 1);
-    return _.deep({obj: _.uniq(arrs[0]), fn: function (d,i,elm) {
-      return _.all(rest, function (other) {
-        return _.indexOf(other, elm, deep) != -1;
+  _.intersection = function (arr) {
+    var arrs = Array.prototype.slice.call(arguments, 1);
+    return _.filter(_.uniq(arr), function (v) {
+      return _.all(arrs, function (alt) {
+        return _.indexOf(alt, v, true) != -1;
       });
-    }, depth: 1, noObjects: true});
+    });
   };
 
-  _.last = function (arr, n, deep) {
-    var deep = deep || _.isBool(n) ? n : false, n = _.isNumber(n) ? arr.length - n : arr.length - 1;
-    return _.deep({obj: arr, fn:function(d,i,v) {
-      if (n <= parseInt(i) && !deep) return true;
-      else if (n-1 <= parseInt(i) && !_.isArray(v) && deep) return true;
-    }, depth: deep ? '*' : 1, noObjects: true});
+  _.last = function (arr, n) {
+    return n ? Array.prototype.slice.call(arr, arr.length-n, arr.length) : arr[arr.length-1];
   };
 
   _.lastIndexOf = function (arr, value, from, deep) {
-    return _.indexOf(arr, value, from, deep, '___lastIndexOf___');
+    if (arr == null) return -1;
+    var deep = deep || _.isBool(from) ? from : false, from = _.isNumber(from) ? from : arr.length;
+    if (arr.lastIndexOf && !deep) return arr.lastIndexOf(value, from);
+    while (--from) {
+      if (deep && _.isEqual(arr[from], value)) return from;
+      else if (arr[from] === value) return from;
+    }
+    return -1;
   };
 
   _.object = _.toObject = function () {
-    var arrs = [], keys = [], ret = {}, allArrays = true, i;
+    var arrs = [], keys = [], ret = {}, allArrays = true;
     _.each(arguments, function (value, index) {
       if (_.isArray(value)) arrs.push(value);
       else allArrays = false;
@@ -124,12 +102,12 @@
       keys = arrs[1];
       _.each(arrs[0], function (value, index) { ret[ value ] = keys[index]; });
     } else if ( allArrays && arrs.length > 1 ) {
-      for (i = 0; i < arrs.length; i ++) {
+      for (var i = 0; i < arrs.length; i ++) {
         var key = arrs[i][0];
         ret[key] = arrs[i][1];
       }
     } else {
-      for (i = 0; i < arrs[0].length; i += 2) {
+      for (var i = 0; i < arrs[0].length; i += 2) {
         ret[arrs[0][i]] = arrs[0][i + 1];
       }
     }
@@ -139,49 +117,38 @@
   _.remove = function (col, value) {
     if (col instanceof Array) {
       var key, i = col.length;
-      while (i--) { if ((key = _.indexOf(col, value)) !== -1) col.splice(key, 1); }
+      while (i--) { if ((key = _.indexOf(col, value, true)) !== -1) col.splice(key, 1); }
     }
     return col;
   };
 
-  _.rest = _.tail = function (arr, n, deep) {
-    var deep = deep || _.isBool(n) ? n : false, n = _.isNumber(n) ? n : 1;
-    return _.deep({obj: arr, fn: function(d,i,v){
-      if (parseInt(i) >= n && !deep) return true;
-      else if (parseInt(i) >= n && !_.isArray(v) && deep) return true;
-    }, depth: deep ? '*' : 1, noObjects: true});
+  _.rest = _.tail = function (arr, n) {
+    var m = n || 1;
+    return _.filter(arr, function(v, i) { if (i >= m) return true; });
   };
 
   _.union = function () {
-    return _.uniq(_.flatten(_.toArray(arguments)));
+    return _.uniq(Array.prototype.concat.apply(Array.prototype, arguments));
   };
 
-  _.uniq = _.unique = function (arr, fn, scope, deep) {
-    var seen = [],
-        deep = _.filter(arguments, function(v) { if(_.isBool(v)) return true; }).length ? true : false;
-    arr = deep ? _.flatten(arr) : arr;
-    return _.deep({obj: _.isFunction(fn) ? _.map(arr, fn, scope) : arr, fn: function (d,i,v) {
+  _.uniq = _.unique = function (arr, fn, scope) {
+    var seen = [];
+    return _.filter(_.isFunction(fn) ? _.map(arr, fn, scope) : arr, function (v) {
       if (!_.contains(seen, v)) {
-        seen.push(v);
+        seen[seen.length] = v;
         return true;
       }
-    }, depth: 1, noObjects: true});
+    });
   };
 
-  _.without = _.exclude = function (arr, values, deep) {
-    var ret = [];
-    if (deep) values = _.flatten(values);
-    _.deep({obj: arr, fn: function(d,i,v){
-      for (var i = 0; i < values.length; i++) { if (_.isEqual(values[i], v)) return false; }
-      ret.push(v);
-    }, depth: deep ? '*' : 1, noObjects: true});
-    return deep ? _.flatten(ret) : ret;
+  _.without = _.exclude = function (arr, values) {
+    return _.filter(arr, function (v) { if (!_.contains(values, v)) return true; });
   };
 
-  _.zip = function () {
-    var i = 0, ret = [], arrs;
-    arrs = _.filter(_.toArray(arguments), function(value) { if (_.isArray(value)) return true; });
-    for (; i < arrs[0].length; i++) { ret[i] = _.pluck(arrs, "" + i); }
+  _.zip = function (arr) {
+    var i = 0, ret = [],
+    arrs = Array.prototype.slice.call(arguments, 0);
+    for (; i < arr.length; i++) { ret[i] = _.pluck(arrs, "" + i); }
     return ret;
   };
 
@@ -323,15 +290,22 @@
     return col;
   };
 
-  _.filter = function (col, fn, scope, reject) {
+  _.filter = function (col, fn, scope) {
     var ret = [];
-    _.each(col, function (value, index) {
-      if (reject) {
-        if (!fn.call(scope ? scope : this, value, index)) ret.push(value);
-      } else {
-        if (fn.call(scope ? scope : this, value, index)) ret.push(value);
+    if (col == null) return ret;
+    if (col.filter) {
+      return col.filter(fn, scope);
+    } else if (col instanceof Array) {
+      for (var i = 0; i < col.length; i++) {
+        if (fn.call(scope || col[i], col[i], i, col)) ret[ret.length] = col[i];
       }
-    });
+    } else {
+      for (var key in col) {
+        if (_.has(col, key)) {
+          if (fn.call(scope || col[key], col[key], key, col)) ret[ret.length] = col[key];
+        }
+      }
+    }
     return ret;
   };
 
@@ -557,7 +531,9 @@
   };
 
   _.reject = function (col, fn, scope) {
-    return _.filter(col, fn, scope || this, true);
+    return _.filter(col, function(v, i, r) {
+      return !fn.call(scope || this, v, i, r);
+    }, scope || this);
   };
 
   _.replace = function (col, fn, scope, deep) {
