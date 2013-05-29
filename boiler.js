@@ -86,21 +86,23 @@
   };
 
   _.object = _.toObject = function () {
-    var arrs = [], keys = [], ret = {}, allArrays = true;
-    _.each(arguments, function (value, index) {
+    var arrs = [], ret = {}, allArrays = true, i = 0;
+    _.each(arguments, function (value) {
       if (_.isArray(value)) arrs.push(value);
       else allArrays = false;
     });
     if (arrs.length === 2) {
-      keys = arrs[1];
-      _.each(arrs[0], function (value, index) { ret[ value ] = keys[index]; });
-    } else if ( allArrays && arrs.length > 1 ) {
-      for (var i = 0; i < arrs.length; i ++) {
+      var keys = arrs[1];
+      for (; i < arrs[0].length; i++) {
+        ret[arrs[0][i]] = keys[i];
+      }
+    } else if (allArrays && arrs.length > 1) {
+      for (; i < arrs.length; i++) {
         var key = arrs[i][0];
         ret[key] = arrs[i][1];
       }
     } else {
-      for (var i = 0; i < arrs[0].length; i += 2) {
+      for (; i < arrs[0].length; i += 2) {
         ret[arrs[0][i]] = arrs[0][i + 1];
       }
     }
@@ -127,7 +129,7 @@
   _.uniq = _.unique = function (arr, fn, scope) {
     var seen = [];
     return _.filter(_.isFunction(fn) ? _.map(arr, fn, scope) : arr, function (v, i) {
-      if (_.indexOf(seen, v) === -1) {
+      if (_.indexOf(seen, v, true) === -1) {
         seen[seen.length] = v;
         return true;
       }
