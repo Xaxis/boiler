@@ -88,6 +88,8 @@ test("compact", function() {
   deepEqual(_.compact([0,  null,  undefined,  '',  NaN,  false, {},  [],  'Red']), [{},[],'Red'], 'returns array with all "falsy" values removed');
 
   deepEqual(_.compact([0,  null,  undefined,  '',  NaN,  false, {},  [],  'Red'], true), ['Red'], 'returns array with all "falsy" values and empty arrays and object literals removed');
+
+  deepEqual(_.compact({0: 0,  1: null,  2: undefined,  3: '',  4: NaN, 5: false, 6: {}, 7: [], 8: 'Red'}), [{},[],'Red'], 'returns array with all "falsy" values removed when an object is passed');
 });
 
 test("difference", function() {
@@ -173,7 +175,7 @@ test("union", function() {
 test("uniq", function() {
   deepEqual(_.uniq([1,2,3,4,5,6,1,2,3]), [1,2,3,4,5,6], 'returns non-duplicate simple values from target array');
 
-  deepEqual(_.uniq([[1,2,3],[4,5,6],[1,2,3], [4,5,6]]), [[1,2,3], [4,5,6]], 'returns non-duplicate complex values from target array');
+  deepEqual(_.uniq([[1,2,3],[4,5,6],[1,2,3], [4,5,6]], true), [[1,2,3], [4,5,6]], 'returns non-duplicate complex values from target array');
 
   deepEqual(_.uniq([1,2,3,3], function (n) {return n * 2;}), [2,4,6], 'returns non-duplicate complex values computed from an iterator function');
 
