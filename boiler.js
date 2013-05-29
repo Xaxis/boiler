@@ -36,13 +36,6 @@
     });
   };
 
-  _.compact = function (arr, all) {
-    return _.filter(arr, function(v) {
-      if (all && !_.isFalsy(v) && !_.isEmpty(v)) return true;
-      else if (!all && !_.isFalsy(v)) return true;
-    });
-  };
-
   _.difference = function (arr) {
     var rest = Array.prototype.concat.apply(Array.prototype, Array.prototype.slice.call(arguments, 1));
     return _.filter(_.uniq(arr), function (v) { return !_.inArray(rest, v); });
@@ -216,6 +209,13 @@
     return ret;
   };
 
+  _.compact = function (col, all) {
+    return _.filter(col, function(v) {
+      if (all && !_.isFalsy(v) && !_.isEmpty(v)) return true;
+      else if (!all && !_.isFalsy(v)) return true;
+    });
+  };
+
   _.contains = _.inArray = function (col, value, deep) {
     return _.isEqual(_.find(col, function (v) {
       return _.isEqual(v, value) ? true : false;
@@ -241,10 +241,15 @@
   };
 
   _.deep = function (col, fn, depth) {
-    var obj = col.obj || col, fn = col.fn || fn, depth = col.depth || (depth || '*'), args = col.args || [],
-        noArrays = col.noArrays || false, noObjects = col.noObjects || false, retType = col.retType || false,
-        ret = col.ret || [], o;
-    for (o in obj) {
+    var obj = col.obj || col,
+        fn = col.fn || fn,
+        depth = col.depth || (depth || '*'),
+        args = col.args || [],
+        noArrays = col.noArrays || false,
+        noObjects = col.noObjects || false,
+        retType = col.retType || false,
+        ret = col.ret || [];
+    for (var o in obj) {
       args.unshift(depth, o, obj[o], obj);
       if (fn.apply(this, args)) ret.push(obj[o]);
       if ((_.isPlainObject(obj[o]) && !noObjects) || (_.isArray(obj[o]) && !noArrays)) {
@@ -318,7 +323,7 @@
   };
 
   _.findKey = _.findIndex = function (col, fn, scope, deep) {
-    deep = _.isBool(scope) ? scope : deep;
+    deep = deep || _.isBool(scope) ? scope : deep;
     return _.find(col, fn, scope || this, deep, "key");
   };
 
@@ -478,7 +483,9 @@
   _.none = function (col, fn, scope, deep) {
     deep = deep || _.isBool(scope) ? scope : false;
     var ret = true;
-    _.deep(col, function(d,i,v) { if (fn.call(scope ? scope : this, v, i)) ret = false; }, deep ? '*' : 1);
+    _.deep(col, function(d,i,v) {
+      if (fn.call(scope ? scope : this, v, i)) ret = false;
+    }, deep ? '*' : 1);
     return ret;
   };
 
@@ -502,7 +509,9 @@
     for (o = 0; o < props.length; o++) {
       if (keys) pathObj[props[o]] = (nextKey + "." + lastKey + "." + props[o]).replace(/^[.]+/g, "");
       else pathObj[(nextKey + "." + lastKey + "." + props[o]).replace(/^[.]+/g, "")] = col[props[o]];
-      if (_.isPlainObject(col[props[o]]) || _.isArray(col[props[o]])) _.paths(col[props[o]], keys, noEnum, pathObj, props[o], nextKey + "." + lastKey);
+      if (_.isPlainObject(col[props[o]]) || _.isArray(col[props[o]])) {
+        _.paths(col[props[o]], keys, noEnum, pathObj, props[o], nextKey + "." + lastKey);
+      }
     }
     return pathObj;
   };
