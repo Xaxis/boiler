@@ -133,8 +133,8 @@
 
   _.uniq = _.unique = function (arr, fn, scope) {
     var seen = [];
-    return _.filter(_.isFunction(fn) ? _.map(arr, fn, scope) : arr, function (v) {
-      if (!_.contains(seen, v)) {
+    return _.filter(_.isFunction(fn) ? _.map(arr, fn, scope) : arr, function (v, i) {
+      if (_.indexOf(seen, v) === -1) {
         seen[seen.length] = v;
         return true;
       }
