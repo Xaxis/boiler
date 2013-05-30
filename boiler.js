@@ -101,7 +101,7 @@
         var key = arrs[i][0];
         ret[key] = arrs[i][1];
       }
-    } else if (allArrays) {
+    } else if (allArrays && arrs.length == 1) {
       for (; i < arrs[0].length; i += 2) {
         ret[arrs[0][i]] = arrs[0][i + 1];
       }
@@ -1096,9 +1096,8 @@
   _.nest = function (obj, prefix) {
     prefix = prefix || "";
     _.each(obj, function (value, index) {
-      var newObj = {};
-      newObj[prefix + index] = value;
-      obj[index] = newObj;
+      obj[index] = {};
+      obj[index][prefix + index] = value;
     });
     return obj;
   };
