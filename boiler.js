@@ -920,33 +920,12 @@
     return _.deep(obj, function(d,i) { if (key == i) return true; })[0];
   };
 
-  _.getByType = function (obj, type, key, deep) {
-    var stack = [];
-    deep = _.isBool(key) ? key : deep;
-    key = !_.isString(key) ? undefined : _.isString(key) ? key : undefined;
+  _.getByType = function (obj, type, deep) {
+    deep = deep || _.isBool(type) ? type : false;
     type = !_.isString(type) ? '*' : _.isString(type) ? type : undefined;
-
-    // Start search at key when given
-    if (key && key !== '*') {
-      obj = _.get(obj, key);
-      if (type === _.type(obj) || type === "*") {
-        var objWrapper = {};
-        key = key.split(".");
-        objWrapper[key[key.length - 1]] = obj;
-        stack.push(objWrapper);
-        return stack;
-      }
-    }
-
-    // Perform deep search for objects of type
-    _.deep({obj: obj, fn: function (depth, index, elm) {
-      if (type === _.type(elm) || type === "*") {
-        var objWrapper = {};
-        objWrapper[index] = elm;
-        stack.push(objWrapper);
-      }
+    return _.deep({obj: obj, fn: function(d, index, value) {
+      if (_.type(value) == type || type == '*') return true;
     }, depth: deep ? '*' : 1, noArrays: true});
-    return stack;
   };
 
   _.howDeep = function (obj, key) {
@@ -1038,12 +1017,8 @@
   };
 
   _.isFalsy = function (obj) {
-    return (_.isUndefined(obj) ||
-            _.isNull(obj) ||
-            _.isNaN(obj) ||
-            obj === "" ||
-            obj === 0 ||
-            (_.isBool(obj) && Boolean(obj) === false));
+    return (_.isUndefined(obj) || _.isNull(obj) || _.isNaN(obj) ||
+      obj === "" || obj === 0 || (_.isBool(obj) && Boolean(obj) === false));
   };
 
   _.isInfinite = function (obj) {
