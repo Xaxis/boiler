@@ -348,6 +348,14 @@
     return ret;
   };
 
+  _.getByType = function (col, type, deep) {
+    deep = deep || _.isBool(type) ? type : false;
+    type = !_.isString(type) ? '*' : _.isString(type) ? type : undefined;
+    return _.deep({obj: col, fn: function(d, index, value) {
+      if (_.type(value) == type || type == '*') return true;
+    }, depth: deep ? '*' : 1});
+  };
+
   _.groupBy = function (col, map, scope, count) {
     count = count || _.isBool(scope) ? scope : false;
     var res = {};
@@ -920,14 +928,6 @@
     return _.deep(obj, function(d,i) { if (key == i) return true; })[0];
   };
 
-  _.getByType = function (obj, type, deep) {
-    deep = deep || _.isBool(type) ? type : false;
-    type = !_.isString(type) ? '*' : _.isString(type) ? type : undefined;
-    return _.deep({obj: obj, fn: function(d, index, value) {
-      if (_.type(value) == type || type == '*') return true;
-    }, depth: deep ? '*' : 1, noArrays: true});
-  };
-
   _.howDeep = function (obj, key) {
     var paths = _.paths(obj, true);
     if (key && (key in paths)) {
@@ -1202,33 +1202,6 @@
   _.value = function (value) {
     return _.isFunction(value) ? value() : value;
   };
-
-  // Generate [type]s() methods
-  _.each(['array', 'object', 'function', 'string', 'bool', 'number', 'null', 'undefined', 'date', 'regexp', 'element', 'nan'],
-    function (type) {
-      _[ type + 's' ] = function (obj, key, deep) {
-        return _.getByType(obj, type, key, deep);
-      };
-  });
-
-  // Generate no[Type]s() methods
-  _.each(['array', 'object', 'function', 'string', 'bool', 'number', 'null', 'undefined', 'date', 'regexp', 'element', 'nan'],
-    function (name) {
-      _[ 'no' + name.charAt(0).toUpperCase() + name.slice(1) + 's' ] = function (obj, key, deep) {
-        return _.filter(_.getByType(obj, "*", key, deep),
-            function (value) { if (!(_.type(value[_.keys(value)[0]]) === name)) return value; });
-      };
-  });
-
-  // Generate [type]Names methods
-  _.each(['array', 'object', 'function', 'string', 'bool', 'number', 'null', 'undefined', 'date', 'regexp', 'element', 'nan'],
-    function (name) {
-      _[ name + 'Names' ] = function (obj, key, deep) {
-        var names = [];
-        _.filter(_.getByType(obj, name, key, deep), function (value) { names.push(_.keys(value)[0]); });
-        return names;
-      };
-  });
 
   // Attach library's methods to its prototype
   _.each(_.filter(_.keys(_), function (value) {
