@@ -849,23 +849,6 @@
     return ret;
   };
 
-  _.call = function (opts) {
-    var only = _.isString(opts.only) ? opts.only.split(" ") : opts.only,
-        fns = _.functions(opts.obj, opts.key, opts.deep);
-    return _.filter(fns, function (value, index) {
-      var key = _.keys(value)[0];
-      if (only) {
-        if (_.inArray(only, _.keys(value)[0])) {
-          value[key].apply(this, opts.args);
-          return true;
-        }
-      } else {
-        value[key].apply(this, opts.args);
-        return true;
-      }
-    });
-  };
-
   _.defaults = function (obj, defaults) {
     _.each(defaults, function (value, index) {
       if (!(index in obj)) { obj[index] = value;
@@ -1085,7 +1068,7 @@
 
   _.parent = function (obj, key) {
     var target = key ? _.get(obj, key) : obj,
-        objs = _.objects(obj, true);
+        objs = _.getByType(obj, 'object', true);
     for (var o in objs) {
       if (_.isPlainObject(objs[o])) {
         for (var p in objs[o]) {
@@ -1127,10 +1110,7 @@
     var types = "Date RegExp Element Arguments PlainObject Array Function String Bool NaN Infinite Number Null Undefined Object".split(" "), i;
     for (i = 0; i < types.length; i++) {
       if (_["is" + types[i]].call(this, obj)) {
-        return types[i]
-            .toLowerCase()
-            .replace(/plainobject/g, "object")
-            .replace(/infinite/g, "infinity");
+        return types[i].toLowerCase().replace(/plainobject/g, "object").replace(/infinite/g, "infinity");
       }
     }
     return false;
