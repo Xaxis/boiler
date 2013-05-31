@@ -1,5 +1,5 @@
 /**
- * boiler.js v0.8.9
+ * boiler.js v0.9.0
  * https://github.com/Xaxis/boiler.js
  * http://www.boilerjs.com
  * (c) 2012-2013 Wil Neeley, Trestle Media, LLC.
@@ -22,7 +22,7 @@
   };
 
   // Library version
-  _._version = "0.8.9";
+  _._version = "0.9.0";
 
   // Export library
   exports._ = _;
