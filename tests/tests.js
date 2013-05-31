@@ -415,6 +415,12 @@ test("flatten", function() {
   deepEqual(_.flatten([1,[2,[3]]], 2), [1,2,[3]], 'successfully flattened an array to specified depth');
 });
 
+test("getByType", function() {
+  equal(_.getByType(obj, 'element').length, 1, 'successfully retrieved values of [type] from object-literal');
+
+  equal(_.getByType(obj, 'array', true).length, 4, 'successfully deeply retrieved values of [type] from object-literal');
+});
+
 test("groupBy", function() {
   var len = _.len(_.groupBy(['Cat',  'Dog',  'Iguana'], function (s){ return s.length; }));
   equal(len, 2, 'grouped array by property length with mapping function');
@@ -845,86 +851,11 @@ test("array", function() {
   deepEqual(_.array({0:1}, {0:2}), [1,2], 'successfully aliased with _.toArray');
 });
 
-test("arrayNames", function() {
-  deepEqual(_.arrayNames(obj), ['B'], 'successfully retrieved [type]Names from object-literal');
-
-  deepEqual(_.arrayNames(obj, 'A'), ['a_1', 'a_2'], 'successfully retrieved [type]Names from object-literal at target key');
-
-  deepEqual(_.arrayNames(obj, 'A', true), ['a_1', 'a_2', 'a_3_1'], 'successfully deeply retrieved [type]Names from object-literal');
-});
-
-test("arrays", function() {
-  equal(_.arrays(obj).length, 1, 'successfully retrieved [type]s from object-literal');
-
-  equal(_.arrays(obj, true).length, 4, 'successfully deeply retrieved [type]s from object-literal');
-
-  equal(_.arrays(obj, 'a_1', true).length, 1, 'successfully deeply retrieved [type]s from object-literal starting at target key');
-});
-
-test("boolNames", function() {
-  deepEqual(_.boolNames(obj), ['C'], 'successfully retrieved [type]Names from object-literal');
-
-  deepEqual(_.boolNames(obj, 'A'), ['a_4', 'a_5'], 'successfully retrieved [type]Names from object-literal at target key');
-
-  deepEqual(_.boolNames(obj, 'A', true), ['a_4', 'a_5', 'a_6_1'], 'successfully deeply retrieved [type]Names from object-literal');
-});
-
-test("bools", function() {
-  equal(_.bools(obj).length, 1, 'successfully retrieved [type]s from object-literal');
-
-  equal(_.bools(obj, true).length, 4, 'successfully deeply retrieved [type]s from object-literal');
-
-  equal(_.bools(obj, 'a_4', true).length, 1, 'successfully deeply retrieved [type]s from object-literal starting at target key');
-});
-
-test("call", function() {
-  equal(_.call({obj:obj}).length, 1, 'successfully called functions in target object');
-
-  equal(_.call({obj:obj, deep:true}).length, 4, 'successfully deeply called functions in target object');
-
-  equal(_.call({obj:obj, deep:true, key:'a_6_2'}).length, 1, 'successfully deeply called functions in target object at target key');
-
-  equal(_.call({obj:obj, deep:true, only:'D'}).length, 1, 'successfully called functions in target object with whitelist');
-});
-
-test("dateNames", function() {
-  deepEqual(_.dateNames(obj), ['E'], 'successfully retrieved [type]Names from object-literal');
-
-  deepEqual(_.dateNames(obj, 'A'), ['a_8'], 'successfully retrieved [type]Names from object-literal at target key');
-
-  deepEqual(_.dateNames(obj, 'A', true), ['a_6_3', 'a_8'], 'successfully deeply retrieved [type]Names from object-literal');
-});
-
-test("dates", function() {
-  equal(_.dates(obj).length, 1, 'successfully retrieved [type]s from object-literal');
-
-  equal(_.dates(obj, true).length, 3, 'successfully deeply retrieved [type]s from object-literal');
-
-  equal(_.dates(obj, 'a_8', true).length, 1, 'successfully deeply retrieved [type]s from object-literal starting at target key');
-});
-
 test("defaults", function() {
   deepEqual(_.defaults({color:'red'}, {color:'blue', type:'rgb'}), {color: "red", type: "rgb"}, 'successfully set default property in target object-literal without overriding any properties');
 
   deepEqual(_.defaults({color:undefined, type:undefined}, {color:'blue', type:'rgb'}), {color: "blue", type: "rgb"}, 'successfully set default properties in object-literal where values were undefined');
 });
-
-test("elementNames", function() {
-  deepEqual(_.elementNames(obj), ['F'], 'successfully retrieved [type]Names from object-literal');
-
-  deepEqual(_.elementNames(obj, 'A'), ['a_9'], 'successfully retrieved [type]Names from object-literal at target key');
-
-  deepEqual(_.elementNames(obj, 'A', true), ['a_6_4', 'a_9'], 'successfully deeply retrieved [type]Names from object-literal');
-});
-
-test("elements", function() {
-  equal(_.elements(obj).length, 1, 'successfully retrieved [type]s from object-literal');
-
-  equal(_.elements(obj, true).length, 3, 'successfully deeply retrieved [type]s from object-literal');
-
-  equal(_.elements(obj, 'a_9', true).length, 1, 'successfully deeply retrieved [type]s from object-literal starting at target key');
-});
-
 test("extend", function() {
   deepEqual(_.extend({'one':1, 'two':{}}, {'three':3}), {one: 1, two: {}, three: 3}, 'successfully extended object onto target');
 
@@ -935,34 +866,10 @@ test("extend", function() {
   deepEqual(_.merge({'one':1, 'two':{}}, {'three':3}), {one: 1, two: {}, three: 3}, 'successfully aliased with _.merge');
 });
 
-test("functionNames", function() {
-  deepEqual(_.functionNames(obj), ['D'], 'successfully retrieved [type]Names from object-literal');
-
-  deepEqual(_.functionNames(obj, 'A'), ['a_7'], 'successfully retrieved [type]Names from object-literal at target key');
-
-  deepEqual(_.functionNames(obj, 'A', true), ['a_3_2', 'a_6_2', 'a_7'], 'successfully deeply retrieved [type]Names from object-literal');
-});
-
-test("functions", function() {
-  equal(_.functions(obj).length, 1, 'successfully retrieved [type]s from object-literal');
-
-  equal(_.functions(obj, true).length, 4, 'successfully deeply retrieved [type]s from object-literal');
-
-  equal(_.functions(obj, 'a_7', true).length, 1, 'successfully deeply retrieved [type]s from object-literal starting at target key');
-});
-
 test("get", function() {
   deepEqual(_.get(obj, 'a_3_1'), [1,2], 'successfully retrieved value at key in object-literal');
 
   deepEqual(_.get(obj, 'a_6_1'), true, 'successfully retrieved value at key in object-literal');
-});
-
-test("getByType", function() {
-  equal(_.getByType(obj, 'element').length, 1, 'successfully retrieved values of [type] from object-literal');
-
-  equal(_.getByType(obj, 'array', true).length, 4, 'successfully deeply retrieved values of [type] from object-literal');
-
-  equal(_.getByType(obj, 'bool', 'C').length, 1, 'successfully retrieved values of [type] from object-literal at target key');
 });
 
 test("howDeep", function() {
@@ -1228,218 +1135,10 @@ test("module", function() {
   deepEqual(_.build('My.DOM.Utility'), {My: {DOM: {Utility: {}}}}, 'successfully aliased with _.build');
 });
 
-test("nanNames", function() {
-  deepEqual(_.nanNames(obj), ['G'], 'successfully retrieved [type]Names from object-literal');
-
-  deepEqual(_.nanNames(obj, 'A'), ['a_10'], 'successfully retrieved [type]Names from object-literal at target key');
-
-  deepEqual(_.nanNames(obj, 'A', true), ['a_3_3', 'a_10'], 'successfully deeply retrieved [type]Names from object-literal');
-});
-
-test("nans", function() {
-  equal(_.nans(obj).length, 1, 'successfully retrieved [type]s from object-literal');
-
-  equal(_.nans(obj, true).length, 3, 'successfully deeply retrieved [type]s from object-literal');
-
-  equal(_.nans(obj, 'a_10', true).length, 1, 'successfully deeply retrieved [type]s from object-literal starting at target key');
-});
-
 test("nest", function() {
   deepEqual(_.nest({'one': 99}), {one:{one:99}}, 'successfully nested values in object-literal');
 
   deepEqual(_.nest({'one': 99}, 'pre-'), {one:{'pre-one':99}}, 'successfully nested values in object-literal and prefixed property');
-});
-
-test("noArrays", function() {
-  var res = true;
-  _.filter(_.noArrays(obj), function(v) { if (_.type(v) === 'array') { res = false}});
-  equal(res, true, 'successfully returned all values from object-literal except of type');
-
-  _.filter(_.noArrays(obj, true), function(v) { if (_.type(v) === 'array') { res = false}});
-  equal(res, true, 'successfully deeply returned all values from object-literal except of type');
-
-  _.filter(_.noArrays(obj, 'A', true), function(v) { if (_.type(v) === 'array') { res = false}});
-  equal(res, true, 'successfully deeply returned all values from object-literal except of type at targeted property key');
-});
-
-test("noBools", function() {
-  var res = true;
-  _.filter(_.noBools(obj), function(v) { if (_.type(v) === 'bool') { res = false}});
-  equal(res, true, 'successfully returned all values from object-literal except of type');
-
-  _.filter(_.noBools(obj, true), function(v) { if (_.type(v) === 'bool') { res = false}});
-  equal(res, true, 'successfully deeply returned all values from object-literal except of type');
-
-  _.filter(_.noBools(obj, 'A', true), function(v) { if (_.type(v) === 'bool') { res = false}});
-  equal(res, true, 'successfully deeply returned all values from object-literal except of type at targeted property key');
-});
-
-test("noDates", function() {
-  var res = true;
-  _.filter(_.noDates(obj), function(v) { if (_.type(v) === 'date') { res = false}});
-  equal(res, true, 'successfully returned all values from object-literal except of type');
-
-  _.filter(_.noDates(obj, true), function(v) { if (_.type(v) === 'date') { res = false}});
-  equal(res, true, 'successfully deeply returned all values from object-literal except of type');
-
-  _.filter(_.noDates(obj, 'A', true), function(v) { if (_.type(v) === 'date') { res = false}});
-  equal(res, true, 'successfully deeply returned all values from object-literal except of type at targeted property key');
-});
-
-test("noElements", function() {
-  var res = true;
-  _.filter(_.noElements(obj), function(v) { if (_.type(v) === 'element') { res = false}});
-  equal(res, true, 'successfully returned all values from object-literal except of type');
-
-  _.filter(_.noElements(obj, true), function(v) { if (_.type(v) === 'element') { res = false}});
-  equal(res, true, 'successfully deeply returned all values from object-literal except of type');
-
-  _.filter(_.noElements(obj, 'A', true), function(v) { if (_.type(v) === 'element') { res = false}});
-  equal(res, true, 'successfully deeply returned all values from object-literal except of type at targeted property key');
-});
-
-test("noFunctions", function() {
-  var res = true;
-  _.filter(_.noFunctions(obj), function(v) { if (_.type(v) === 'function') { res = false}});
-  equal(res, true, 'successfully returned all values from object-literal except of type');
-
-  _.filter(_.noFunctions(obj, true), function(v) { if (_.type(v) === 'function') { res = false}});
-  equal(res, true, 'successfully deeply returned all values from object-literal except of type');
-
-  _.filter(_.noFunctions(obj, 'A', true), function(v) { if (_.type(v) === 'function') { res = false}});
-  equal(res, true, 'successfully deeply returned all values from object-literal except of type at targeted property key');
-});
-
-test("noNans", function() {
-  var res = true;
-  _.filter(_.noNans(obj), function(v) { if (_.type(v) === 'nan') { res = false}});
-  equal(res, true, 'successfully returned all values from object-literal except of type');
-
-  _.filter(_.noNans(obj, true), function(v) { if (_.type(v) === 'nan') { res = false}});
-  equal(res, true, 'successfully deeply returned all values from object-literal except of type');
-
-  _.filter(_.noNans(obj, 'A', true), function(v) { if (_.type(v) === 'nan') { res = false}});
-  equal(res, true, 'successfully deeply returned all values from object-literal except of type at targeted property key');
-});
-
-test("noNulls", function() {
-  var res = true;
-  _.filter(_.noNulls(obj), function(v) { if (_.type(v) === 'null') { res = false}});
-  equal(res, true, 'successfully returned all values from object-literal except of type');
-
-  _.filter(_.noNulls(obj, true), function(v) { if (_.type(v) === 'null') { res = false}});
-  equal(res, true, 'successfully deeply returned all values from object-literal except of type');
-
-  _.filter(_.noNulls(obj, 'A', true), function(v) { if (_.type(v) === 'null') { res = false}});
-  equal(res, true, 'successfully deeply returned all values from object-literal except of type at targeted property key');
-});
-
-test("noNumbers", function() {
-  var res = true;
-  _.filter(_.noNumbers(obj), function(v) { if (_.type(v) === 'number') { res = false}});
-  equal(res, true, 'successfully returned all values from object-literal except of type');
-
-  _.filter(_.noNumbers(obj, true), function(v) { if (_.type(v) === 'number') { res = false}});
-  equal(res, true, 'successfully deeply returned all values from object-literal except of type');
-
-  _.filter(_.noNumbers(obj, 'A', true), function(v) { if (_.type(v) === 'number') { res = false}});
-  equal(res, true, 'successfully deeply returned all values from object-literal except of type at targeted property key');
-});
-
-test("noObjects", function() {
-  var res = true;
-  _.filter(_.noObjects(obj), function(v) { if (_.type(v) === 'defaultobject') { res = false}});
-  equal(res, true, 'successfully returned all values from object-literal except of type');
-
-  _.filter(_.noObjects(obj, true), function(v) { if (_.type(v) === 'defaultobject') { res = false}});
-  equal(res, true, 'successfully deeply returned all values from object-literal except of type');
-
-  _.filter(_.noObjects(obj, 'A', true), function(v) { if (_.type(v) === 'defaultobject') { res = false}});
-  equal(res, true, 'successfully deeply returned all values from object-literal except of type at targeted property key');
-});
-
-test("noRegexps", function() {
-    var res = true;
-    _.filter(_.noRegexps(obj), function(v) { if (_.type(v) === 'regexp') { res = false}});
-    equal(res, true, 'successfully returned all values from object-literal except of type');
-
-    _.filter(_.noRegexps(obj, true), function(v) { if (_.type(v) === 'regexp') { res = false}});
-    equal(res, true, 'successfully deeply returned all values from object-literal except of type');
-
-    _.filter(_.noRegexps(obj, 'A', true), function(v) { if (_.type(v) === 'regexp') { res = false}});
-    equal(res, true, 'successfully deeply returned all values from object-literal except of type at targeted property key');
-});
-
-test("noStrings", function() {
-  var res = true;
-  _.filter(_.noStrings(obj), function(v) { if (_.type(v) === 'string') { res = false}});
-  equal(res, true, 'successfully returned all values from object-literal except of type');
-
-  _.filter(_.noStrings(obj, true), function(v) { if (_.type(v) === 'string') { res = false}});
-  equal(res, true, 'successfully deeply returned all values from object-literal except of type');
-
-  _.filter(_.noStrings(obj, 'A', true), function(v) { if (_.type(v) === 'string') { res = false}});
-  equal(res, true, 'successfully deeply returned all values from object-literal except of type at targeted property key');
-});
-
-test("noUndefineds", function() {
-  var res = true;
-  _.filter(_.noUndefineds(obj), function(v) { if (_.type(v) === 'undefined') { res = false}});
-  equal(res, true, 'successfully returned all values from object-literal except of type');
-
-  _.filter(_.noUndefineds(obj, true), function(v) { if (_.type(v) === 'undefined') { res = false}});
-  equal(res, true, 'successfully deeply returned all values from object-literal except of type');
-
-  _.filter(_.noUndefineds(obj, 'A', true), function(v) { if (_.type(v) === 'undefined') { res = false}});
-  equal(res, true, 'successfully deeply returned all values from object-literal except of type at targeted property key');
-});
-
-test("nullNames", function() {
-  deepEqual(_.nullNames(obj), ['H'], 'successfully retrieved [type]Names from object-literal');
-
-  deepEqual(_.nullNames(obj, 'A'), ['a_11'], 'successfully retrieved [type]Names from object-literal at target key');
-
-  deepEqual(_.nullNames(obj, 'A', true), ['a_3_4', 'a_11'], 'successfully deeply retrieved [type]Names from object-literal');
-});
-
-test("nulls", function() {
-  equal(_.nulls(obj).length, 1, 'successfully retrieved [type]s from object-literal');
-
-  equal(_.nulls(obj, true).length, 3, 'successfully deeply retrieved [type]s from object-literal');
-
-  equal(_.nulls(obj, 'a_11', true).length, 1, 'successfully deeply retrieved [type]s from object-literal starting at target key');
-});
-
-test("numberNames", function() {
-  deepEqual(_.numberNames(obj), ['I'], 'successfully retrieved [type]Names from object-literal');
-
-  deepEqual(_.numberNames(obj, 'A'), ['a_12'], 'successfully retrieved [type]Names from object-literal at target key');
-
-  deepEqual(_.numberNames(obj, 'A', true), ['a_3_5', 'a_12'], 'successfully deeply retrieved [type]Names from object-literal');
-});
-
-test("numbers", function() {
-  equal(_.numbers(obj).length, 1, 'successfully retrieved [type]s from object-literal');
-
-  equal(_.numbers(obj, true).length, 3, 'successfully deeply retrieved [type]s from object-literal');
-
-  equal(_.numbers(obj, 'a_12', true).length, 1, 'successfully deeply retrieved [type]s from object-literal starting at target key');
-});
-
-test("objectNames", function() {
-  deepEqual(_.objectNames(obj), ['A', 'J'], 'successfully retrieved [type]Names from object-literal');
-
-  deepEqual(_.objectNames(obj, 'A'), ['A'], 'successfully retrieved [type]Names from object-literal at target key');
-
-  deepEqual(_.objectNames(obj, 'A', true), ['A'], 'successfully deeply retrieved [type]Names from object-literal');
-});
-
-test("objects", function() {
-  equal(_.objects(obj).length, 2, 'successfully retrieved [type]s from object-literal');
-
-  equal(_.objects(obj, true).length, 6, 'successfully deeply retrieved [type]s from object-literal');
-
-  equal(_.objects(obj, 'A', true).length, 1, 'successfully deeply retrieved [type]s from object-literal starting at target key');
 });
 
 test("pairs", function() {
@@ -1469,44 +1168,12 @@ test("pluck", function() {
   deepEqual(_.pluck(objs, 'color.vals.hex'), ['FF0', '0F0', '00F'], 'successfully plucked nested values from object-literals in target array');
 });
 
-test("regexpNames", function() {
-  deepEqual(_.regexpNames(obj), ['M'], 'successfully retrieved [type]Names from object-literal');
-
-  deepEqual(_.regexpNames(obj, 'A'), ['a_16'], 'successfully retrieved [type]Names from object-literal at target key');
-
-  deepEqual(_.regexpNames(obj, 'A', true), ['a_3_9', 'a_16'], 'successfully deeply retrieved [type]Names from object-literal');
-});
-
-test("regexps", function() {
-  equal(_.regexps(obj).length, 1, 'successfully retrieved [type]s from object-literal');
-
-  equal(_.regexps(obj, true).length, 3, 'successfully deeply retrieved [type]s from object-literal');
-
-  equal(_.regexps(obj, 'A', true).length, 2, 'successfully deeply retrieved [type]s from object-literal starting at target key');
-});
-
 test("resolve", function() {
   equal(_.resolve({'colors':{'red':{'vals':{'rgb':'#F00', 'hsl':'0, 100, 50'}}}}, 'colors.red.vals.rgb'), '#F00', 'successfully resolved value at targeted namespace');
 
   equal(_.resolve({'colors':{'red':{'vals':{'rgb':'#F00', 'hsl':'0, 100, 50'}}}}, "rgb", true), 'colors.red.vals.rgb', 'successfully resolved full namespace at targeted partical namespace');
 
   equal(_.resolve({'colors':{'red':{'vals':{'rgb':'#F00', 'hsl':[0, 100, 50]}}}}, 'colors.red.vals.hsl.1'), 100, 'successfully resolved value in nested array at targeted namespace');
-});
-
-test("stringNames", function() {
-  deepEqual(_.stringNames(obj), ['K'], 'successfully retrieved [type]Names from object-literal');
-
-  deepEqual(_.stringNames(obj, 'A'), ['a_14'], 'successfully retrieved [type]Names from object-literal at target key');
-
-  deepEqual(_.stringNames(obj, 'A', true), ['a_3_7', 'a_14'], 'successfully deeply retrieved [type]Names from object-literal');
-});
-
-test("strings", function() {
-  equal(_.strings(obj).length, 1, 'successfully retrieved [type]s from object-literal');
-
-  equal(_.strings(obj, true).length, 3, 'successfully deeply retrieved [type]s from object-literal');
-
-  equal(_.strings(obj, 'A', true).length, 2, 'successfully deeply retrieved [type]s from object-literal starting at target key');
 });
 
 test("toQueryString", function() {
@@ -1545,22 +1212,6 @@ test("type", function() {
   equal(_.type('red'), 'string', 'successfully returned type string of [type]');
 
   equal(_.type(undefined), 'undefined', 'successfully returned type string of [type]');
-});
-
-test("undefinedNames", function() {
-  deepEqual(_.undefinedNames(obj), ['L'], 'successfully retrieved [type]Names from object-literal');
-
-  deepEqual(_.undefinedNames(obj, 'A'), ['a_15'], 'successfully retrieved [type]Names from object-literal at target key');
-
-  deepEqual(_.undefinedNames(obj, 'A', true), ['a_3_8', 'a_15'], 'successfully deeply retrieved [type]Names from object-literal');
-});
-
-test("undefineds", function() {
-  equal(_.undefineds(obj).length, 1, 'successfully retrieved [type]s from object-literal');
-
-  equal(_.undefineds(obj, true).length, 3, 'successfully deeply retrieved [type]s from object-literal');
-
-  equal(_.undefineds(obj, 'A', true).length, 2, 'successfully deeply retrieved [type]s from object-literal starting at target key');
 });
 
 // STRING METHODS
