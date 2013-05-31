@@ -851,8 +851,11 @@
 
   _.defaults = function (obj, defaults) {
     _.each(defaults, function (value, index) {
-      if (!(index in obj)) { obj[index] = value;
-      } else if (index in obj) { if (_.isNull(obj[index]) || _.isUndefined(obj[index])) obj[index] = value; }
+      if (!(index in obj)) {
+        obj[index] = value;
+      } else {
+        if (obj[index] === null || obj[index] === undefined) obj[index] = value;
+      }
     });
     return obj;
   };
@@ -1062,7 +1065,7 @@
 
   _.pairs = function (obj) {
     var pairs = [];
-    if (_.isPlainObject(obj)) { _.each(obj, function (value, index) { pairs.push([index, value]); }); }
+    _.each(obj, function (value, index) { pairs.push([index, value]); });
     return pairs;
   };
 
