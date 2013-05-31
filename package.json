@@ -1,7 +1,7 @@
 {
   "name": "boiler",
-  "version": "0.8.6",
-  "description": "Boiler is a utility library that makes every day tasks in JavaScript easier by providing over 150 methods that work on arrays, collections, functions, numbers, objects, and strings. It's the perfect solution for those looking for the JavaScript equivalent of a Swiss Army Knife.",
+  "version": "0.9.0",
+  "description": "Boiler is a utility library that makes every day tasks in JavaScript easier by providing over 115 methods that work on `arrays`, `collections`, `functions`, `numbers`, `objects`, and `strings`. It's the JavaScript equivalent of a Swiss Army Knife.",
   "homepage": "http://boilerjs.com",
   "license": "MIT",
   "main": "/boiler.js",
@@ -10,7 +10,6 @@
       "util",
       "utility",
       "library",
-      "deep",
       "recursion"
   ],
   "author": {
