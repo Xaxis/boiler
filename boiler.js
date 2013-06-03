@@ -208,11 +208,11 @@
 
   _.clone = function (col, fn, deep) {
     var deep = deep || _.isBool(fn) ? fn : false,
-        ret = _.isArray(col) ? [] : {},
-        iterator = _.isFunction(fn), i;
+        iterator = _.isFunction(fn) ? fn : _.identity,
+        ret = _.isArray(col) ? [] : {}, i;
     for (i in col) {
       if (typeof col[i] == 'object' && deep) ret[i] = _.clone(col[i], fn, deep);
-      else ret[i] = iterator ? fn.call(this, col[i]) : col[i];
+      else ret[i] = iterator.call(col, col[i]);
     }
     return ret;
   };
