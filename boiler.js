@@ -155,7 +155,7 @@
 
   _.add = function (col, key, value, deep) {
     var start = true, type = _.isArray(col) ? true : false;
-    _.deep({obj: col, fn:function(d,i,v) {
+    return _.deep({obj: col, fn: function(d, i, v) {
       if (start) {
         if (!(key in col)) col[key] = value;
         start = false;
@@ -163,8 +163,7 @@
       if (((_.isArray(v) && type) || (_.isPlainObject(v) && !type)) && deep) {
         if (!(key in v)) v[key] = value;
       }
-    }, depth: deep ? '*' : 1});
-    return col;
+    }, depth: deep ? '*' : 1, retType: true});
   };
 
   _.all = _.every = function (col, fn, scope, deep) {
