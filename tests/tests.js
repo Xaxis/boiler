@@ -202,7 +202,7 @@ test("add", function() {
 
   deepEqual(_.add([1,2,3], 2, 4), [1,2,3], 'did not add value to array at existing index');
 
-  deepEqual(_.add([1,2,[]], 0, 3, true), [1,2,[3]], 'deeply added value at index');
+  deepEqual(_.add([1,2,[]], 0, 3, true), [1, 2, [3]], 'successfully deeply added value to array at index');
 
   deepEqual(_.add({0:1,1:2,2:3, 4:{}}, 3, 4, true), {0:1,1:2,2:3,3:4, 4:{3:4}}, 'successfully deeply added value to object-literal at index');
 });
@@ -683,9 +683,11 @@ test("sum", function() {
 
   equal(_.sum([1,2,[3]], true), 6, 'successfully summed an array of values (counting deep values)');
 
-  equal(_.sum({0:1,1:2,2:3}), 6, 'successfully summed an object-literal of values');
+  equal(_.sum({0:1,1:2,2:3}), 6, 'successfully summed an object-literal\'s values');
 
   equal(_.sum({0:1,1:2,2:{0:3}}, true), 6, 'successfully summed an object-literal of values (counting deep values)');
+
+  equal(_.sum({0:1,1:2,2:3}, function(num) { return num * 2; }), 12, 'successfully summed an object-literal\'s values');
 });
 
 test("tap", function() {
