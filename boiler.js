@@ -649,10 +649,12 @@
     }), 'value');
   };
 
-  _.sum = function (col, deep) {
-    var ret = 0;
+  _.sum = function (col, fn, deep) {
+    var deep = deep || _.isBool(fn) ? fn : false,
+        iterator = _.isFunction(fn) ? fn : _.identity,
+        ret = 0;
     _.deep(col, function (depth, index, value) {
-      if (_.isNumber(value)) ret += value;
+      if (_.isNumber(value)) ret += iterator.call(col, value);
     }, deep ? "*" : 1);
     return ret;
   };
