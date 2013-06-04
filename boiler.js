@@ -949,59 +949,34 @@
   };
 
   _.isEqual = function (obj1, obj2) {
+    var type = _.type(obj1), o;
 
-    // Quick compare objects that don't have nested objects
-    if (_.type(obj1) === _.type(obj2) && !_.isPlainObject(obj1) && !_.isArray(obj1)) {
-      switch (_.type(obj1)) {
-        case "function" :
-          if (obj1.toString() !== obj2.toString()) return false;
-          break;
-        case "nan" :
-          if (obj1 === obj2) return false;
-          break;
-        default:
-          if (obj1 !== obj2) return false;
-      }
-    } else {
+    // Not the same TYPE
+    if (type != _.type(obj2)) return false;
 
-      // When target or comparison is falsy we compare them directly
-      if (_.isFalsy(obj1) || _.isFalsy(obj2)) {
-        if (obj1 !== obj2) return false;
-      }
-      for (var o in obj1) {
-        switch (true) {
+    // A primitive (all but arrays, objects (including null), nan, and HTML elements)
+    if (typeof obj1 != 'object' && type != 'function' && type != 'nan' || type == 'null') return obj1 === obj2;
 
-          // Catch comparison of element first to prevent infinite loop when caught as objects
-          case ( _.isElement(obj1[o]) ) :
-            if (obj1[o] !== obj2[o]) return false;
-            break;
-          case ( _.isNaN(obj1[o]) ) :
-            if (!_.isNaN(obj2[o])) return false;
-            break;
-          case ( typeof obj1[o] === "object" ) :
-            if (!_.isEqual(obj1[o], obj2[o])) return false;
-            break;
-          case ( typeof obj1[o] === "function" ) :
-            if (!_.isFunction(obj2[o])) return false;
-            if (obj1[o].toString() !== obj2[o].toString()) return false;
-            break;
-          default :
-            if (obj1[o] !== obj2[o]) return false;
-        }
-      }
+    // A Function
+    if (type == 'function') {
+      return obj1.toString() == obj2.toString()
+          && _.isEqual(_.keys(obj1), _.keys(obj2))
+          && _.isEqual(_.values(obj1), _.values(obj2));
+    }
 
-      // Reverse comparison of `obj2`
-      for (var o in obj2) {
-        if (typeof obj1 === "undefined") return false;
-        if (obj1 === null || obj1 === undefined) return false;
-        if (_.isFalsy(obj1[o])) {
-          if (_.isNaN(obj1[o])) {
-            if (!_.isNaN(obj2[o])) return false;
-          } else if (obj1[o] !== obj2[o]) return false;
+    // NaN
+    if (type == 'nan') return obj1 !== obj2;
+
+    // An Object (array, object, or HTML element)
+    if (typeof obj1 == 'object') {
+      if (_.len(obj1) == 0) {
+        return type == _.type(obj2) && _.len(obj2) == 0;
+      } else {
+        for (o in obj1) {
+          return _.isEqual(obj1[o], obj2[o]);
         }
       }
     }
-    return true;
   };
 
   _.isFalsy = function (obj) {
