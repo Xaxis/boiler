@@ -949,34 +949,38 @@
   };
 
   _.isEqual = function (obj1, obj2) {
-    var type = _.type(obj1), o;
+    var type = _.type(obj1), result, o;
 
-    // Not the same TYPE
-    if (type != _.type(obj2)) return false;
+    switch (true) {
 
-    // A primitive (all but arrays, objects (including null), nan, and HTML elements)
-    if (typeof obj1 != 'object' && type != 'function' && type != 'nan' || type == 'null') return obj1 === obj2;
+      // Not the same TYPE
+      case type != _.type(obj2) :
+        return false;
 
-    // A Function
-    if (type == 'function') {
-      return obj1.toString() == obj2.toString()
-          && _.isEqual(_.keys(obj1), _.keys(obj2))
-          && _.isEqual(_.values(obj1), _.values(obj2));
-    }
+      // NaNs
+      case type == 'nan' :
+        return _.isNaN(obj1) && _.isNaN(obj2);
 
-    // NaN
-    if (type == 'nan') return obj1 !== obj2;
+      // Primitives (types that will compare correctly with ===)
+      case ((typeof obj1 != 'object' && type != 'function') || type == 'null') :
+        return obj1 === obj2;
 
-    // An Object (array, object, or HTML element)
-    if (typeof obj1 == 'object') {
-      if (_.len(obj1) == 0) {
-        return type == _.type(obj2) && _.len(obj2) == 0;
-      } else {
-        for (o in obj1) {
-          return _.isEqual(obj1[o], obj2[o]);
+      // Functions or Elements
+      case type == 'function' || type == 'element' :
+        return obj1.constructor === obj2.constructor;
+
+      // JavaScript Objects
+      default :
+        if (_.len(obj1) == 0) {
+          result = _.len(obj2) == 0;
+        } else {
+          for (o in obj1) {
+            if (!(result = _.isEqual(obj1[o], obj2[o]))) break;
+          }
         }
-      }
     }
+
+    return result;
   };
 
   _.isFalsy = function (obj) {
