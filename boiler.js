@@ -948,40 +948,38 @@
     return obj ? obj.nodeType === 1 : false;
   };
 
-    _.isEqual = function (obj1, obj2) {
-      var type = _.type(obj1), result, o;
+  _.isEqual = function (obj1, obj2) {
+    var type = _.type(obj1), result, o;
+    switch (true) {
 
-      switch (true) {
+      // Not the same TYPE
+      case type != _.type(obj2) :
+        return false;
 
-        // Not the same TYPE
-        case type != _.type(obj2) :
-          return false;
+      // NaNs
+      case type == 'nan' :
+        return _.isNaN(obj1) && _.isNaN(obj2);
 
-        // NaNs
-        case type == 'nan' :
-          return _.isNaN(obj1) && _.isNaN(obj2);
+      // Primitives (types that will compare correctly with ===)
+      case ((typeof obj1 != 'object' && type != 'function') || type == 'null') :
+        return obj1 === obj2;
 
-        // Primitives (types that will compare correctly with ===)
-        case ((typeof obj1 != 'object' && type != 'function') || type == 'null') :
-          return obj1 === obj2;
+      // Functions or Elements
+      case type == 'function' || type == 'element' :
+        return obj1.prototype.constructor === obj2.prototype.constructor;
 
-        // Functions or Elements
-        case type == 'function' || type == 'element' :
-          return obj1.prototype.constructor === obj2.prototype.constructor;
-
-        // JavaScript Objects
-        default :
-          if (_.len(obj1) == 0) {
-            result = _.len(obj2) == 0;
-          } else {
-            for (o in obj1) {
-              if (!(result = _.isEqual(obj1[o], obj2[o]))) break;
-            }
+      // JavaScript Objects
+      default :
+        if (_.len(obj1) == 0) {
+          result = _.len(obj2) == 0;
+        } else {
+          for (o in obj1) {
+            if (!(result = _.isEqual(obj1[o], obj2[o]))) break;
           }
-      }
-
-      return result;
-    };
+        }
+    }
+    return result;
+  };
 
   _.isFalsy = function (obj) {
     return !obj;
