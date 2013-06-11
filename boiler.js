@@ -984,8 +984,7 @@
     };
 
   _.isFalsy = function (obj) {
-    return (_.isUndefined(obj) || _.isNull(obj) || _.isNaN(obj) ||
-      obj === "" || obj === 0 || (_.isBool(obj) && Boolean(obj) === false));
+    return !obj;
   };
 
   _.isInfinite = function (obj) {
