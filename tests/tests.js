@@ -969,9 +969,9 @@ test("isEqual", function() {
 
   equal(_.isEqual({}, {}), true, 'successfully determined equality between two objects');
 
-  equal(_.isEqual(Infinity, Infinity), true, 'successfully determined equality between two objects');
-
   equal(_.isEqual(function(){return 1;}, function(){return 1;}), true, 'successfully determined equality between two objects');
+
+  equal(_.isEqual(Infinity, Infinity), true, 'successfully determined equality between two objects');
 });
 
 test("isFalsy", function() {
