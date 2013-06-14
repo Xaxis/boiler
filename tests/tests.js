@@ -82,6 +82,11 @@ test("at", function() {
   deepEqual(_.at([1,2,3], 1), [2], 'returns array with value at single index when `index` is passed as number');
 
   deepEqual(_.at([1,2,3], [0,1]), [1,2], 'returns array with values at indices when `index` is passed as as an array of indices');
+
+  deepEqual(_.chain().at([false,0,1,2,3], [0,1]).last().end(), 0, 'chain returns array with last value of array values at indicies when `index` is passed as an array of indicies');
+
+  deepEqual(_.chain().at([false,0,1,2,3], [0,1]).last(1).end(), [0], 'chain returns array with last n values of array values at indicies when `index` is passed as an array of indicies');
+
 });
 
 test("compact", function() {
@@ -90,6 +95,11 @@ test("compact", function() {
   deepEqual(_.compact([0,  null,  undefined,  '',  NaN,  false, {},  [],  'Red'], true), ['Red'], 'returns array with all "falsy" values and empty arrays and object literals removed');
 
   deepEqual(_.compact({0: 0,  1: null,  2: undefined,  3: '',  4: NaN, 5: false, 6: {}, 7: [], 8: 'Red'}), [{},[],'Red'], 'returns array with all "falsy" values removed when an object is passed');
+  
+  deepEqual(_.chain().compact([0, null, 1, 'pork', 'beans']).first().end(), 1, 'chain returns array containing first value of array containing compacted array');
+
+  deepEqual(_.chain().compact([0, null, 1, 'pork', 'beans']).first(1).end(), [1], 'chain returns array containing first n values of array containing compacted array');
+
 });
 
 test("difference", function() {
