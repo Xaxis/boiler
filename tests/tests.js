@@ -106,12 +106,19 @@ test("difference", function() {
   deepEqual(_.difference(['Red',  'Green',  'Blue'], ['Red',  'Green']), ['Blue'], 'returns array containing the difference of values between target array and comparison array(s)');
 
   deepEqual(_.difference([1,2,3], [2,3,4], [3,4,5]), [1], 'returns array containing the difference of values between target array and comparison array(s)');
+
+  deepEqual(_.chain().difference(['ham', 'eggs', 'toast'],['ham', 'eggs', 'toast', 'canceled']).remove('canceled').end(), [], 'chain returns the `difference` of two arrays less a removed value');
+  
+  deepEqual(_.chain().difference(['ham', 'eggs', 'beans'],['bacon', 'eggs', 'beans', 'toast']).remove('ham').end(), [], 'returns [] because your difference function is a wee under-powered ;)');
+  
 });
 
 test("first", function() {
   deepEqual(_.first([1,2,3]), 1, 'returns array containing first value from target array');
 
   deepEqual(_.first([1,2,3], 2), [1,2], 'returns array containing first `n` values from target array');
+  
+  deepEqual(_.chain().first([1,2,3], 2).last(1).end(), [2], 'chain returns the last `n` of the first `n` values of an array.');
 });
 
 test("indexOf", function() {
@@ -122,24 +129,39 @@ test("indexOf", function() {
   deepEqual(_.indexOf([1, 2, [3], 1, 2, [3]], [3], true), 2, 'returns the index of the first value encountered that matches the `value` (using deep comparison)');
 
   deepEqual(_.indexOf([1, 2, [3], 1, 2, [3]], [3], 3, true), 5, 'returns the index of the first value encountered that matches the `value` (using deep comparison) starting after `from`');
+  
+  deepEqual(_.chain().clone(['carnitas','pollo','cabeza']).indexOf('carnitas').end(), 0 ,'chain returns index of value for cloned array');
+  
+  
 });
 
 test("initial", function() {
   deepEqual(_.initial([1,2,3]), [1,2], 'returns all but the last value in array');
 
   deepEqual(_.initial([1,2,3], 2), [1], 'returns all but the last `n` values in array');
+  
+  deepEqual(_.chain().initial([1,2,3]).add(2,4).end(), [1,2,4], 'chain returns all but last value in array and appends new value');
+  
+  deepEqual(_.chain().initial([1,2,3], 2).add(2,4).compact().end(), [1,4], 'chain return all but last `n` values in array and appends new value. compacts to remove undefined index.');
+  
+ 
 });
 
 test("intersection", function() {
   deepEqual(_.intersection([1,2,3,4], [1,2,101,102]), [1,2], 'returns an array containing intersected values');
 
   deepEqual(_.intersection([7,8,9], [9,10,11]), [9], 'returns an array containing intersected values');
+  
+  deepEqual(_.chain().intersection([1,2,3,4], [2,3,4,5]).first().end(), 2,'chain returns first value of intersecting values between two arrays');
 });
 
 test("last", function() {
   deepEqual(_.last([1,2,3]), 3, 'returns an array containing the last value in target array');
 
   deepEqual(_.last([1,2,3], 2), [2,3], 'returns an array containing the last `n` values in target array');
+  
+  deepEqual(_.chain().last([1,2,3], 2).has(1).end(), true, 'biff boff');
+
 });
 
 test("lastIndexOf", function() {
@@ -150,6 +172,9 @@ test("lastIndexOf", function() {
   deepEqual(_.lastIndexOf([1, 2, [3], 1, 2, [3]], [3], true), 5, 'returns the index of the first value encountered that matches the `value` (using deep comparison)');
 
   deepEqual(_.lastIndexOf([1, 2, [3], 1, 2, [3]], [3], 3, true), 2, 'returns the index of the first value encountered that matches the `value` (using deep comparison) starting after `from`');
+
+  // TODO.
+  //deepEqual(_.chain()...end(),val,'boffin toff. biff boff');
 });
 
 test("object", function() {
@@ -160,6 +185,8 @@ test("object", function() {
   deepEqual(_.object(['one',1],['two',2],['three',3]),{one:1,two:2,three:3}, 'successfully created object-literal from multiple arrays, where first element in each array represents a key and the second element a value');
 
   deepEqual(_.toObject(['one',1,'two',2,'three',3]),{one:1,two:2,three:3}, 'successfully aliased with _.toObject');
+  
+  deepEqual(_.chain().object(0, 'toast').add(1,'bagel').end(),{0:'toast',1:'bagel'},'chain create object and append value at name');
 });
 
 test("remove", function() {
