@@ -966,7 +966,7 @@
 
       // Functions or Elements
       case type == 'function' || type == 'element' :
-        return obj1.prototype.constructor === obj2.prototype.constructor;
+        return obj1.constructor === obj2.constructor && (obj1.prototype.constructor === obj2.prototype.constructor || obj1.toLocaleString() === obj2.toLocaleString());
 
       // JavaScript Objects
       default :
