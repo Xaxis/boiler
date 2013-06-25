@@ -211,7 +211,8 @@
         ret = _.isArray(col) ? [] : {}, i;
     for (i in col) {
       if (typeof col[i] == 'object' && deep) ret[i] = _.clone(col[i], fn, deep);
-      else ret[i] = iterator.call(col, col[i]);
+      else if (!(typeof col[i] == 'object')) ret[i] = iterator.call(col, col[i]);
+      else ret[i] = col[i];
     }
     return ret;
   };
@@ -950,6 +951,7 @@
 
   _.isEqual = function (obj1, obj2) {
     var type = _.type(obj1), result, o;
+
     switch (true) {
 
       // Not the same TYPE
@@ -966,7 +968,7 @@
 
       // Functions or Elements
       case type == 'function' || type == 'element' :
-        return obj1.prototype.constructor === obj2.prototype.constructor;
+        return obj1.constructor === obj2.constructor;
 
       // JavaScript Objects
       default :
@@ -978,11 +980,13 @@
           }
         }
     }
+
     return result;
   };
 
   _.isFalsy = function (obj) {
-    return !obj;
+    return (_.isUndefined(obj) || _.isNull(obj) || _.isNaN(obj) ||
+      obj === "" || obj === 0 || (_.isBool(obj) && Boolean(obj) === false));
   };
 
   _.isInfinite = function (obj) {
