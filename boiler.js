@@ -876,7 +876,7 @@
     // Shift target off of the `objs` array
     target = objs.shift();
 
-    // When TRUE is passed perform deep iteration on target
+    // Perform deep iteration on target
     if (deep) {
 
       // Build property reference used to prevent never ending loops
@@ -900,7 +900,7 @@
       }, "*");
     }
 
-    // Merge first level properties after going deep
+    // Merge first level properties
     for (i = 0; i < objs.length; i++) {
       if (( obj = objs[i] ) !== null) {
         for (key in obj) {
