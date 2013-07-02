@@ -578,17 +578,15 @@
     return ret;
   };
 
-  _.set = function (col, key, value, deep) {
-    var start = true, type = _.isArray(col) ? true : false;
-    _.deep({obj: col, fn:function(d,i,v) {
-      if (start) {
-        col[key] = value;
-        start = false;
+  _.set = function (col, key, value) {
+    var path = key.toString().split('.'), i = 0, target = col;
+    for (; i<path.length; i++) {
+      if (_.has(target, path[i]) && i != path.length-1) {
+        target = target[path[i]];
+      } else if (i == path.length-1) {
+        target[path[i]] = value;
       }
-      if (((_.isArray(v) && type) || (_.isPlainObject(v) && !type)) && deep) {
-        v[key] = value;
-      }
-    }, depth: deep ? '*' : 1});
+    }
     return col;
   };
 
