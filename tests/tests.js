@@ -239,9 +239,9 @@ test("add", function() {
 
   deepEqual(_.add([1,2,3], 2, 4), [1,2,3], 'did not add value to array at existing index');
 
-  deepEqual(_.add([1,2,[]], 0, 3, true), [1, 2, [3]], 'successfully deeply added value to array at index');
+  deepEqual(_.add([1,2,[]], '2.0', 3), [1, 2, [3]], 'successfully deeply added value to array at index');
 
-  deepEqual(_.add({0:1,1:2,2:3, 4:{}}, 3, 4, true), {0:1,1:2,2:3,3:4, 4:{3:4}}, 'successfully deeply added value to object-literal at index');
+  deepEqual(_.add({0:1,1:2,2:3, 4:{}}, '4.0', 4), {0:1, 1:2, 2:3, 4:{0:4}}, 'successfully deeply added value to object-literal at index');
 });
 
 test("all", function() {
