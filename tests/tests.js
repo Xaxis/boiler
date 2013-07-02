@@ -674,7 +674,7 @@ test("set", function() {
 
   deepEqual(_.set({0:1,1:2,2:3}, 0, 2), {0:2,1:2,2:3}, 'successfully set value in an object-literal at key');
 
-  deepEqual(_.set({0:1,1:2,2:3,3:{}}, 0, 2, true), {0:2,1:2,2:3,3:{0:2}}, 'successfully set value in an object-literal at key');
+  deepEqual(_.set({0:1,1:2,2:3,3:{0:4}}, '3.0', 2), {0:1,1:2,2:3,3:{0:2}}, 'successfully deeply set value in an object-literal at key');
 });
 
 test("setUndef", function() {
