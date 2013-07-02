@@ -153,17 +153,16 @@
 
   /* COLLECTION METHODS */
 
-  _.add = function (col, key, value, deep) {
-    var start = true, type = _.isArray(col) ? true : false;
-    return _.deep({obj: col, fn: function(d, i, v) {
-      if (start) {
-        if (!(key in col)) col[key] = value;
-        start = false;
+  _.add = function (col, key, value) {
+    var path = key.toString().split('.'), i = 0, target = col;
+    for (; i<path.length; i++) {
+      if (_.has(target, path[i]) && i != path.length-1) {
+        target = target[path[i]];
+      } else if (!_.has(target, path[i]) && i == path.length-1) {
+        target[path[i]] = value;
       }
-      if (((_.isArray(v) && type) || (_.isPlainObject(v) && !type)) && deep) {
-        if (!(key in v)) v[key] = value;
-      }
-    }, depth: deep ? '*' : 1, retType: true});
+    }
+    return col;
   };
 
   _.all = _.every = function (col, fn, scope, deep) {
