@@ -288,6 +288,35 @@
     }
   };
 
+  _.lazyEach = function(col, fn, scope) {
+    var seq = 0, len = 0, interval;
+    if (col == null) return this;
+    if (col instanceof Array) {
+      len = col.length;
+      interval = setInterval(function() {
+        fn.call(scope || col[seq], col[seq], seq, col);
+        seq += 1;
+        if (seq == len) clearInterval(interval);
+      }, 1);
+    } else {
+      var keys = [];
+      if (Object.keys) {
+        keys = Object.keys(col);
+      } else {
+        for (var p in col) {
+          if (col.hasOwnProperty(p)) keys.push(p);
+        }
+      }
+      len = keys.length;
+      interval = setInterval(function() {
+        var key = keys[seq];
+        fn.call(scope || col[key], col[key], key, col);
+        seq += 1;
+        if (seq == len) clearInterval(interval);
+      }, 1);
+    }
+  };
+
   _.empty = function (col, deep) {
     var ref = null;
     _.deep(col, function(d, index, value, r) {
