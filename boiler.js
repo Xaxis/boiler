@@ -1,8 +1,7 @@
 /**
  * boiler.js v0.9.0
  * https://github.com/Xaxis/boiler.js
- * http://www.boilerjs.com
- * (c) 2012-2013 Wil Neeley, Trestle Media, LLC.
+ * (c) 2012-2013 Wil Neeley
  * boiler.js may be freely distributed under the MIT license.
  **/
 (function (exports) {
